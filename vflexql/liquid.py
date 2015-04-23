@@ -135,7 +135,7 @@ def experiment(pkgs=('foo', 'goo', 'hoo')):
         for pkg, commit in zip(pkgs, commits):
             checkout(pkg, commit)
             pip_install(pkg)
-        
+
         # TODO: Add script path and name 
         status = run()
 
