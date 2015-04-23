@@ -32,6 +32,10 @@ def init(dir='simple', universe=('foo', 'goo', 'hoo')):
     env.error_file = 'error.txt'
     env.empty = False
 
+    # create here a virtual environment
+    #activate()
+
+
 #cmd = 'python simple/test.py'
 #
 def checkout(pkg, commit):
@@ -58,10 +62,26 @@ def master(pkg):
     name = env.branch_names[pkg]
     checkout(pkg, name)
 
-def activate():
+def activate(dir=None):
     """ TODO
     """
     p = env.pkg_dir/'venv2/bin/activate_this.py'
+    execfile(p, dict(__file__=p))
+
+def create_or_activate(dir=None):
+    """ TODO
+    """
+    global env
+    if dir is None:
+        dir = env.pkg_dir
+
+    dir.chdir()
+    sh("virtualenv --always-copy venv")
+    env.curdir.chdir()
+
+    env.venv_dir = dir
+
+    p = dir/'venv/bin/activate_this.py'
     execfile(p, dict(__file__=p))
 
 def config(pkg_config):
