@@ -12,8 +12,10 @@ def versions(path):
 
     """
     repo = git.Repo(path)
-    print 'Branch : ', repo.active_branch.name
-
+    try:
+        print 'Branch : ', repo.active_branch.name
+    except:
+        pass
     commits = repo.iter_commits()
 
     for c in commits:
@@ -53,4 +55,29 @@ def test():
         clone(*openalea)
         (pkgs/'..').cd()
 
-    print tags('pkgs/scikit-learn')
+    _tags = tags('pkgs/scikit-learn')
+    print _tags
+
+    _versions = list(versions('pkgs/scikit-learn'))
+    return _tags, _versions
+
+def universe_versions(dir='simple', universe=('foo', 'goo', 'hoo')):
+    pkgs = path(dir).abspath()
+
+    res = {}
+    for pkg in universe:
+        l = list(versions(dir+'/'+pkg))
+        res[pkg] = l
+
+    return res
+
+def branch_names(dir='simple', universe=('foo', 'goo', 'hoo')):
+    _dir = path(dir)
+
+    res = {}
+    for pkg in universe:
+        p = _dir/pkg
+        repo = git.Repo(p)
+        res[pkg] = repo.active_branch.name
+
+    return res

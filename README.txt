@@ -31,10 +31,10 @@ Go to http://gforge.inria.fr/frs/?group_id=79
 
 === Requirements ===
 
-* Scons >= 1
-* SconsX
-* OpenAlea.Deploy
-* Boost.Python
+
+pip install ipython
+pip install path.py
+pip install gitpython
 
 
 === Installation ===
