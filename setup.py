@@ -19,8 +19,8 @@ description = 'VFlexQL : Version Flexible Query Language'
 long_description = '''
 
 '''
+authors = 'Christophe Pradal, Sarah Cohen-Boulakia, Patrick Valduriez, Dennis Shasha'
 authors_email = 'christophe.pradal@inria.fr shasha@courant.nyu.edu Sarah.Cohen_Boulakia@lri.fr Patrick.Valduriez@inria.fr'.split()
-authors_email = 'christophe.pradal@inria.fr'
 url = 'http://openalea.gforge.inria.fr'
 license = 'Cecill-C'
 
