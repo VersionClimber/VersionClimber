@@ -1,18 +1,43 @@
 """
 Climber test
+
+1. Use liquidclimber on the simple test
+  - map commit version and package name to integer 
+  compute sourcemap
+2. Remove the global variables
+
 """
 
 from vflexql import liquid, liquidparser
 
-liquid.init(dir='/Users/pradal/devlp/project/vflexql/test/simple',
-     universe=('foo', 'goo', 'hoo'))
+liquid.env.init(dir='/Users/pradal/devlp/project/vflexql/test/simple',
+                universe=('foo', 'goo', 'hoo'))
 
 liquid.activate()
 
-#results = liquid.experiment()
-#print results
+ordered_packages = ('foo', 'goo', 'hoo')
+sourcemap, default, todolist = liquid.variables_for_parser(ordered_packages)
 
-compatibilities= []
+_orderofpackages = ['hoo', 'goo', 'foo', 'hoo']
+orderofpackages = [liquid.env.pkg2int[p] for p in _orderofpackages]
+
+
+
+results, compatibilities = liquid.experiment()
+
+# set global variables
+liquidparser.compatibilities = compatibilities
+liquidparser.orderofpackages = orderofpackages
+liquidparser.default = default
+liquidparser.sourcemap = sourcemap
+
+constraints = {}
+endconfig = liquidparser.liquidclimber(constraints, todolist)
+print endconfig
+
+# print results
+
+#compatibilities= []
 # compatibilities.append([1, 11, 11, 2, 21, 21])
 # compatibilities.append([1, 12, 12, 2, 22, 22])
 # compatibilities.append([1, 15, 15, 2, 28, 28])
@@ -42,7 +67,7 @@ sourcemap = { 1: [11, 12, 13, 14, 15, 16, 17, 18, 19],
 default = {1:11,2:21, 3:31, 4:41} # configuration that works
 
 constraints = {}
-todolist = [3,2,4,1]
+todolist = [3, 2, 4, 1]
 
 # set global variables
 liquidparser.compatibilities = compatibilities
