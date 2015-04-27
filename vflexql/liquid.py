@@ -16,24 +16,55 @@ from vflexql import multigit
 class Environment(object):
     empty = True
 
+
+    def init(self, dir='simple', universe=('foo', 'goo', 'hoo')):
+        """ Set a global variable """
+
+        self.d = self.commits = multigit.universe_versions(dir, universe)
+        self.universe = self.d.keys()
+        self.curdir = path('.').abspath()
+
+        self.pkg_dir = path(dir)
+
+        self.branch_names = multigit.branch_names(env.pkg_dir)
+        self.error_file = 'error.txt'
+        self.empty = False
+
+        self.conversion()
+
+        # create here a virtual environment
+        #activate()
+
+    def conversion(self):
+        self._convert_pkgname()
+        self._convert_commits()
+
+    def _convert_pkgname(self):
+        """ Return 2 dict corresponding to package_name -> int 
+        and the reversed dict int -> package_name
+
+        """
+        universe = self.universe
+        n = len(universe) + 1
+        self.pkg2int = dict(zip(universe, range(1, n)))
+        self.int2pkg = dict(zip(range(1, n), universe))
+
+    def _convert_commits(self):
+        """ Convert a list of commits to int
+
+        The commits are a list from newer to later
+        """
+        commits = self.commits
+        c2i2c = self.bidir_commits = {}
+        for pkg, commit_list in commits.iteritems():
+            n = len(commit_list) + 1
+            cl = map(str, reversed(commit_list))
+            c2i = dict(zip(cl, range(1, n)))
+            i2c = dict(zip(range(1, n), cl))
+            c2i2c[pkg] = c2i, i2c
+
+
 env = Environment()
-
-def init(dir='simple', universe=('foo', 'goo', 'hoo')):
-    """ Set a global variable """
-
-    global env
-    env.d = env.commits = multigit.universe_versions(dir, universe)
-    env.universe = env.d.keys()
-    env.curdir = path('.').abspath()
-
-    env.pkg_dir = path(dir)
-
-    env.branch_names = multigit.branch_names(env.pkg_dir)
-    env.error_file = 'error.txt'
-    env.empty = False
-
-    # create here a virtual environment
-    #activate()
 
 
 #cmd = 'python simple/test.py'
@@ -126,12 +157,21 @@ def parse_error(error_file):
             tgt = ''
     return src, tgt
 
-def experiment(pkgs=('foo', 'goo', 'hoo')):
+def experiment(pkgs=('foo', 'goo', 'hoo'), order_list=['hoo', 'goo', 'foo', 'hoo']):
+    n = len(order_list)
+    pkgi = env.pkg2int
+    c2i = env.bidir_commits
+    pairs = [(order_list[i], order_list[i+1]) for i in range(n-1)]
+
+
     restore_config()
     gen = itertools.product(*[reversed(env.commits[pkg]) for pkg in pkgs])
 
     result = []
+    compatibilities = []
+
     for commits in gen:
+        dc = dict(zip(pkgs, commits))
         for pkg, commit in zip(pkgs, commits):
             checkout(pkg, commit)
             pip_install(pkg)
@@ -139,12 +179,47 @@ def experiment(pkgs=('foo', 'goo', 'hoo')):
         # TODO: Add script path and name 
         status = run()
 
-        res = ', '.join([pkg+'(%s)'%str(commit) for pkg, commit in zip(pkgs, commits)])
+        res = ', '.join(['%d' % (pkgi[pkg]) +
+                        '(v %d)' % (c2i[pkg][0][str(commit)])
+                         for pkg, commit in zip(pkgs, commits)])
+
         if status == 0:
             result.append(res + ', OK')
+            for p1,p2 in pairs:
+                c1, c2 = c2i[p1][0][str(dc[p1])], c2i[p2][0][str(dc[p2])]
+                l = [pkgi[p1], c1, c1, pkgi[p2], c2, c2]
+                compatibilities.append(l)
         else: 
             result.append(res + ', FAILURE' +' (%s ,%s)'%(status[0], status[1]))
 
     restore_config()
-    return '\n'.join(result)
+    return '\n'.join(result), compatibilities
+
+
+def variables_for_parser(pkgs=('foo', 'goo', 'hoo')):
+    """ Compute the main variables to call liquidparser
+
+    :Parameters:
+      - pkgs : the package names in a specific order
+
+    :Returns:
+        - sourcemap
+
+    """
+    universe = env.universe
+    commits = env.commits
+    bidir_commits = env.bidir_commits
+    p2i = env.pkg2int
+
+    todolist = [p2i[p] for p in pkgs]
+
+    sourcemap = {}
+    default = {}
+    for pkg, commit_list in commits.iteritems():
+        c2i, i2c = bidir_commits[pkg]
+        cl = [c2i[str(commit)] for commit in reversed(commit_list)]
+        sourcemap[p2i[pkg]] = cl
+        default[p2i[pkg]] = cl[0]
+
+    return sourcemap, default, todolist
 

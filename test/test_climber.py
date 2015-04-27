@@ -10,6 +10,58 @@ Climber test
 
 from vflexql import liquid, liquidparser
 
+
+###############################################################################
+
+# MONKEY PATCHING
+
+count = 0
+
+def works(listofpackversions):
+   print 'LPV ', listofpackversions
+   history = []
+   for p in liquidparser.orderofpackages:
+    x = liquidparser.decidepackage(history, [p,listofpackversions[p]])
+    if x[0]:
+        history.append([p,listofpackversions[p]])
+    else:
+        return [False, p, x[1]]
+   return [True, -1, -1] # -1 indicates all ok only use the True part
+
+
+def works2(listofpackversions):
+    global count
+    count += 1
+
+    config = listofpackversions
+    int2pkg = liquid.env.int2pkg
+    pkg2int = liquid.env.pkg2int
+
+    bidir = liquid.env.bidir_commits
+    semantic_config = {}
+    for pi, ci in config.iteritems():
+        pkg = int2pkg[pi]
+        commit = bidir[pkg][1][ci]
+        semantic_config[pkg] = commit
+
+    for pkg, commit in semantic_config.iteritems():
+        liquid.checkout(pkg, commit)
+        liquid.pip_install(pkg)
+
+    status = liquid.run()
+
+    if status == 0:
+        res = [True, -1, -1]
+    else:
+        res = [False, pkg2int[status[1]], pkg2int[status[0]]]
+
+    return res
+
+liquidparser.works = works2
+
+###############################################################################
+
+
 liquid.env.init(dir='/Users/pradal/devlp/project/vflexql/test/simple',
                 universe=('foo', 'goo', 'hoo'))
 
@@ -21,9 +73,9 @@ sourcemap, default, todolist = liquid.variables_for_parser(ordered_packages)
 _orderofpackages = ['hoo', 'goo', 'foo', 'hoo']
 orderofpackages = [liquid.env.pkg2int[p] for p in _orderofpackages]
 
+compatibilities = []
 
-
-results, compatibilities = liquid.experiment()
+#results, compatibilities = liquid.experiment()
 
 # set global variables
 liquidparser.compatibilities = compatibilities
@@ -32,8 +84,11 @@ liquidparser.default = default
 liquidparser.sourcemap = sourcemap
 
 constraints = {}
-endconfig = liquidparser.liquidclimber(constraints, todolist)
-print endconfig
+
+try:
+    endconfig = liquidparser.liquidclimber(constraints, todolist)
+finally:
+    liquid.restore_config()
 
 # print results
 
@@ -57,6 +112,9 @@ print endconfig
 # compatibilities.append([3, 32, 32, 4, 42, 42])
 # compatibilities.append([3, 38, 38, 4, 48, 48])
 
+""" 
+OLD BACKUP
+
 orderofpackages = [1, 3, 4, 2, 3, 4, 3, 1, 2]
 
 sourcemap = { 1: [11, 12, 13, 14, 15, 16, 17, 18, 19],
@@ -76,11 +134,4 @@ liquidparser.default = default
 liquidparser.sourcemap = sourcemap
 
 endconfig = liquidparser.liquidclimber(constraints, todolist)
-
-"""
-d = liquid.env.commits
-commits2int = {}
-for k, v in d.iteritems():
-    commits2int[k] = dict(enumerate(reversed(v)))
-print commits2int
 """
