@@ -49,9 +49,8 @@ sys.setrecursionlimit(20000)
 now = datetime.datetime.now()
 currentyear = now.year
 
-
 #####################################
-# global varable
+# global variables
 #####################################
 
 memory = {} # we will remember here the versions of package
@@ -61,8 +60,11 @@ memory = {} # we will remember here the versions of package
 axiom = {} # we use the historicity and failure monotonicity axioms
  # each element is keyed by two packages and has the format
  # (pack1, version1, lesseq/eq/greatereq, pack2, version2, lesseq/eq/greatereq)
+ # Will no longer be used once we have the monotonicity code.
 
-#################################################################################
+###################################################################
+
+
 # Simulator code
 
 
@@ -227,13 +229,14 @@ def addtomemory(temp, badpack, badother, maxpushlist):
    # if x not in memory.viewkeys():
 	# memory[x] = []
    # memory[x].append([badpack, verpack])
-   x = flatten([badpack, badother])
-   if x not in axiom.viewkeys():
-	axiom[x] = []
+   # x = flatten([badpack, badother])
+   # if x not in axiom.viewkeys():
+	# axiom[x] = []
    # if badother == maxpushlist[-1]:
    	# axiom[x].append([badpack, verpack, 'lesseq', badother, verother, 'eq'])
-   if (not badother in  maxpushlist) and (not badpack in maxpushlist):
-   	axiom[x].append([badpack, verpack, 'greatereq', badother, verother, 'lesseq'])
+   # if (not badother in  maxpushlist) and (not badpack in maxpushlist):
+   	# axiom[x].append([badpack, verpack, 'greatereq', badother, verother, 'lesseq'])
+
 
 # by advancing versions as needed, try to make a compatible set of
 # package-version pairs
@@ -241,19 +244,16 @@ def addtomemory(temp, badpack, badother, maxpushlist):
 # temp is the configuration of package-versions we are trying
 # searchedpackage is the package that was pushed
 def trytomakework(searchedpackage, temp, newsourcemap):
+  initialtemp = copy.deepcopy(temp)
   x = checkworks(temp) # we simulate this now, but in general
 	# this involves the creation of a frozen virtual machine
   print "Within trytomakework, works on ", temp, " has a return value of: ", x
   maximizepushlist = [searchedpackage]
   while x[0] == False:
-     badpack = x[1]
-     badother = x[2]
+     badpack = x[1] # callee
+     badother = x[2] # caller
      if (x[3]): # x[3] is true if we really did execute
      	addtomemory(temp, badpack, badother, maximizepushlist)
-     if badpack in maximizepushlist:
-  	maximizepushlist.append(badother) # now will push that one
-	badpack = badother
-     print "Bad package is ", badpack
      if (temp[badpack] < max(newsourcemap[badpack])):
 	  nexthope =min([v for v in newsourcemap[badpack] if v > temp[badpack]])
 	  temp[badpack] = nexthope
@@ -261,6 +261,7 @@ def trytomakework(searchedpackage, temp, newsourcemap):
   	  print "Within while, works on ", temp, " has a return value of: ", x
      elif (temp[badother] < max(newsourcemap[badother])):
 	  nexthope =min([v for v in newsourcemap[badother] if v > temp[badother]])
+	  temp = copy.deepcopy(initialtemp)
 	  temp[badother] = nexthope
   	  x = checkworks(temp) 
   	  print "Within while, works on ", temp, " has a return value of: ", x
@@ -302,6 +303,7 @@ def liquidclimber(constraints, todolist):
 	
 	
 	
+
 '''
 # DATA
 
@@ -460,6 +462,5 @@ print "Start with this: ",default
 
 endconfig = liquidclimber(constraints, todolist)
 print "End with this: ",endconfig
-
 
 '''
