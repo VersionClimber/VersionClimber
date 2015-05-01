@@ -6,27 +6,27 @@ hoo : master
 """
 
 import itertools
-import git
+# import git
 from vflexql.utils import sh, path
 from vflexql import multigit
 
 # Create a singleton defined once by the init method
 # replace all that stuff with Objects.
 
+
 class Environment(object):
     empty = True
 
-
-    def init(self, dir='simple', universe=('foo', 'goo', 'hoo')):
+    def init(self, dir='simple', universe=('foo', 'goo', 'hoo'), Tags=False):
         """ Set a global variable """
 
-        self.d = self.commits = multigit.universe_versions(dir, universe)
+        self.d = self.commits = multigit.universe_versions(dir, universe, Tags=Tags)
         self.universe = self.d.keys()
         self.curdir = path('.').abspath()
 
         self.pkg_dir = path(dir)
 
-        self.branch_names = multigit.branch_names(env.pkg_dir)
+        self.branch_names = multigit.branch_names(env.pkg_dir, universe)
         self.error_file = 'error.txt'
         self.empty = False
 
@@ -82,9 +82,9 @@ def checkout(pkg, commit):
 def pip_install(pkg, no_index=True):
     env.pkg_dir.chdir()
     if no_index:
-        cmd = 'pip --isolated install --no-index --upgrade ./%s' % pkg
+        cmd = 'pip install --no-index --upgrade ./%s' % pkg
     else:
-        cmd = 'pip --isolated install --upgrade ./%s' % pkg
+        cmd = 'pip install --upgrade ./%s' % pkg
 
     sh(cmd)
     env.curdir.chdir()
@@ -196,7 +196,7 @@ def experiment(pkgs=('foo', 'goo', 'hoo'), order_list=['hoo', 'goo', 'foo', 'hoo
     return '\n'.join(result), compatibilities
 
 
-def variables_for_parser(pkgs=('foo', 'goo', 'hoo')):
+def variables_for_parser(pkgs=('foo', 'goo', 'hoo'), default=None):
     """ Compute the main variables to call liquidparser
 
     :Parameters:
@@ -214,12 +214,15 @@ def variables_for_parser(pkgs=('foo', 'goo', 'hoo')):
     todolist = [p2i[p] for p in pkgs]
 
     sourcemap = {}
-    default = {}
+    _default = {}
     for pkg, commit_list in commits.iteritems():
         c2i, i2c = bidir_commits[pkg]
         cl = [c2i[str(commit)] for commit in reversed(commit_list)]
         sourcemap[p2i[pkg]] = cl
-        default[p2i[pkg]] = cl[0]
+        if default is None:
+            _default[p2i[pkg]] = cl[0]
+        else:
+            _default[p2i[pkg]] = c2i[default[pkg]]
 
-    return sourcemap, default, todolist
+    return sourcemap, _default, todolist
 

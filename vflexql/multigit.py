@@ -61,12 +61,15 @@ def test():
     _versions = list(versions('pkgs/scikit-learn'))
     return _tags, _versions
 
-def universe_versions(dir='simple', universe=('foo', 'goo', 'hoo')):
+def universe_versions(dir='simple', universe=('foo', 'goo', 'hoo'), Tags=False):
     pkgs = path(dir).abspath()
 
     res = {}
     for pkg in universe:
-        l = list(versions(dir+'/'+pkg))
+        if not Tags:
+            l = list(versions(dir+'/'+pkg))
+        else:
+            l = list(tags(dir+'/'+pkg))            
         res[pkg] = l
 
     return res
