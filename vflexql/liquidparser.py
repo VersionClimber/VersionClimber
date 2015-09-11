@@ -1,3 +1,8 @@
+# What we want: reprozip runs. 
+# packages are discovered.
+# user is asked any restrictions -- can click.
+# which to maximize
+# go
 # This code is nearly ready for integration with Christophe.
 # It must fill the variable sourcemap based on versions of each relevant
 # package
@@ -62,6 +67,11 @@ axiom = {} # we use the historicity and failure monotonicity axioms
  # (pack1, version1, lesseq/eq/greatereq, pack2, version2, lesseq/eq/greatereq)
  # Will no longer be used once we have the monotonicity code.
 
+successful = [] # configurations that have been tried and worked at any time
+
+failedconfigs = [] # configurations that have failed
+
+
 ###################################################################
 
 
@@ -101,10 +111,10 @@ def decidepackage(historyofpackversions, newpackver):
 	return [True, newpackver[0]]
    h = historyofpackversions[-1] # only worry about the very last one
    if compatible(h, newpackver) == False:
-	print "call on compatible ", h, " with ", newpackver, " has return value False."
+	print "decidepackage: call on compatible from ", h, " to ", newpackver, " has return value False."
 	return [False, h[0]]
    else:
-	print "call on compatible ", h, " with ", newpackver, " has return value True."
+	print "decidepackage: call on compatible from ", h, " to ", newpackver, " has return value True."
    	return [True, newpackver[0]]
 
 # Does an execution work? If so return an empty list. 
@@ -116,6 +126,8 @@ def works(listofpackversions):
 	if x[0]:
 		history.append([p,listofpackversions[p]])
 	else:
+		print "  Success up to: ", history
+		print "  Failure on: ", p, listofpackversions[p]
 		return [False, p, x[1]]
    return [True, -1, -1] # -1 indicates all ok only use the True part
 
@@ -180,8 +192,10 @@ def memorydecidepackage(historyofpackversions, newpackver):
    for h in historyofpackversions:
 	if flatten(h) in memory.viewkeys():
 	   if newpackver in memory[flatten(h)]:
-		print "memory call for  ", h, " with ", newpackver, " has return value False."
+		print "memorydecidepackage: memory call from  ", h, " to ", newpackver, " has return value False."
 		return [False, h[0]]
+	   else:
+		print "memorydecidepackage: memory call from  ", h, " to ", newpackver, " has return value True."
    h = historyofpackversions[-1]
    x = flatten([h[0], newpackver[0]])
    if x in axiom.viewkeys():
@@ -189,6 +203,44 @@ def memorydecidepackage(historyofpackversions, newpackver):
 		print "axiom call for  ", h, " with ", newpackver, " has return value False because of ", axiom[x]
 		return [False, h[0]]
    return [True, newpackver[0]]
+
+# is newconfig in list of configs?
+def inconfig(newconfig, listofconfigs):
+   if 0 == len(listofconfigs):
+	return False
+   for s in listofconfigs:
+	if s == newconfig:
+		return True
+   return False
+
+# is newconfig in list of configs?
+def inconfigfail(newconfig, listofconfigs_packs):
+   if 0 == len(listofconfigs_packs):
+	return [False, -3, -3]
+   for s in listofconfigs_packs:
+	if s[0] == newconfig:
+		return [True, s[1], s[2]]
+   return [False, -2, -2]
+
+# see whether both the caller with this version and the callee with this
+# version are in memory
+def inmem(callpackver, calleepackver, memory):
+   x = flatten(callpackver)
+   if x not in memory.viewkeys():
+	return False
+   for e in memory[x]:
+	if ((e[0] == calleepackver[0]) and (e[1] == calleepackver[1])):
+		return True
+   return False
+
+# see whether there is a caller having a smaller version that calls
+# a callee with a greater version. If so, return true (meaning
+# that in the strong monotonic assumption, this will fail).
+def inmemstrong(callpackver, calleepackver, strongmemory):
+   for s in strongmemory:
+	if (s[0] == callpackver[0]) and (s[1] <= callpackver[1]) and (s[2] == calleepackver[0]) and (s[3] >= calleepackver[1]):
+		return True
+   return False
 
 # First see whether we can determine that this won't work because
 # of what we remember. If we can, then return False, 
@@ -200,6 +252,15 @@ def memorydecidepackage(historyofpackversions, newpackver):
 # Otherwise, return False, identify the offending package combinations
 # and return a True indicating we DID a real execution.
 def checkworks(listofpackversions):
+   if inconfig(listofpackversions, successful):
+	print "listofpackversions: ", listofpackversions
+	print "matching successful run: ", listofpackversions
+	return [True, -1, -1, False] # already good. Didn't execute
+   zz = inconfigfail(listofpackversions, failedconfigs)
+   if zz[0]:
+	print "listofpackversions: ", listofpackversions
+	print "matching failedconfigs run: ", listofpackversions
+	return [False, zz[1], zz[2], False] # already known to be bad. Didn't execute
    history = []
    for p in listofpackversions:
 	x = memorydecidepackage(history, [p,listofpackversions[p]])
@@ -210,101 +271,202 @@ def checkworks(listofpackversions):
 		return [False, p, x[1], False]
    # using memory did not exclude the possibility that this would work
    x = works(listofpackversions)
-   print "Tested configuration: ", listofpackversions
+   print "Tested configuration in works: ", listofpackversions
+   y = copy.deepcopy(listofpackversions)
+   if (x[0]):
+   	successful.append(y)
+   else: 
+   	failedconfigs.append([y, x[1], x[2]])
    return [x[0], x[1], x[2], True]
 	
 
-# whichever version of badpack is in temp is incompatible with
-# the version of badother in temp
+# whichever version of badcallee is in temp is incompatible with
+# the version of badcaller in temp
 # We are storing package version pairs and indexing by package version pairs.
-# We also know which packages have been maximize pushed
-def addtomemory(temp, badpack, badother, maxpushlist):
-   verpack = temp[badpack]
-   verother = temp[badother]
-   x = flatten([badpack, verpack])
+# In strongmemory, [badcaller, vercaller, badcallee, vercallee]
+def addtomemory(temp, badcallee, badcaller):
+   vercallee = temp[badcallee]
+   vercaller = temp[badcaller]
+   x = flatten([badcaller, vercaller])
    if x not in memory.viewkeys():
 	memory[x] = []
-   memory[x].append([badother, verother])
-   # x = flatten([badother, verother])
-   # if x not in memory.viewkeys():
-	# memory[x] = []
-   # memory[x].append([badpack, verpack])
-   # x = flatten([badpack, badother])
-   # if x not in axiom.viewkeys():
-	# axiom[x] = []
-   # if badother == maxpushlist[-1]:
-   	# axiom[x].append([badpack, verpack, 'lesseq', badother, verother, 'eq'])
-   # if (not badother in  maxpushlist) and (not badpack in maxpushlist):
-   	# axiom[x].append([badpack, verpack, 'greatereq', badother, verother, 'lesseq'])
-
+   memory[x].append([badcallee, vercallee])
+   strongmemory.append([badcaller, vercaller, badcallee, vercallee])
 
 # by advancing versions as needed, try to make a compatible set of
 # package-version pairs
 # Side effect to memory in order to avoid unnecessary executions
 # temp is the configuration of package-versions we are trying
 # searchedpackage is the package that was pushed
-def trytomakework(searchedpackage, temp, newsourcemap):
-  initialtemp = copy.deepcopy(temp)
+def trytomakework(searchedpackage, temp, newsourcemap, phase):
+  print "        "
+  print "+++ Within trytomakework, on configuration ", temp
   x = checkworks(temp) # we simulate this now, but in general
 	# this involves the creation of a frozen virtual machine
-  print "Within trytomakework, works on ", temp, " has a return value of: ", x
-  maximizepushlist = [searchedpackage]
-  while x[0] == False:
-     badpack = x[1] # callee
-     badother = x[2] # caller
+  print "++ Return value of: ", x
+  if x[0] == False:
+     badcallee = x[1] # callee
+     badcaller = x[2] # caller
+     i = todolist.index(searchedpackage)
+     keepfixed = todolist[:i+1] # don't change these
      if (x[3]): # x[3] is true if we really did execute
-     	addtomemory(temp, badpack, badother, maximizepushlist)
-     if (temp[badpack] < max(newsourcemap[badpack])):
-	  nexthope =min([v for v in newsourcemap[badpack] if v > temp[badpack]])
-	  temp[badpack] = nexthope
-  	  x = checkworks(temp) 
-  	  print "Within while, works on ", temp, " has a return value of: ", x
-     elif (temp[badother] < max(newsourcemap[badother])):
-	  nexthope =min([v for v in newsourcemap[badother] if v > temp[badother]])
-	  temp = copy.deepcopy(initialtemp)
-	  temp[badother] = nexthope
-  	  x = checkworks(temp) 
-  	  print "Within while, works on ", temp, " has a return value of: ", x
+     	addtomemory(temp, badcallee, badcaller)
+     if badcaller in keepfixed:
+	posscallerversions = [temp[badcaller]]
      else:
-	  return {}
-  return temp
+	posscallerversions = newsourcemap[badcaller]
+     if badcallee in keepfixed:
+	posscalleeversions = [temp[badcallee]]
+     else:
+	posscalleeversions = newsourcemap[badcallee]
+     print "calling package: ", badcaller, " with possible versions: ", posscallerversions
+     print "called package: ", badcallee, " with possible versions: ", posscalleeversions
+     for c_er in posscallerversions:
+     	for c_ee in posscalleeversions:
+	   if ((phase == 1) and (not inmemstrong([badcaller,c_er], [badcallee,c_ee], strongmemory))) or ((phase == 2) and (not inmem([badcaller,c_er], [badcallee,c_ee], memory))):
+		newtemp = copy.deepcopy(temp)
+		newtemp[badcaller] = c_er
+		newtemp[badcallee] = c_ee
+  	  	print "        "
+  	  	print "+++ Within trytomakework deep, on configuration ", newtemp
+		print "inconfig(newtemp,successful):", inconfig(newtemp,successful)
+		print "inconfigfail(newtemp,failedconfigs):", inconfigfail(newtemp,failedconfigs)
+		zz = inconfigfail(newtemp,failedconfigs)
+		if (not inconfig(newtemp,successful)) and (not zz[0]):
+		  x = trytomakework(searchedpackage, newtemp, newsourcemap, phase)
+  	  	  print "++ Return value of: ", x
+		  if 0 < len(x):
+			return x  
+     return {}
+  else:
+     return temp
   
+	
+
+
 	
 
 # This implements the algorithm against our simulator, but eventually
 # against a real system
 # todolist gives the order of packages that must be maximized
+# When the global phase is 1 then we use strong monotonicity.
+# When the global phase is 2, we go to the conservative approach.
 def liquidclimber(constraints, todolist):
   newsourcemap = filtermap(sourcemap, constraints)
-  print "newsourcemap is: ", newsourcemap
+  print "newsourcemap before monotonicity filtering: ", newsourcemap
+  bestmonoconfig = liquidclimberworker(constraints, todolist, newsourcemap, 1)
+  print "best configuration after  monotonicity filtering: ", bestmonoconfig
+  newsourcemap = adjustsource(newsourcemap, bestmonoconfig, todolist)
+  print "newsourcemap after monotonicity filtering: ", newsourcemap
+  print "failed configurations: ", failedconfigs
+  return liquidclimberworker(constraints, todolist, newsourcemap, 2)
+
+
+# This implements the algorithm against our simulator, but eventually
+# against a real system
+# todolist gives the order of packages that must be maximized
+# When the global phase is 1 then we use strong monotonicity.
+# When the global phase is 2, we go to the conservative approach.
+def liquidclimberworker(constraints, todolist, newsourcemap, phase):
   current = copy.deepcopy(default)
   for m in todolist: # todolist gives the packages to maximize
 	# in descending order of priority
 	maxmyversions = max(newsourcemap[m])
-	print "package to optimize is: ", m
-	print "current is: ", current
+	print "liquidclimber: current is: ", current, "phase is: ", phase
 	if (current[m] < maxmyversions):
 		versionstodo = sorted([v for v in newsourcemap[m] if v > current[m]])
-		print "versionstodo is: ",versionstodo
+		print "liquidclimber: package is: ",m
+		print "liquidclimber: versionstodo is: ",versionstodo
+		# versions still to try
+		for v in versionstodo:
+			temp = copy.deepcopy(current)
+			temp[m] = v
+			ret = trytomakework(m, temp, newsourcemap, phase)
+			# print "return value: ", ret, " for config: ", temp
+			if 0 < len(ret):
+				current = copy.deepcopy(ret)
+  return current
+	
+# For monotonicity
+
+
+# In the order of the todolist, we have achieved
+# the maximum out of the first L <= K,
+# take those as fixed and call liquidparser. Note that
+# the configuration in which those are at their maxima and the others
+# aren't may not actually work.
+# Start the next one with those first sources at their maximum values.
+def adjustsource(newsourcemap, bestmonoconfig, todolist):
+ i = 0
+ flag = True
+ while(i < len(todolist)) and flag:
+	p = todolist[i]
+	if max(newsourcemap[p]) == bestmonoconfig[p]:
+		newsourcemap[p] = [bestmonoconfig[p]]
+	else: 
+		flag = False
+	i+= 1
+ return newsourcemap
+
+	
+# This implements the algorithm against our simulator, but assumes that
+# the strong monotonicity assumption holds.
+# Very similar to liquidclimber itself,  except it calls strongmono_trytomakework
+def strongmono_liquidclimber(newsourcemap, todolist):
+  current = copy.deepcopy(default)
+  lasttried = copy.deepcopy(current)
+  for m in todolist: # todolist gives the packages to maximize
+	# in descending order of priority
+	maxmyversions = max(newsourcemap[m])
+	print "strongmono_liquidclimber: current is: ", current
+	if (lasttried[m] < maxmyversions):
+		versionstodo = sorted([v for v in newsourcemap[m] if v > current[m]])
+		print "strongmono_liquidclimber: package is: ",m
+		print "strongmono_liquidclimber: versionstodo is: ",versionstodo
 		# versions still to try
 		for v in versionstodo:
 		   # if keepwork:
 			# print "v is: ", v
-			temp = copy.deepcopy(current)
+			temp = copy.deepcopy(lasttried)
 			temp[m] = v
-			ret = trytomakework(m, temp, newsourcemap)
+			ret = strongmono_trytomakework(m, temp, newsourcemap)
 			# print "return value: ", ret, " for config: ", temp
-			if 0 < len(ret):
-				current = copy.deepcopy(ret)
-			# else:
-				# keepwork = False # higher versions also bad 
+			if ret[0]:
+				current = copy.deepcopy(ret[1])
+			lasttried = copy.deepcopy(ret[1])
   return current
 
-	
+# by advancing versions as needed, try to make a compatible set of
+# package-version pairs
+# Side effect to memory in order to avoid unnecessary executions
+# temp is the configuration of package-versions we are trying
+# searchedpackage is the package that was pushed
+def strongmono_trytomakework_old(searchedpackage, temp, newsourcemap):
+  print "        "
+  print "+++ Within strongmono_trytomakework, on configuration ", temp
+  x = checkworks(temp) # we simulate this now, but in general
+	# this involves the creation of a frozen virtual machine
+  print "++ Return value of: ", x
+  while x[0] == False:
+     badcallee = x[1] # callee
+     badcaller = x[2] # caller
+     if (x[3]): # x[3] is true if we really did execute
+     	addtomemory(temp, badcallee, badcaller)
+     if (temp[badcallee] < max(newsourcemap[badcallee])):
+	  nexthope =min([v for v in newsourcemap[badcallee] if v > temp[badcallee]])
+	  temp[badcallee] = nexthope
+  	  print "        "
+  	  print "+++ Within strongmono_trytomakework deep, on configuration ", temp
+  	  x = checkworks(temp) 
+  	  print "++ Return value of: ", x
+     else:
+	  return [False, temp]
+  return [True, temp]
+  
 	
 	
 
-'''
+'''  # When transferring to Chrisophe
 # DATA
 
 # For simulator
@@ -427,7 +589,7 @@ compatibilities.append([3, 38, 38, 4, 48, 48])
 
 
 
-orderofpackages = [1, 3, 4, 2, 3, 4, 3, 1, 2]
+orderofpackages = [1, 3, 4, 2, 3, 4, 3,  2]
 
 
 # outside of the simulator
@@ -437,9 +599,13 @@ memory = {} # we will remember here the versions of package
 	# combinations that don't work, so we don't redo them
 	# we just keep exploring higher versions
 
+strongmemory = [] # these will be in the form 
+		# [callpack, callver, calleepack, calleever]
+
 axiom = {} # we use the historicity and failure monotonicity axioms
  # each element is keyed by two packages and has the format
  # (pack1, version1, lesseq/eq/greatereq, pack2, version2, lesseq/eq/greatereq)
+
 
 
 sourcemap = { 1: [11, 12, 13, 14, 15, 16, 17, 18, 19],
@@ -462,5 +628,6 @@ print "Start with this: ",default
 
 endconfig = liquidclimber(constraints, todolist)
 print "End with this: ",endconfig
+print "successful: ",successful
 
-'''
+''' # When transferring to Chrisophe
