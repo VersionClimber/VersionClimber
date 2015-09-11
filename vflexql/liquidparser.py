@@ -1,3 +1,130 @@
+# [x for x in temp if not x[0] in keepfixed]
+# May 10, 2015:
+# This version can be called as follows 
+# python liquidparser.py 2
+# which means that the caller and callee at the point of error is always known
+# or
+# python liquidparser.py 1
+# which means that the caller may not be known (the default)
+# The interface to works changes in its return value
+# 
+# [True] -- everything is fine
+# [False, 0, callee, caller] -- if you know both; Must be used with option 2
+# [False, 1, callee] -- if compilation
+# [False, 2, callee] -- if in execution and you don't know the caller.
+#
+#
+# Basic idea is this: False, 0 we handle now.
+# False 1 -- just eliminate that version of that package.
+# False 2 -- Because we are changing just one package at a time,
+# if we have a configuration in which Pj has no error and then 
+# we change Pi and Pj has an error, then Pi calls Pj.
+# In general, if we have a configuration C that has an error on 
+# Pj that has just been pushed 
+# and we push Pi where i != j to get configuration C'
+# and C' fails on Pk where i != k, then
+# Pi must precede Pj in the call stack and
+# either Pi calls Pk (Pi --> Pk) or Pi calls Pj and is compatible but Pj
+# calls Pk and is not compatible (Pi --> Pj --> Pk).
+# Unpush Pj from C' to obtain C''
+# If get an error on Pk, then Pi --> Pk.
+# If get an error on Pm, then
+# We might have prior information about calling relationships.
+# In either case, start to push Pk.
+# If there is a configuration C'' that is a minimal pair with C except Pj
+# C1 that works.
+# C2 pushes Pj from C1 and Pk fails, then Pj --> Pk and that is minimal pair
+# C2 pushes Pj from C1 and Pj fails, then test each Pq 
+#  by pushing from C2 giving C2_q
+#  and by pushing Pq from C1 as well giving C1_q
+#  If nothing fails in C2_q, then great.
+#  If Pq fails in C2_q, then Pq precedes Pj
+#  If Pj fails in C2_q, then Pj precedes Pq o test C1_q
+
+# Let's say we optimize in the order P3 then P1 and execution
+# order is PA, PB, P1, PC, P3, ...
+# Pushing P3 will result in an error. Pushing PA results in an error on PB. 
+# Pushing PB results in an error on PB.
+#  
+#     
+# 
+# If we now take a case where we keep Pi pushed but unpush Pj and we
+# still get an error on Pk, then 
+# If we then change Pj and there is still an error, Pi still calls Pj.
+# If we change Pj and there is an error on Pk, then Pj is the caller.
+# So, remember who the lastcaller and packagechanged are.
+# If the error is on packagechanged, then caller is lastcaller.
+# If the error is on a different package, then lastpackagechanged becomes 
+# the lastcaller
+# and the package in error is the callee.
+# The problem arises when we are pushing a priority version.
+# In that case, if the error occurs on that package P1, we have to test other
+# packages that do not precede P1 on the todo list. 
+# Test package P2 with respect to the original setting of the given
+# package. If you do that and get an error in Px then P2 calls Px
+# (this is the only case we know for sure -- start in a good configuration
+# and go to a bad one and one package advances and another fails).
+# Keep advancing P2. This may give more stuff in memo.
+# If you try all versions of other packages and none of them result in
+# an error on P1, then advance P1 to the version causing an error and
+# one at a time try all versions of other packages on that one
+# except for a package Py that is known to cause a problem with the original
+# version of package Pz (can use memo as usual for this).
+# So, if a package Py.vy' has no problem with Pw.vw initially
+# but does after P1.v1 advances to P1.v1', then ...
+# If one of those makes P1 work, then  that one calls P1.
+# If none does, then advance P1 again.
+# There are cases where we are indeterminate: P1 has been pushed on the
+# original configuration causing an error. Then P2 pushes and finds an
+# error on package P3 -- did that error precede the error on P1 or follow it.
+# If it preceded, then we don't know if P2 is compatible with P1 but maybe
+# Scenario: All versions start at 1 and work.
+# P3.2 with all others at version 1 and P3 fails as callee.
+# P1.2 with all others at version 1.
+# If Px fails for x != 1, then P1 calls Px.
+#     add P1.2, Px.1 to memo
+#    if x == 3, then advance P3 to P3.2 and try again
+# If P1 fails, then we don't know anything other than this has failed.
+# Let's see if we can find a cross-product based algorithm.
+# Advance in descending order of priority and each time, try the cross-product
+# of possibilities of other packages. If advancing a version of Px to i+1
+# causes a failure in Py.j and when the identical configuration with Px with i
+# worked, then Px.i+1 to Py.j goes into memo.
+# If we later try Px.i+2 and Py.j and it fails on Py.j, but some other
+# configuration worked identical except we had Px.i and instead of Px.i+2, then
+# again we can add Px.i+2, Py.j to memo.
+# So, we advance in descending order of priority. If we fail on some Py,
+# then we apply this rule.
+# Always take the cross-product of downstream in priority.
+# If we start to get ideas about who calls whom, then we can 
+# at least use the following heuristic: if I fail on Pw that I have
+# just pushed, then first
+# look at configurations in which some caller of package Pw changes. 
+# So we need functions that push from successful configurations
+# and others that look at likely callers and evaluate the 
+# cross-product of those.
+# Can we do better than this?
+# A) P1.1., P2.1, P3.1 ... works
+# B) P1.1., P2.1, P3.2 ... fails on P3
+# Cannot conclude anything about caller.
+# C) P1.2., P2.1, P3.1 ... fails on P3
+# P1 calls P3.
+# D) P1.2, P2.1, P3.2, P4... fails on P4
+# P1.2 is compatible with P3.2 and P3 calls P4.
+# So we should remember who calls whom (so if we get a failure we have 
+# an idea what to do). And we should remember where there are compatibilities
+# If we know who calls whom and a package can be called from several
+# calling packages, then when the package fails after being pushed,
+# we should play this game.
+# Procedure: if we push Px and get an error on Px, then play with 
+# potential callers of Px and see what you can do.
+# First look at callers of Px denoted Py and push those. See if you get 
+# an error on Px in which case you'll add that to memo.
+# Try pushed Py with pushed Px and see if you go beyond Px say to Pz.
+# 
+# The reason we can't stay with the version of P1 that didn't work is that
+# we may never find out what calls P1.
+# May 5, 2015 version: includes strong monotonicity code
 # What we want: reprozip runs. 
 # packages are discovered.
 # user is asked any restrictions -- can click.
@@ -49,13 +176,14 @@ import collections
 import datetime
 import random
 from operator import itemgetter, attrgetter
-sys.setrecursionlimit(20000) 
+sys.setrecursionlimit(30000) 
+
 
 now = datetime.datetime.now()
 currentyear = now.year
 
 #####################################
-# global variables
+# global variables Global GLOBAL
 #####################################
 
 memory = {} # we will remember here the versions of package
@@ -71,6 +199,18 @@ successful = [] # configurations that have been tried and worked at any time
 
 failedconfigs = [] # configurations that have failed
 
+nocompile = [] 
+   # package-versions that don't compile, so should not be considered further
+
+knowcaller = False # if you'll always know the caller, then set to True
+# can override with a command line argument
+if 1 < len(sys.argv):
+  if (sys.argv[1] == "False") or (sys.argv[1] == "1") or (sys.argv[1] == "false") or (sys.argv[1] == "FALSE"):
+     knowcaller = False
+  else:
+     knowcaller = True
+
+
 
 ###################################################################
 
@@ -82,6 +222,7 @@ failedconfigs = [] # configurations that have failed
 # If the packages are the same then return true
 # Could be compatible if there is no mention of the two versions
 # or if there is a match
+# This is based on symmetric compatibilities
 def compatible(packver1, packver2):
   pack1 = packver1[0]
   ver1 = packver1[1]
@@ -104,17 +245,42 @@ def compatible(packver1, packver2):
 	# then we'll return False
 		
 
+# is ver1 of pack1 compatible with ver2 of pack2
+# If the packages are the same then return true
+# Could be compatible if there is no mention of the two versions
+# or if there is a match
+# This is based on CUDF style compatibilities -- caller can call
+# a callee having version x or better
+def cudftest(packver1, packver2):
+  pack1 = packver1[0]
+  ver1 = packver1[1]
+  pack2 = packver2[0]
+  ver2 = packver2[1]
+  bydefault = True
+  if pack1 == pack2:
+	return True
+  for c in cudf:
+    if (c[0] == pack1) and (c[3] == pack2): 
+	bydefault = False # the two packages are in the list of cudfs
+    	if (ver1 >= c[1]) and (ver1 <= c[2]) and (ver2 >= c[4]):
+		return True
+  return bydefault # if we've never encountered these packages, we'll return
+	# true, but if we have found the packages but no compatible versions,
+	# then we'll return False
+		
 # Given a new package-version pair newpackver,
 # is it compatible with the ones that are already there?
 def decidepackage(historyofpackversions, newpackver):
+   print "decidepackage: historyofpackversions, newpackver:", historyofpackversions, newpackver
    if 0 == len(historyofpackversions):
 	return [True, newpackver[0]]
    h = historyofpackversions[-1] # only worry about the very last one
-   if compatible(h, newpackver) == False:
-	print "decidepackage: call on compatible from ", h, " to ", newpackver, " has return value False."
+   if compatible(h, newpackver) == False: # ??? Changed for CUDF
+   # if cudftest(h, newpackver) == False:
+	print "decidepackage: call for config from ", h, " to ", newpackver, " has return value False."
 	return [False, h[0]]
    else:
-	print "decidepackage: call on compatible from ", h, " to ", newpackver, " has return value True."
+	# print "decidepackage: call on compatible from ", h, " to ", newpackver, " has return value True."
    	return [True, newpackver[0]]
 
 # Does an execution work? If so return an empty list. 
@@ -128,11 +294,36 @@ def works(listofpackversions):
 	else:
 		print "  Success up to: ", history
 		print "  Failure on: ", p, listofpackversions[p]
-		return [False, p, x[1]]
-   return [True, -1, -1] # -1 indicates all ok only use the True part
+		if knowcaller:
+			return [False, 0, p, x[1]] 
+		else:
+			return [False, 2, p, x[1]] 
+			# ??? changed the 0 to 2 to test out callee only
+   return [True, 0, -1, -1] # -1 indicates all ok only use the True part
 
 
 # APPLICATION-SPECIFIC (outside of simulator)
+
+# given that we have just pushed package P,
+# find a minimal pair of current configuration with
+# a successful configuration, meaning a configuration in 
+# successful that is identical to current in pack-ver except in P.
+def findminimalpair(P, currentconf):
+   i = 0
+   print "findminimal currentconf: ", currentconf
+   print "  findminimal P: ", P
+   while i < len(successful):
+      s = successful[i]
+      print "  findminimal s: ", s
+      flag = True
+      for c in currentconf:
+        if (not c == P) and (not currentconf[c] == s[c]):
+             flag = False # no minmal pair
+      print "  findminimal flag: ", flag
+      if flag:
+        return True
+      i+= 1
+   return False
 
 # filter the source based on constraints and output the result
 def filtermap(sourcemap, constraints):
@@ -196,6 +387,7 @@ def memorydecidepackage(historyofpackversions, newpackver):
 		return [False, h[0]]
 	   else:
 		print "memorydecidepackage: memory call from  ", h, " to ", newpackver, " has return value True."
+   print "+++ memorydecidepackage -- position 2"
    h = historyofpackversions[-1]
    x = flatten([h[0], newpackver[0]])
    if x in axiom.viewkeys():
@@ -212,6 +404,14 @@ def inconfig(newconfig, listofconfigs):
 	if s == newconfig:
 		return True
    return False
+
+# output a unique set of configs
+def finduniqs(inputconfigs):
+   out = []
+   for s in inputconfigs:
+	if not inconfig(s,out):
+		out.append(s)
+   return out
 
 # is newconfig in list of configs?
 def inconfigfail(newconfig, listofconfigs_packs):
@@ -247,11 +447,12 @@ def inmemstrong(callpackver, calleepackver, strongmemory):
 # identify the offending package
 # combinations and return a False indicating we did not need to to a real
 # execution.
-# Otherwise, do a real execution.
-# If it succeeds, then return True, and three fields we don't care about.
+# latestpackchanged is the package that was most recently changed
 # Otherwise, return False, identify the offending package combinations
+# when possible
 # and return a True indicating we DID a real execution.
-def checkworks(listofpackversions):
+def checkworks(listofpackversions, latestpackchanged):
+   print "--- checkworks listofpackversions, lastpackchanged:", listofpackversions, latestpackchanged
    if inconfig(listofpackversions, successful):
 	print "listofpackversions: ", listofpackversions
 	print "matching successful run: ", listofpackversions
@@ -261,9 +462,15 @@ def checkworks(listofpackversions):
 	print "listofpackversions: ", listofpackversions
 	print "matching failedconfigs run: ", listofpackversions
 	return [False, zz[1], zz[2], False] # already known to be bad. Didn't execute
+   for x in listofpackversions:
+	if x in nocompile:
+		print "this pack-version doesn't compile:", x
+		return [False, x[0], x[0], False] # doesn't compile
    history = []
    for p in listofpackversions:
+   	print "--- checkworks package before : ", history, p
 	x = memorydecidepackage(history, [p,listofpackversions[p]])
+   	print "--- checkworks package after : ", p
 	if x[0]:
 		history.append([p,listofpackversions[p]])
 	else:
@@ -274,11 +481,31 @@ def checkworks(listofpackversions):
    print "Tested configuration in works: ", listofpackversions
    y = copy.deepcopy(listofpackversions)
    if (x[0]):
+   	print "  Test successful!"
    	successful.append(y)
-   else: 
-   	failedconfigs.append([y, x[1], x[2]])
-   return [x[0], x[1], x[2], True]
-	
+	z = -1
+	return [True, -1, -1, True]
+   else: # config did not work
+     if (x[1] == 0):
+	failedconfigs.append([y, x[2], x[3]])
+	addtomemory(y, x[2], x[3])
+	return [x[0], x[2], x[3], True]
+     if (x[1] == 1):
+	nocompile.append([x[2], y[x[2]]])
+	failedconfigs.append([y, x[2], x[3]])
+	return [x[0], x[2], x[2], True]
+     if (x[1] == 2):
+	if (not latestpackchanged == x[2]) and findminimalpair(latestpackchanged, y): 
+	   # found minimal pair with respect to a successful configuration
+	   # that differs only in latestpackchanged
+	   # and callee is not the same as latestpackchanged
+	   failedconfigs.append([y, x[2], latestpackchanged])
+	   addtomemory(y, x[2], latestpackchanged)
+	   return [x[0], x[2], latestpackchanged, True]
+	else:
+	   return [x[0], x[2], -1, True]
+        
+
 
 # whichever version of badcallee is in temp is incompatible with
 # the version of badcaller in temp
@@ -287,38 +514,117 @@ def checkworks(listofpackversions):
 def addtomemory(temp, badcallee, badcaller):
    vercallee = temp[badcallee]
    vercaller = temp[badcaller]
+   print "caller: ", badcaller, vercaller, " and callee: ", badcallee, vercallee
    x = flatten([badcaller, vercaller])
    if x not in memory.viewkeys():
 	memory[x] = []
    memory[x].append([badcallee, vercallee])
    strongmemory.append([badcaller, vercaller, badcallee, vercallee])
 
+def mymed(mylist):
+   return mylist[len(mylist) / 2]
+
+# hunter method of finding best configuration.
+# This method can degenerate into a cross-product method if we 
+# are not careful. However we can try.
+def hunter(searchedpackage, temp, newsourcemap, phase, previouscaller, lastpackchanged):
+   # First we try just pushing all packages except those in todo list 
+   # that either precede or equal searchedpackage
+   # until we get something that works.
+   i = todolist.index(searchedpackage)
+   keepfixed = todolist[:i+1] # don't change these
+   packagestopush = [x for x in temp if not x in keepfixed]
+   print "hunter: packagestopush ", packagestopush
+   print "hunter: newsourcemap ", newsourcemap
+   found = False
+   temp2 = copy.deepcopy(temp)
+   temp2_max = copy.deepcopy(temp2)
+   for p in packagestopush:
+	temp2_max[p] = max(newsourcemap[p])
+   allconfigs = []
+   allconfigs.append(temp2)
+   allconfigs.append(temp2_max)
+   while not found:
+	returnnow = True
+	newallconfigs = copy.deepcopy(allconfigs)
+	print "hunter: newsourcemap: ", newsourcemap
+	for c in allconfigs: 
+	 keepgoing = True
+	 while keepgoing:
+	   keepgoing = False
+	   # for each configuration, push within packagestopush but give
+	   # priority to ones that just had an error
+	   newstack = [] # used when we want to focus on some package
+	   mystack = copy.deepcopy(packagestopush)
+	   while (0 < len(mystack)) or (0 < len(newstack)):
+		if 0 == len(newstack):
+		   temp3 = copy.deepcopy(c)
+		   p = mystack.pop() # takes from the end
+		else:
+		   p = newstack.pop() # take from reserve of newstack items
+			# adjust already updated temp3
+		# print "temp3", temp3
+		# print "temp3[p]", temp3[p]
+		# print "newsourcemap[p]", newsourcemap[p]
+		if temp3[p] > min(newsourcemap[p]):
+		   newver = max([v for v in newsourcemap[p] if v < temp3[p]])
+		   temp3[p] = newver
+		   print "hunter: temp3:", temp3
+		   if not  inconfig(temp3,newallconfigs):
+		     print "hunter: temp3 past inconfig"
+		     returnnow = False
+		     keepgoing = True
+		     t = copy.deepcopy(temp3)
+		     newallconfigs.append(t)
+		     ret = checkworks(temp3, p)
+		     # print "ret is: ", ret
+		     if ret[0]:
+			print "xxx successful config: ", temp3
+			return temp3
+		     # elif ret[1] in packagestopush:
+			# newstack.append(ret[1])
+	allconfigs = finduniqs(newallconfigs)
+	if returnnow:
+	   return {}
+	print "xxx len(allconfigs): ", len(allconfigs)
+	# temp2 = copy.deepcopy(allconfigs[-1])
+   return {}
+
+
 # by advancing versions as needed, try to make a compatible set of
 # package-version pairs
 # Side effect to memory in order to avoid unnecessary executions
 # temp is the configuration of package-versions we are trying
 # searchedpackage is the package that was pushed
-def trytomakework(searchedpackage, temp, newsourcemap, phase):
+# Works well when we get caller and callee
+def trytomakework(searchedpackage, temp, newsourcemap, phase, previouscaller, lastpackchanged):
   print "        "
   print "+++ Within trytomakework, on configuration ", temp
-  x = checkworks(temp) # we simulate this now, but in general
+  x = checkworks(temp, lastpackchanged) 
+	# searchedpackage acts both the role of previous caller and
+	# currently changed package
+	# we simulate this now, but in general
 	# this involves the creation of a frozen virtual machine
   print "++ Return value of: ", x
   if x[0] == False:
      badcallee = x[1] # callee
      badcaller = x[2] # caller
+     previouscaller = badcaller
      i = todolist.index(searchedpackage)
      keepfixed = todolist[:i+1] # don't change these
-     if (x[3]): # x[3] is true if we really did execute
-     	addtomemory(temp, badcallee, badcaller)
+     # if (x[3]) and (not badcallee == badcaller): 
+	# x[3] is true if we really did execute
+	# baddcallee == baddcaller if compile error
+	# Those have been added to nocompile already
+     	# addtomemory(temp, badcallee, badcaller)
      if badcaller in keepfixed:
 	posscallerversions = [temp[badcaller]]
      else:
-	posscallerversions = newsourcemap[badcaller]
+	posscallerversions = reversed(sorted(newsourcemap[badcaller]))
      if badcallee in keepfixed:
 	posscalleeversions = [temp[badcallee]]
      else:
-	posscalleeversions = newsourcemap[badcallee]
+	posscalleeversions = reversed(sorted(newsourcemap[badcallee]))
      print "calling package: ", badcaller, " with possible versions: ", posscallerversions
      print "called package: ", badcallee, " with possible versions: ", posscalleeversions
      for c_er in posscallerversions:
@@ -327,13 +633,17 @@ def trytomakework(searchedpackage, temp, newsourcemap, phase):
 		newtemp = copy.deepcopy(temp)
 		newtemp[badcaller] = c_er
 		newtemp[badcallee] = c_ee
+		if (not newtemp[badcaller] == temp[badcaller]):
+			lastpackchanged = badcaller
+		elif (not newtemp[badcallee] == temp[badcallee]):
+			lastpackchanged = badcallee
   	  	print "        "
   	  	print "+++ Within trytomakework deep, on configuration ", newtemp
 		print "inconfig(newtemp,successful):", inconfig(newtemp,successful)
 		print "inconfigfail(newtemp,failedconfigs):", inconfigfail(newtemp,failedconfigs)
 		zz = inconfigfail(newtemp,failedconfigs)
 		if (not inconfig(newtemp,successful)) and (not zz[0]):
-		  x = trytomakework(searchedpackage, newtemp, newsourcemap, phase)
+		  x = trytomakework(searchedpackage, newtemp, newsourcemap, phase, previouscaller, lastpackchanged)
   	  	  print "++ Return value of: ", x
 		  if 0 < len(x):
 			return x  
@@ -353,12 +663,17 @@ def trytomakework(searchedpackage, temp, newsourcemap, phase):
 # When the global phase is 2, we go to the conservative approach.
 def liquidclimber(constraints, todolist):
   newsourcemap = filtermap(sourcemap, constraints)
-  print "newsourcemap before monotonicity filtering: ", newsourcemap
-  bestmonoconfig = liquidclimberworker(constraints, todolist, newsourcemap, 1)
-  print "best configuration after  monotonicity filtering: ", bestmonoconfig
-  newsourcemap = adjustsource(newsourcemap, bestmonoconfig, todolist)
-  print "newsourcemap after monotonicity filtering: ", newsourcemap
-  print "failed configurations: ", failedconfigs
+  y = copy.deepcopy(default)
+  if 0 < len(default):
+    successful.append(y) # initially, we have a working configuration
+  if knowcaller:
+    print "newsourcemap before monotonicity filtering: ", newsourcemap
+    bestmonoconfig = liquidclimberworker(constraints, todolist, newsourcemap, 1)
+    print "best configuration after  monotonicity filtering: ", bestmonoconfig
+    newsourcemap = adjustsource(newsourcemap, bestmonoconfig, todolist)
+    print "newsourcemap after monotonicity filtering: ", newsourcemap
+    print "failed configurations: ", failedconfigs
+  # if knowcaller is false, come straight to here
   return liquidclimberworker(constraints, todolist, newsourcemap, 2)
 
 
@@ -369,25 +684,37 @@ def liquidclimber(constraints, todolist):
 # When the global phase is 2, we go to the conservative approach.
 def liquidclimberworker(constraints, todolist, newsourcemap, phase):
   current = copy.deepcopy(default)
+  if (0 == len(current)):
+	for p in newsourcemap:
+		x = min(sourcemap[p]) - 1
+		current[p] = x
   for m in todolist: # todolist gives the packages to maximize
 	# in descending order of priority
 	maxmyversions = max(newsourcemap[m])
-	print "liquidclimber: current is: ", current, "phase is: ", phase
+	print "liquidclimberworker: current is: ", current, "phase is: ", phase
 	if (current[m] < maxmyversions):
-		versionstodo = sorted([v for v in newsourcemap[m] if v > current[m]])
-		print "liquidclimber: package is: ",m
-		print "liquidclimber: versionstodo is: ",versionstodo
+		versionstodo = [v for v in newsourcemap[m] if v > current[m]]
+		versionstodo.sort(reverse=True)
+		print "liquidclimberworker: package is: ",m
+		print "liquidclimberworker: versionstodo is: ",versionstodo
 		# versions still to try
+		found = False
 		for v in versionstodo:
+		   if not found:
+			print "liquidclimberworker pack-ver: ", m, v
 			temp = copy.deepcopy(current)
 			temp[m] = v
-			ret = trytomakework(m, temp, newsourcemap, phase)
-			# print "return value: ", ret, " for config: ", temp
+			if knowcaller:
+				ret = trytomakework(m, temp, newsourcemap, phase, m, m)
+			else:
+				print "liquidclimberworker calling hunter"
+				ret = hunter(m, temp, newsourcemap, phase, m, m) # don't know the caller always
+			print "return value: ", ret, " for config: ", temp
 			if 0 < len(ret):
-				current = copy.deepcopy(ret)
-  return current
-	
-# For monotonicity
+				current = copy.deepcopy(ret) 
+				found = True
+  return current 
+
 
 
 # In the order of the todolist, we have achieved
@@ -409,64 +736,9 @@ def adjustsource(newsourcemap, bestmonoconfig, todolist):
  return newsourcemap
 
 	
-# This implements the algorithm against our simulator, but assumes that
-# the strong monotonicity assumption holds.
-# Very similar to liquidclimber itself,  except it calls strongmono_trytomakework
-def strongmono_liquidclimber(newsourcemap, todolist):
-  current = copy.deepcopy(default)
-  lasttried = copy.deepcopy(current)
-  for m in todolist: # todolist gives the packages to maximize
-	# in descending order of priority
-	maxmyversions = max(newsourcemap[m])
-	print "strongmono_liquidclimber: current is: ", current
-	if (lasttried[m] < maxmyversions):
-		versionstodo = sorted([v for v in newsourcemap[m] if v > current[m]])
-		print "strongmono_liquidclimber: package is: ",m
-		print "strongmono_liquidclimber: versionstodo is: ",versionstodo
-		# versions still to try
-		for v in versionstodo:
-		   # if keepwork:
-			# print "v is: ", v
-			temp = copy.deepcopy(lasttried)
-			temp[m] = v
-			ret = strongmono_trytomakework(m, temp, newsourcemap)
-			# print "return value: ", ret, " for config: ", temp
-			if ret[0]:
-				current = copy.deepcopy(ret[1])
-			lasttried = copy.deepcopy(ret[1])
-  return current
-
-# by advancing versions as needed, try to make a compatible set of
-# package-version pairs
-# Side effect to memory in order to avoid unnecessary executions
-# temp is the configuration of package-versions we are trying
-# searchedpackage is the package that was pushed
-def strongmono_trytomakework_old(searchedpackage, temp, newsourcemap):
-  print "        "
-  print "+++ Within strongmono_trytomakework, on configuration ", temp
-  x = checkworks(temp) # we simulate this now, but in general
-	# this involves the creation of a frozen virtual machine
-  print "++ Return value of: ", x
-  while x[0] == False:
-     badcallee = x[1] # callee
-     badcaller = x[2] # caller
-     if (x[3]): # x[3] is true if we really did execute
-     	addtomemory(temp, badcallee, badcaller)
-     if (temp[badcallee] < max(newsourcemap[badcallee])):
-	  nexthope =min([v for v in newsourcemap[badcallee] if v > temp[badcallee]])
-	  temp[badcallee] = nexthope
-  	  print "        "
-  	  print "+++ Within strongmono_trytomakework deep, on configuration ", temp
-  	  x = checkworks(temp) 
-  	  print "++ Return value of: ", x
-     else:
-	  return [False, temp]
-  return [True, temp]
-  
-	
 	
 
-'''  # When transferring to Chrisophe
+'''  # When transferring to Christophe
 # DATA
 
 # For simulator
@@ -587,9 +859,27 @@ compatibilities.append([3, 31, 31, 4, 41, 41])
 compatibilities.append([3, 32, 32, 4, 42, 42])
 compatibilities.append([3, 38, 38, 4, 48, 48])
 
+cudf= []
+cudf.append([1, 11, 12, 2, 21])
+cudf.append([1, 13, 15, 2, 24])
+cudf.append([1, 16, 19, 2, 27])
+cudf.append([1, 11, 12, 3, 31])
+cudf.append([1, 13, 19, 3, 36])
+cudf.append([1, 11, 12, 4, 41])
+cudf.append([1, 13, 19, 4, 46])
+cudf.append([2, 21, 22, 3, 31])
+cudf.append([2, 23, 29, 3, 36])
+cudf.append([2, 21, 24, 4, 41])
+cudf.append([2, 25, 29, 4, 47])
+cudf.append([3, 31, 34, 4, 41])
+cudf.append([3, 35, 39, 4, 47])
+cudf.append([4, 41, 42, 3, 31])
+cudf.append([4, 43, 49, 3, 36])
 
 
-orderofpackages = [1, 3, 4, 2, 3, 4, 3,  2]
+
+
+orderofpackages = [1, 3, 4, 1, 2, 3, 4, 3, 2, 4]
 
 
 # outside of the simulator
@@ -614,12 +904,15 @@ sourcemap = { 1: [11, 12, 13, 14, 15, 16, 17, 18, 19],
 4: [41, 42, 43, 44, 45, 46, 47, 48, 49]}
 
 default = {1:11,2:21, 3:31, 4:41} # configuration that works
+default = {} # configuration that works
 
 # constraints indicate low and high versions
 # if no constraints, then take every one
 # constraints = { 1: [12, 15], 2:[21,27]}
 # map from package to low allowed version to high version inclusive
-constraints = { 1: [11, 19], 2:[21,28]}
+constraints = { 1: [11, 19], 2:[21,29]}
+# constraints = { 1: [11, 15], 2:[21,21], 3:[38,38], 4:[40,49]}
+# ok when True and 1: [11,14]
 todolist = [3,1]
 
 # EXECUTION
@@ -630,4 +923,5 @@ endconfig = liquidclimber(constraints, todolist)
 print "End with this: ",endconfig
 print "successful: ",successful
 
-''' # When transferring to Chrisophe
+
+''' # When transferring to Christophe
