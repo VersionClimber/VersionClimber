@@ -5,7 +5,7 @@ from setuptools import setup, find_packages
 
 # Packages list, namespace and root directory of packages
 
-packages = find_packages('.')
+packages = ['vflexql']
 
 # dependencies to other eggs
 setup_requires = []

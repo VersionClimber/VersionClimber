@@ -52,8 +52,10 @@ def works2(listofpackversions):
 
     if status == 0:
         res = [True, -1, -1]
+        res = [True, 0, -1, -1]
     else:
         res = [False, pkg2int[status[1]], pkg2int[status[0]]]
+        res = [False, 0, pkg2int[status[1]], pkg2int[status[0]]]
 
     return res
 
@@ -82,6 +84,8 @@ liquidparser.compatibilities = compatibilities
 liquidparser.orderofpackages = orderofpackages
 liquidparser.default = default
 liquidparser.sourcemap = sourcemap
+liquidparser.todolist = todolist
+liquidparser.strongmemory = []
 
 constraints = {}
 

@@ -545,7 +545,7 @@ def hunter(searchedpackage, temp, newsourcemap, phase, previouscaller, lastpackc
 	temp2_max[p] = max(newsourcemap[p])
    allconfigs = []
    allconfigs.append(temp2)
-   allconfigs.append(temp2_max)
+   # allconfigs.append(temp2_max)
    while not found:
 	returnnow = True
 	newallconfigs = copy.deepcopy(allconfigs)
@@ -568,8 +568,8 @@ def hunter(searchedpackage, temp, newsourcemap, phase, previouscaller, lastpackc
 		# print "temp3", temp3
 		# print "temp3[p]", temp3[p]
 		# print "newsourcemap[p]", newsourcemap[p]
-		if temp3[p] > min(newsourcemap[p]):
-		   newver = max([v for v in newsourcemap[p] if v < temp3[p]])
+		if temp3[p] < max(newsourcemap[p]):
+		   newver = min([v for v in newsourcemap[p] if v > temp3[p]])
 		   temp3[p] = newver
 		   print "hunter: temp3:", temp3
 		   if not  inconfig(temp3,newallconfigs):
@@ -622,11 +622,11 @@ def trytomakework(searchedpackage, temp, newsourcemap, phase, previouscaller, la
      if badcaller in keepfixed:
 	posscallerversions = [temp[badcaller]]
      else:
-	posscallerversions = reversed(sorted(newsourcemap[badcaller]))
+	posscallerversions = (sorted(newsourcemap[badcaller]))
      if badcallee in keepfixed:
 	posscalleeversions = [temp[badcallee]]
      else:
-	posscalleeversions = reversed(sorted(newsourcemap[badcallee]))
+	posscalleeversions = (sorted(newsourcemap[badcallee]))
      print "calling package: ", badcaller, " with possible versions: ", posscallerversions
      print "called package: ", badcallee, " with possible versions: ", posscalleeversions
      for c_er in posscallerversions:

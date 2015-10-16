@@ -35,6 +35,7 @@ class Environment(object):
         # create here a virtual environment
         #activate()
 
+
     def conversion(self):
         self._convert_pkgname()
         self._convert_commits()
@@ -69,6 +70,16 @@ env = Environment()
 
 #cmd = 'python simple/test.py'
 #
+
+def configure(dir, git_pkgs=[], svn_pkgs=[], pypi_pkgs=[]):
+    pass
+
+def init(dir='simple', universe=('foo', 'goo', 'hoo'), Tags=False):
+    """ Factory method for environment initialisation.
+    """
+    env.init(dir=dir, universe=universe, Tags=Tags)
+
+
 def checkout(pkg, commit):
     d = env.pkg_dir / pkg
     d.chdir()
