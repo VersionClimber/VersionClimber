@@ -9,6 +9,7 @@ import re
 import json
 import urllib2
 from distutils.version import LooseVersion
+import multigit
 
 
 def sh(cmd):
@@ -37,7 +38,6 @@ def pypi_versions(package_name):
 def git_versions(package_path, tags=False):
     """ Return a list of git versions of a package.
     """
-    from vflexql import multigit
     if tags:
         return list(multigit.tags(package_path))
     else:

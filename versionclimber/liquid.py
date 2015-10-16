@@ -7,8 +7,8 @@ hoo : master
 
 import itertools
 # import git
-from vflexql.utils import sh, path
-from vflexql import multigit
+from utils import sh, path
+import multigit
 
 # Create a singleton defined once by the init method
 # replace all that stuff with Objects.
@@ -33,15 +33,14 @@ class Environment(object):
         self.conversion()
 
         # create here a virtual environment
-        #activate()
-
+        # activate()
 
     def conversion(self):
         self._convert_pkgname()
         self._convert_commits()
 
     def _convert_pkgname(self):
-        """ Return 2 dict corresponding to package_name -> int 
+        """ Return 2 dict corresponding to package_name -> int
         and the reversed dict int -> package_name
 
         """
@@ -68,11 +67,12 @@ class Environment(object):
 env = Environment()
 
 
-#cmd = 'python simple/test.py'
+# cmd = 'python simple/test.py'
 #
 
 def configure(dir, git_pkgs=[], svn_pkgs=[], pypi_pkgs=[]):
     pass
+
 
 def init(dir='simple', universe=('foo', 'goo', 'hoo'), Tags=False):
     """ Factory method for environment initialisation.
@@ -86,9 +86,10 @@ def checkout(pkg, commit):
 
     commit = str(commit)
 
-    sh('git checkout %s'%commit)
+    sh('git checkout %s' % commit)
 
     env.curdir.chdir()
+
 
 def pip_install(pkg, no_index=True):
     env.pkg_dir.chdir()
@@ -100,15 +101,18 @@ def pip_install(pkg, no_index=True):
     sh(cmd)
     env.curdir.chdir()
 
+
 def master(pkg):
     name = env.branch_names[pkg]
     checkout(pkg, name)
 
+
 def activate(dir=None):
     """ TODO
     """
-    p = env.pkg_dir/'venv2/bin/activate_this.py'
+    p = env.pkg_dir / 'venv2/bin/activate_this.py'
     execfile(p, dict(__file__=p))
+
 
 def create_or_activate(dir=None):
     """ TODO
@@ -126,24 +130,28 @@ def create_or_activate(dir=None):
     p = dir/'venv/bin/activate_this.py'
     execfile(p, dict(__file__=p))
 
+
 def config(pkg_config):
     for pkg, commit in env.pkg_config.iteritems():
         checkout(pkg, commit)
+
 
 def restore_config():
     for pkg in env.branch_names:
         master(pkg)
 
+
 def run(cmd=None, error_file='error.txt'):
     if cmd is None:
-        cmd = 'python %s' % (env.pkg_dir/'test.py')
+        cmd = 'python %s' % (env.pkg_dir / 'test.py')
 
-    #sh('rm simple/*/*.pyc')
+    # sh('rm simple/*/*.pyc')
     status = sh(cmd)
     if status == 0:
         return status
     else:
         return parse_error(error_file)
+
 
 def parse_error(error_file):
     s = open(error_file).read()
@@ -168,12 +176,12 @@ def parse_error(error_file):
             tgt = ''
     return src, tgt
 
+
 def experiment(pkgs=('foo', 'goo', 'hoo'), order_list=['hoo', 'goo', 'foo', 'hoo']):
     n = len(order_list)
     pkgi = env.pkg2int
     c2i = env.bidir_commits
     pairs = [(order_list[i], order_list[i+1]) for i in range(n-1)]
-
 
     restore_config()
     gen = itertools.product(*[reversed(env.commits[pkg]) for pkg in pkgs])
@@ -187,7 +195,7 @@ def experiment(pkgs=('foo', 'goo', 'hoo'), order_list=['hoo', 'goo', 'foo', 'hoo
             checkout(pkg, commit)
             pip_install(pkg)
 
-        # TODO: Add script path and name 
+        # TODO: Add script path and name
         status = run()
 
         res = ', '.join(['%d' % (pkgi[pkg]) +
@@ -196,11 +204,11 @@ def experiment(pkgs=('foo', 'goo', 'hoo'), order_list=['hoo', 'goo', 'foo', 'hoo
 
         if status == 0:
             result.append(res + ', OK')
-            for p1,p2 in pairs:
+            for p1, p2 in pairs:
                 c1, c2 = c2i[p1][0][str(dc[p1])], c2i[p2][0][str(dc[p2])]
                 l = [pkgi[p1], c1, c1, pkgi[p2], c2, c2]
                 compatibilities.append(l)
-        else: 
+        else:
             result.append(res + ', FAILURE' +' (%s ,%s)'%(status[0], status[1]))
 
     restore_config()
@@ -217,7 +225,6 @@ def variables_for_parser(pkgs=('foo', 'goo', 'hoo'), default=None):
         - sourcemap
 
     """
-    universe = env.universe
     commits = env.commits
     bidir_commits = env.bidir_commits
     p2i = env.pkg2int
@@ -236,4 +243,3 @@ def variables_for_parser(pkgs=('foo', 'goo', 'hoo'), default=None):
             _default[p2i[pkg]] = c2i[default[pkg]]
 
     return sourcemap, _default, todolist
-
