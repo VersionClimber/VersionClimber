@@ -5,7 +5,7 @@ from setuptools import setup, find_packages
 
 # Packages list, namespace and root directory of packages
 
-packages = ['vflexql']
+packages = ['versionclimber']
 
 # dependencies to other eggs
 setup_requires = []
@@ -14,8 +14,8 @@ install_requires = []
 # web sites where to find eggs
 dependency_links = ['http://openalea.gforge.inria.fr/pi']
 
-name = 'VFlexQL'
-description = 'VFlexQL : Version Flexible Query Language'
+name = 'VersionClimber'
+description = 'VFlexQL: Version Flexible Query Language'
 long_description = '''
 
 '''
