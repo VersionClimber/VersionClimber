@@ -36,26 +36,26 @@ Go to http://gforge.inria.fr/frs/?group_id=79
 Requirements
 ++++++++++++
 
-pip install ipython
-pip install path.py
-pip install gitpython
+::
+
+    pip install ipython
+    pip install path.py
+    pip install gitpython
 
 
 Installation
 ++++++++++++
 
 
-Utilisation
-+++++++++++
+Usage
++++++
 
+::
 
-<code>
-python setup.py install
-</code>
-
+    python setup.py install
 
 
 Documentation
 -------------
 
-Todo
+TODO
