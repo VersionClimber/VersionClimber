@@ -4,8 +4,9 @@ Task 3: Report the version graph for each particular package
 """
 
 import os
-from utils import path, clone
 import git
+from path import path
+
 
 def versions(path):
     """
@@ -39,6 +40,8 @@ def tags(path):
 
 
 def test():
+    from versionclimber.utils import path, clone
+    
     pkgs = path('pkgs').abspath()
     
 
