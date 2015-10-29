@@ -1,7 +1,7 @@
 VersionClimber 
 ==============
 
-**Authors** : Christophe Pradal
+**Authors** : Christophe Pradal, Sarah Cohen-Boulakia, Patrick Valduriez, Dennis Shasha
 
 **Institutes** : CIRAD / INRIA / NYU   
 
@@ -16,7 +16,7 @@ About
 Description
 +++++++++++
 
-Version Climber is a ...
+Version Climber is a system for package evolution for Data Science.
 
 
 Content
@@ -28,10 +28,6 @@ The Version Climber package contains :
 Installation
 ------------
 
-Download
-++++++++
-
-Go to http://gforge.inria.fr/frs/?group_id=79
 
 Requirements
 ++++++++++++

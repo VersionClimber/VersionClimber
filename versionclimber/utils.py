@@ -25,18 +25,20 @@ def clone(repo, pkg):
 def pypi_versions(package_name):
     """ Retrieve the different versions of a package on PyPi.
 
-    Return the sorted list.
+    Returns the versions as a sorted list.
     """
     url = "https://pypi.python.org/pypi/%s/json" % (package_name,)
     data = json.load(urllib2.urlopen(urllib2.Request(url)))
     versions = data["releases"].keys()
     versions.sort(key=LooseVersion)
-    # print versions
+
     return versions
 
 
 def git_versions(package_path, tags=False):
     """ Return a list of git versions of a package.
+
+
     """
     if tags:
         return list(multigit.tags(package_path))
@@ -45,7 +47,9 @@ def git_versions(package_path, tags=False):
 
 
 def svn_versions(package_path):
-    """ Return the svn versions """
+    """ Extract all the svn versions of a given directory
+
+    """
     cwd = path('.').abspath()
     pp = path(package_path)
     if pp.exists():
