@@ -127,7 +127,7 @@ def create_or_activate(dir=None):
 
     env.venv_dir = dir
 
-    p = dir/'venv/bin/activate_this.py'
+    p = dir / 'venv/bin/activate_this.py'
     execfile(p, dict(__file__=p))
 
 
@@ -159,10 +159,10 @@ def parse_error(error_file):
     lines = [l.strip() for l in lines if l.startswith('  ')]
     n = len(lines)
     for i in range(n):
-        if lines[-i-1].strip().startswith('File '):
+        if lines[-i - 1].strip().startswith('File '):
             break
 
-    lines = lines[-i-1:]
+    lines = lines[-i - 1:]
     l = lines[0]
     filename = l.split(',')[0].split(' ')[-1].strip('"')
     src = str(path(filename).namebase)
@@ -181,7 +181,7 @@ def experiment(pkgs=('foo', 'goo', 'hoo'), order_list=['hoo', 'goo', 'foo', 'hoo
     n = len(order_list)
     pkgi = env.pkg2int
     c2i = env.bidir_commits
-    pairs = [(order_list[i], order_list[i+1]) for i in range(n-1)]
+    pairs = [(order_list[i], order_list[i + 1]) for i in range(n - 1)]
 
     restore_config()
     gen = itertools.product(*[reversed(env.commits[pkg]) for pkg in pkgs])
@@ -199,7 +199,7 @@ def experiment(pkgs=('foo', 'goo', 'hoo'), order_list=['hoo', 'goo', 'foo', 'hoo
         status = run()
 
         res = ', '.join(['%d' % (pkgi[pkg]) +
-                        '(v %d)' % (c2i[pkg][0][str(commit)])
+                         '(v %d)' % (c2i[pkg][0][str(commit)])
                          for pkg, commit in zip(pkgs, commits)])
 
         if status == 0:
@@ -209,7 +209,7 @@ def experiment(pkgs=('foo', 'goo', 'hoo'), order_list=['hoo', 'goo', 'foo', 'hoo
                 l = [pkgi[p1], c1, c1, pkgi[p2], c2, c2]
                 compatibilities.append(l)
         else:
-            result.append(res + ', FAILURE' +' (%s ,%s)'%(status[0], status[1]))
+            result.append(res + ', FAILURE' + ' (%s ,%s)' % (status[0], status[1]))
 
     restore_config()
     return '\n'.join(result), compatibilities
