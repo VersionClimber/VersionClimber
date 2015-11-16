@@ -58,3 +58,19 @@ def minors(seq):
 
 def patchs(seq):
     return _hversions(seq, type='patch')
+
+
+def take(seq, p):
+    """ Takes p values in a sequence seq.
+    With the first and last value.
+    """
+    n = len(seq)
+    step = n/(p-1)
+    values = [seq[0]]
+    indices = range(step, n-step+1, step)[-p+2:]
+    values.extend([seq[i] for i in indices])
+    if values[-1] != seq[-1]:
+        values.append(seq[-1])
+
+    return values
+
