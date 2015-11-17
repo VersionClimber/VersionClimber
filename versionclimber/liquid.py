@@ -9,7 +9,7 @@ import itertools
 # import git
 from .utils import sh, path
 from . import multigit
-from .version import take
+from .version import take, hversions
 
 # Create a singleton defined once by the init method
 # replace all that stuff with Objects.
@@ -18,10 +18,16 @@ from .version import take
 class Environment(object):
     empty = True
 
-    def init(self, dir='simple', universe=('foo', 'goo', 'hoo'), Tags=False):
+    def init(self, dir='simple', universe=('foo', 'goo', 'hoo'), Tags=False, endof=None):
         """ Set a global variable """
 
         self.d = self.commits = multigit.universe_versions(dir, universe, Tags=Tags)
+        if endof:
+            for pkg in endof:
+                print 'DDD', self.d.keys()
+                if pkg in self.d:
+                    self.d[pkg].insert(0,endof[pkg])
+
         self.universe = self.d.keys()
         self.curdir = path('.').abspath()
 
@@ -150,8 +156,10 @@ def run(cmd=None, error_file='error.txt'):
     status = sh(cmd)
     if status == 0:
         return status
-    else:
+    elif env.knowcaller:
         return parse_error(error_file)
+    else:
+        return (-1, -1)
 
 
 def parse_error(error_file):
@@ -216,7 +224,7 @@ def experiment(pkgs=('foo', 'goo', 'hoo'), order_list=['hoo', 'goo', 'foo', 'hoo
     return '\n'.join(result), compatibilities
 
 
-def variables_for_parser(pkgs=('foo', 'goo', 'hoo'), default=None):
+def variables_for_parser(pkgs=('foo', 'goo', 'hoo'), default=None, env=env):
     """ Compute the main variables to call liquidparser
 
     :Parameters:
@@ -236,7 +244,7 @@ def variables_for_parser(pkgs=('foo', 'goo', 'hoo'), default=None):
     _default = {}
     for pkg, commit_list in commits.iteritems():
         c2i, i2c = bidir_commits[pkg]
-        cl = [c2i[str(commit)] for commit in reversed(commit_list)]
+        cl = [c2i[str(commit)] for commit in commit_list]
         sourcemap[p2i[pkg]] = cl
         if default is None:
             _default[p2i[pkg]] = cl[0]
@@ -283,16 +291,14 @@ def pkg_versions(universe, init_config, versions, endof=None):
 
         if nb_versions in ('major', 'minor', 'patch'):
             commits = replace_by_wrong_commits(pkg, commits, endof)
-            # TODO: select the right versions
-            pass
-        elif nb_versions == 0:
-            pass
+            commits = hversions(commits, nb_versions)
         elif nb_versions == 1:
-            commits = commits[0]
+                commits = commits[0]
         elif nb_versions == 2:
             commits = [commits[0], commits[-1]]
         else:
-            commits = take(commits, nb_versions)
+            if nb_versions > 2:
+                commits = take(commits, nb_versions)
             commits = replace_by_wrong_commits(pkg, commits, endof)
 
         pkgs[pkg] = commits
@@ -328,10 +334,12 @@ def _convert_commits(pkgs):
 '''
 
 
-class MyEnv(Environment):
+class MyEnv(object):
+    """ TODO: inherit of Environment before replacnig it...
+    """
     empty = True
 
-    def init(self, universe, versions):
+    def __init__(self, universe, versions):
         """ Set a global variable """
 
         self.d = self.commits = versions  # multigit.universe_versions(dir, universe, Tags=Tags)
