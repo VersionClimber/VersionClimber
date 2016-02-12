@@ -273,6 +273,9 @@ def pkg_versions(universe, init_config, versions, endof=None):
         init_config['mtg'] = ('r13066',0)
         init_config['rpy2'] = (u'2.5.1',0)
 
+        # pkgs is a subset of versions
+        pkgs = pkg_versions(universe, init_config, versions, endof)
+
     """
     pkgs = {}
     for pkg in universe:
@@ -384,3 +387,15 @@ class MyEnv(object):
             c2i = dict(zip(cl, range(1, n)))
             i2c = dict(zip(range(1, n), cl))
             c2i2c[pkg] = c2i, i2c
+
+    def config2txt(self, config):
+        semantic_config = {}
+        int2pkg = self.int2pkg
+        bidir = self.bidir_commits
+        for pi, ci in config.iteritems():
+            pkg = int2pkg[pi]
+            commit = bidir[pkg][1][ci]
+            semantic_config[pkg] = commit
+        return semantic_config
+
+
