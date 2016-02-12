@@ -7,8 +7,9 @@ hoo : master
 
 import itertools
 # import git
-from utils import sh, path
-import multigit
+from .utils import sh, path
+from . import multigit
+from .version import take, hversions
 
 # Create a singleton defined once by the init method
 # replace all that stuff with Objects.
@@ -17,10 +18,16 @@ import multigit
 class Environment(object):
     empty = True
 
-    def init(self, dir='simple', universe=('foo', 'goo', 'hoo'), Tags=False):
+    def init(self, dir='simple', universe=('foo', 'goo', 'hoo'), Tags=False, endof=None):
         """ Set a global variable """
 
         self.d = self.commits = multigit.universe_versions(dir, universe, Tags=Tags)
+        if endof:
+            for pkg in endof:
+                print 'DDD', self.d.keys()
+                if pkg in self.d:
+                    self.d[pkg].insert(0,endof[pkg])
+
         self.universe = self.d.keys()
         self.curdir = path('.').abspath()
 
@@ -127,7 +134,7 @@ def create_or_activate(dir=None):
 
     env.venv_dir = dir
 
-    p = dir/'venv/bin/activate_this.py'
+    p = dir / 'venv/bin/activate_this.py'
     execfile(p, dict(__file__=p))
 
 
@@ -149,8 +156,10 @@ def run(cmd=None, error_file='error.txt'):
     status = sh(cmd)
     if status == 0:
         return status
-    else:
+    elif env.knowcaller:
         return parse_error(error_file)
+    else:
+        return (-1, -1)
 
 
 def parse_error(error_file):
@@ -159,10 +168,10 @@ def parse_error(error_file):
     lines = [l.strip() for l in lines if l.startswith('  ')]
     n = len(lines)
     for i in range(n):
-        if lines[-i-1].strip().startswith('File '):
+        if lines[-i - 1].strip().startswith('File '):
             break
 
-    lines = lines[-i-1:]
+    lines = lines[-i - 1:]
     l = lines[0]
     filename = l.split(',')[0].split(' ')[-1].strip('"')
     src = str(path(filename).namebase)
@@ -181,7 +190,7 @@ def experiment(pkgs=('foo', 'goo', 'hoo'), order_list=['hoo', 'goo', 'foo', 'hoo
     n = len(order_list)
     pkgi = env.pkg2int
     c2i = env.bidir_commits
-    pairs = [(order_list[i], order_list[i+1]) for i in range(n-1)]
+    pairs = [(order_list[i], order_list[i + 1]) for i in range(n - 1)]
 
     restore_config()
     gen = itertools.product(*[reversed(env.commits[pkg]) for pkg in pkgs])
@@ -199,7 +208,7 @@ def experiment(pkgs=('foo', 'goo', 'hoo'), order_list=['hoo', 'goo', 'foo', 'hoo
         status = run()
 
         res = ', '.join(['%d' % (pkgi[pkg]) +
-                        '(v %d)' % (c2i[pkg][0][str(commit)])
+                         '(v %d)' % (c2i[pkg][0][str(commit)])
                          for pkg, commit in zip(pkgs, commits)])
 
         if status == 0:
@@ -209,13 +218,13 @@ def experiment(pkgs=('foo', 'goo', 'hoo'), order_list=['hoo', 'goo', 'foo', 'hoo
                 l = [pkgi[p1], c1, c1, pkgi[p2], c2, c2]
                 compatibilities.append(l)
         else:
-            result.append(res + ', FAILURE' +' (%s ,%s)'%(status[0], status[1]))
+            result.append(res + ', FAILURE' + ' (%s ,%s)' % (status[0], status[1]))
 
     restore_config()
     return '\n'.join(result), compatibilities
 
 
-def variables_for_parser(pkgs=('foo', 'goo', 'hoo'), default=None):
+def variables_for_parser(pkgs=('foo', 'goo', 'hoo'), default=None, env=env):
     """ Compute the main variables to call liquidparser
 
     :Parameters:
@@ -235,7 +244,7 @@ def variables_for_parser(pkgs=('foo', 'goo', 'hoo'), default=None):
     _default = {}
     for pkg, commit_list in commits.iteritems():
         c2i, i2c = bidir_commits[pkg]
-        cl = [c2i[str(commit)] for commit in reversed(commit_list)]
+        cl = [c2i[str(commit)] for commit in commit_list]
         sourcemap[p2i[pkg]] = cl
         if default is None:
             _default[p2i[pkg]] = cl[0]
@@ -243,3 +252,150 @@ def variables_for_parser(pkgs=('foo', 'goo', 'hoo'), default=None):
             _default[p2i[pkg]] = c2i[default[pkg]]
 
     return sourcemap, _default, todolist
+
+
+##############################################################################
+# Extended version
+##############################################################################
+
+def pkg_versions(universe, init_config, versions, endof=None):
+    """ Extract a set of versions for each packages.
+
+    The selection is computed based on initial information contains in init_config.
+
+    :Example:
+    ::
+        universe = ('adel', 'mtg', 'caribu', 'rpy2')
+
+        init_config = {}
+        init_config['adel'] = ('r3417',0)
+        init_config['caribu'] = ('r4122',0)
+        init_config['mtg'] = ('r13066',0)
+        init_config['rpy2'] = (u'2.5.1',0)
+
+        # pkgs is a subset of versions
+        pkgs = pkg_versions(universe, init_config, versions, endof)
+
+    """
+    pkgs = {}
+    for pkg in universe:
+        iversion = init_config[pkg][0]
+        nb_versions = init_config[pkg][1]
+
+        commits = versions[pkg][versions[pkg].index(iversion):]
+
+        if 'r' == commits[0][0]:
+            commits = [ci[1:] for ci in commits]
+        pkgs[pkg] = commits
+
+    for pkg in universe:
+        nb_versions = init_config[pkg][1]
+        commits = pkgs[pkg]
+
+        if nb_versions in ('major', 'minor', 'patch'):
+            commits = replace_by_wrong_commits(pkg, commits, endof)
+            commits = hversions(commits, nb_versions)
+        elif nb_versions == 1:
+                commits = commits[0]
+        elif nb_versions == 2:
+            commits = [commits[0], commits[-1]]
+        else:
+            if nb_versions > 2:
+                commits = take(commits, nb_versions)
+            commits = replace_by_wrong_commits(pkg, commits, endof)
+
+        pkgs[pkg] = commits
+
+    return pkgs
+
+
+def replace_by_wrong_commits(pkg, commits, endof):
+    """
+    """
+    if pkg in endof:
+        wrong_commits = endof[pkg]
+        n = len(wrong_commits)
+        commits[-2 * n:-n], commits[-n:] = commits[-n:], wrong_commits
+
+    return commits
+
+'''
+def _convert_commits(pkgs):
+    """ Convert a list of commits to int
+
+    The commits are a list from newer to later
+    """
+    commits = pkgs
+    c2i2c = bidir_commits = {}
+    for pkg, commit_list in commits.iteritems():
+        n = len(commit_list) + 1
+        cl = map(str, commit_list)
+        c2i = dict(zip(cl, range(1, n)))
+        i2c = dict(zip(range(1, n), cl))
+        c2i2c[pkg] = c2i, i2c
+    return bidir_commits
+'''
+
+
+class MyEnv(object):
+    """ TODO: inherit of Environment before replacnig it...
+    """
+    empty = True
+
+    def __init__(self, universe, versions):
+        """ Set a global variable """
+
+        self.d = self.commits = versions  # multigit.universe_versions(dir, universe, Tags=Tags)
+        self.universe = universe
+        # self.curdir = path('.').abspath()
+
+        # self.pkg_dir = path(dir)
+
+        # self.branch_names = multigit.branch_names(env.pkg_dir, universe)
+        # self.error_file = 'error.txt'
+        self.empty = False
+
+        self.conversion()
+
+        # create here a virtual environment
+        # activate()
+
+    def conversion(self):
+        self._convert_pkgname()
+        self._convert_commits()
+
+    def _convert_pkgname(self):
+        """ Return 2 dict corresponding to package_name -> int
+        and the reversed dict int -> package_name
+
+        """
+        universe = self.universe
+        n = len(universe) + 1
+        self.pkg2int = dict(zip(universe, range(1, n)))
+        self.int2pkg = dict(zip(range(1, n), universe))
+
+    def _convert_commits(self):
+        """ Convert a list of commits to int
+
+        The commits are a list from newer to later
+        """
+        commits = self.commits
+        c2i2c = self.bidir_commits = {}
+        for pkg, commit_list in commits.iteritems():
+            n = len(commit_list) + 1
+            cl = map(str, commit_list)
+            c2i = dict(zip(cl, range(1, n)))
+            i2c = dict(zip(range(1, n), cl))
+            c2i2c[pkg] = c2i, i2c
+
+    def config2txt(self, config):
+        semantic_config = {}
+        int2pkg = self.int2pkg
+        bidir = self.bidir_commits
+        for pi, ci in config.iteritems():
+            pkg = int2pkg[pi]
+            commit = bidir[pkg][1][ci]
+            semantic_config[pkg] = commit
+        return semantic_config
+
+
