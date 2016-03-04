@@ -37,6 +37,7 @@ Requirements
     pip install ipython
     pip install path.py
     pip install gitpython
+    pip install pyyaml
 
 
 Installation
