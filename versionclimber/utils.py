@@ -59,7 +59,7 @@ def svn_versions(package_path):
 
     revisions = []
     try:
-        svn_revs = subprocess.check_output(['/opt/local/bin/svn', 'log'])
+        svn_revs = subprocess.check_output(['svn', 'log'])
         revisions = [l.split(' | ')[0] for l in re.split("\n+", svn_revs)
                      if re.match(r"^r[0-9]+", l)]
         revisions.reverse()
