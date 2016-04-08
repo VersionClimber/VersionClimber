@@ -3,21 +3,21 @@ packages:
       vcs       : git
       url       : https://github.com/scikit-image/scikit-image
       cmd       : pip install --no-index --no-deps -U
-      version   : 0.4
-      hierarchy : commit
+      version   : v0.4
+      hierarchy : patch
       directory : /Users/pradal/devlp/git_cache
 
     - name      : scikit-learn
       vcs       : git
       url       : https://github.com/scikit-learn/scikit-learn
       cmd       : pip install --no-index --no-deps -U
-      version   : 0.8
-      hierarchy : commit
+      version   : '0.8'
+      hierarchy : patch
       directory : /Users/pradal/devlp/git_cache
 
     - name      : scipy
       vcs       : pypi
-      version   : 1.3.0
+      version   : 0.13.0
       hierarchy : minor
 
     - name      : numpy

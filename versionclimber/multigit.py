@@ -20,8 +20,8 @@ def versions(path):
     commits = repo.iter_commits()
 
     for c in commits:
-        print str(c), ' : ', c.summary, '(%d)'%c.authored_date
-        yield c 
+        print c.name_rev, ' : ', c.summary, '(%d)'%c.authored_date
+        yield c
 
 def tags(path):
     """
@@ -30,7 +30,7 @@ def tags(path):
     repo = git.Repo(path)
 
     l = [(t.commit.authored_date, t.name) for t in repo.tags]
-    l.sort(key=lambda x: x[0], reverse=True)
+    l.sort(key=lambda x: x[0])
     if l:
         res = zip(*l)[1]
         print res
@@ -41,20 +41,20 @@ def tags(path):
 
 def test():
     from versionclimber.utils import path, clone
-    
+
     pkgs = path('pkgs').abspath()
-    
+
 
     sklearn = ('scikit-learn', 'scikit-learn')
     openalea = ('openalea', 'openalea')
 
     if not (pkgs/sklearn[-1]).isdir():
-        pkgs.cd() 
+        pkgs.cd()
         clone(*sklearn)
         (pkgs/'..').cd()
 
     if not (pkgs/openalea[-1]).isdir():
-        pkgs.cd() 
+        pkgs.cd()
         clone(*openalea)
         (pkgs/'..').cd()
 
@@ -72,7 +72,7 @@ def universe_versions(dir='simple', universe=('foo', 'goo', 'hoo'), Tags=False):
         if not Tags:
             l = list(versions(dir+'/'+pkg))
         else:
-            l = list(tags(dir+'/'+pkg))            
+            l = list(tags(dir+'/'+pkg))
         res[pkg] = l
 
     return res

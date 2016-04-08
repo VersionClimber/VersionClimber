@@ -5,7 +5,8 @@ Read the configuration from yaml description file.
 
 import yaml
 from path import path
-from versionclimber.utils import sh
+from versionclimber.utils import sh, pypi_versions, git_versions, svn_versions
+
 
 class Package(object):
     """Package description
@@ -18,14 +19,14 @@ class Package(object):
                  cmd='pip install -U',
                  version=None,
                  hierarchy='commit',
-                 dir ='.'):
+                 directory='.'):
         self.name = name
         self.vcs = vcs
         self.url = url
         self.cmd = cmd
         self.version = version
         self.hierarchy = hierarchy
-        self.dir = path('.').abspath()
+        self.dir = path(directory).abspath()
 
     def __str__(self):
         return self.name
@@ -47,7 +48,22 @@ class Package(object):
             sh(cmd)
             cwd.chdir()
 
-
+    def versions(self, tags=True):
+        pp = self.dir/self.name
+        versions = []
+        if self.vcs == 'pypi':
+            versions = pypi_versions(self.name)
+        else:
+            if not pp.exists():
+                print('We clone the package to get the versions')
+                self.clone()
+            if self.vcs == 'git':
+                versions = git_versions(pp, tags=tags)
+            elif self.vcs == 'svn':
+                versions = svn_versions(pp)
+            else:
+                raise Exception('%s is not implemented yet'%self.vcs)
+        return versions
 
 
 def load_config(yaml_filename):
