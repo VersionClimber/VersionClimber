@@ -1,6 +1,7 @@
 import versionclimber
 from versionclimber import liquid
 from versionclimber import liquidparser
+
 ###############################################################################
 # Load config
 
