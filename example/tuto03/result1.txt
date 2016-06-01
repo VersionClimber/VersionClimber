@@ -1,0 +1,119 @@
+
+Configuration 1
+VersionClimber_test2: 90bc6c51996b623d1d2b98e7d6211c55126a8545, VersionClimber_test1: 330ba449b4b6ee4331424573b50ee9198bddabbb
+
+# Installation of packages
+Install (VersionClimber_test2,90bc6c51996b623d1d2b98e7d6211c55126a8545) in 1.591000 s
+Install (VersionClimber_test1,330ba449b4b6ee4331424573b50ee9198bddabbb) in 1.248000 s
+Configuration execution in 0.047000 s 
+Execution FAILED
+Total time: 2.886000 s
+
+Configuration 2
+VersionClimber_test2: 90bc6c51996b623d1d2b98e7d6211c55126a8545, VersionClimber_test1: 13aaf82d7b16883ad074a9de51d40e3d768e7e30
+
+# Installation of packages
+Install (VersionClimber_test2,90bc6c51996b623d1d2b98e7d6211c55126a8545) in 1.248000 s
+Install (VersionClimber_test1,13aaf82d7b16883ad074a9de51d40e3d768e7e30) in 1.248000 s
+Configuration execution in 0.046000 s 
+Execution FAILED
+Total time: 2.542000 s
+
+Configuration 3
+VersionClimber_test2: 90bc6c51996b623d1d2b98e7d6211c55126a8545, VersionClimber_test1: d851d9a6c4895282e4be177f87296458984145fc
+
+# Installation of packages
+Install (VersionClimber_test2,90bc6c51996b623d1d2b98e7d6211c55126a8545) in 1.217000 s
+Install (VersionClimber_test1,d851d9a6c4895282e4be177f87296458984145fc) in 1.264000 s
+Configuration execution in 0.047000 s 
+Execution FAILED
+Total time: 2.528000 s
+
+Configuration 4
+VersionClimber_test2: 90bc6c51996b623d1d2b98e7d6211c55126a8545, VersionClimber_test1: 25d56fa2830de928c3ccc9b2f08f70997666f395
+
+# Installation of packages
+Install (VersionClimber_test2,90bc6c51996b623d1d2b98e7d6211c55126a8545) in 1.232000 s
+Install (VersionClimber_test1,25d56fa2830de928c3ccc9b2f08f70997666f395) in 1.373000 s
+Configuration execution in 0.047000 s 
+Execution FAILED
+Total time: 2.652000 s
+
+Configuration 5
+VersionClimber_test2: 90bc6c51996b623d1d2b98e7d6211c55126a8545, VersionClimber_test1: eb4f89f426ba189bed4e0376f03f1fb1187e0d86
+
+# Installation of packages
+Install (VersionClimber_test2,90bc6c51996b623d1d2b98e7d6211c55126a8545) in 1.232000 s
+Install (VersionClimber_test1,eb4f89f426ba189bed4e0376f03f1fb1187e0d86) in 1.279000 s
+Configuration execution in 0.047000 s 
+Execution FAILED
+Total time: 2.558000 s
+
+Configuration 6
+VersionClimber_test2: 90bc6c51996b623d1d2b98e7d6211c55126a8545, VersionClimber_test1: b796ff14aa814b9390532f119d6b4821a0bcf4d0
+
+# Installation of packages
+Install (VersionClimber_test2,90bc6c51996b623d1d2b98e7d6211c55126a8545) in 1.295000 s
+Install (VersionClimber_test1,b796ff14aa814b9390532f119d6b4821a0bcf4d0) in 1.263000 s
+Configuration execution in 0.032000 s 
+Execution FAILED
+Total time: 2.590000 s
+
+Configuration 7
+VersionClimber_test2: 90bc6c51996b623d1d2b98e7d6211c55126a8545, VersionClimber_test1: f01bdc33b6061e74fc42ca9407eac6b1fbfb3b16
+
+# Installation of packages
+Install (VersionClimber_test2,90bc6c51996b623d1d2b98e7d6211c55126a8545) in 1.669000 s
+Install (VersionClimber_test1,f01bdc33b6061e74fc42ca9407eac6b1fbfb3b16) in 1.279000 s
+Configuration execution in 0.047000 s 
+Execution FAILED
+Total time: 2.995000 s
+
+Configuration 8
+VersionClimber_test2: 90bc6c51996b623d1d2b98e7d6211c55126a8545, VersionClimber_test1: bb842bf963267629300e059ca85c1cd06eceed37
+
+# Installation of packages
+Install (VersionClimber_test2,90bc6c51996b623d1d2b98e7d6211c55126a8545) in 1.232000 s
+Install (VersionClimber_test1,bb842bf963267629300e059ca85c1cd06eceed37) in 1.264000 s
+Configuration execution in 0.047000 s 
+Execution FAILED
+Total time: 2.543000 s
+
+Configuration 9
+VersionClimber_test2: 90bc6c51996b623d1d2b98e7d6211c55126a8545, VersionClimber_test1: d9d13b34d5e57c0799631c445ded7c1c85105f07
+
+# Installation of packages
+Install (VersionClimber_test2,90bc6c51996b623d1d2b98e7d6211c55126a8545) in 1.216000 s
+Install (VersionClimber_test1,d9d13b34d5e57c0799631c445ded7c1c85105f07) in 1.248000 s
+Configuration execution in 0.032000 s 
+Execution FAILED
+Total time: 2.496000 s
+
+Configuration 10
+VersionClimber_test2: 90bc6c51996b623d1d2b98e7d6211c55126a8545, VersionClimber_test1: e113601b99291cdfda6868f63514296382738f22
+
+# Installation of packages
+Install (VersionClimber_test2,90bc6c51996b623d1d2b98e7d6211c55126a8545) in 1.216000 s
+Install (VersionClimber_test1,e113601b99291cdfda6868f63514296382738f22) in 1.233000 s
+Configuration execution in 0.047000 s 
+Execution FAILED
+Total time: 2.496000 s
+
+Configuration 11
+VersionClimber_test2: d5316dd71716bcc486da652750fa337a7e794c3b, VersionClimber_test1: 330ba449b4b6ee4331424573b50ee9198bddabbb
+
+# Installation of packages
+Install (VersionClimber_test2,d5316dd71716bcc486da652750fa337a7e794c3b) in 1.544000 s
+Install (VersionClimber_test1,330ba449b4b6ee4331424573b50ee9198bddabbb) in 1.232000 s
+Configuration execution in 0.047000 s 
+Total time: 2.823000 s
+
+Configuration 12
+VersionClimber_test2: 90bc6c51996b623d1d2b98e7d6211c55126a8545, VersionClimber_test1: 330ba449b4b6ee4331424573b50ee9198bddabbb
+
+# Installation of packages
+Install (VersionClimber_test2,90bc6c51996b623d1d2b98e7d6211c55126a8545) in 1.233000 s
+Install (VersionClimber_test1,330ba449b4b6ee4331424573b50ee9198bddabbb) in 1.232000 s
+Configuration execution in 0.047000 s 
+Execution FAILED
+Total time: 2.512000 s
