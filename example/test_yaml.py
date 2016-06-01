@@ -48,54 +48,64 @@ import git
 import versionclimber
 from versionclimber import liquid, config
 from versionclimber.utils import sh, path, pypi_versions, git_versions, svn_versions
-
+from versionclimber import liquidparser
 ###############################################################################
 # Load config
 
 config_file = 'config.yaml'
+env = liquid.YAMLEnv(config_file)
 
-pkgs, cmd = config.load_config(config_file)
-print map(str, pkgs)
+constraints, todolist = env.monkey_patch(liquidparser, universe)
 
-###############################################################################
-# Create a Virtual Env
-# TODO
-#os.system('source climber1/bin/activate')
+try:
+    endconfig = liquidparser.liquidclimber(constraints, todolist)
+    print liquidparser.memory
+finally:
+    env.restore()
 
-###############################################################################
-# Get the packages from their git repository
-# TODO: Pull when already download
-for pkg in pkgs:
-    print('Get %s'%pkg)
-    pkg.clone()
 
-###############################################################################
-# Access to the whole set of versions of the experiment
+# pkgs, cmd = config.load_config(config_file)
+# print map(str, pkgs)
 
-pkg_versions = {}
-for pkg in pkgs:
-    tags = pkg.hierarchy != 'commit'
-    vers = pkg.versions(tags=tags)
-    pkg_versions[pkg.name] = vers
+# ###############################################################################
+# # Create a Virtual Env
+# # TODO
+# #os.system('source climber1/bin/activate')
 
-# Check validity of the default version of each package.
+# ###############################################################################
+# # Get the packages from their git repository
+# # TODO: Pull when already download
+# for pkg in pkgs:
+#     print('Get %s'%pkg)
+#     pkg.clone()
 
-universe = [pkg.name for pkg in pkgs]
+# ###############################################################################
+# # Access to the whole set of versions of the experiment
 
-print(pkg_versions)
+# pkg_versions = {}
+# for pkg in pkgs:
+#     tags = pkg.hierarchy != 'commit'
+#     vers = pkg.versions(tags=tags)
+#     pkg_versions[pkg.name] = vers
 
-init_config = {}
-for pkg in pkgs:
-    init_config[pkg.name] = (pkg.version, pkg.hierarchy)
+# # Check validity of the default version of each package.
 
-# retrieve for each package (e.g. numpy, scipy, ...) the set of versions
-_pkgs = liquid.pkg_versions(universe, init_config, pkg_versions, {})
-env = liquid.MyEnv(universe, _pkgs)
+# universe = [pkg.name for pkg in pkgs]
 
-# Alias
-pkg2int = env.pkg2int  # dict(zip(universe, range(1, len(universe)+1)))
-int2pkg = env.int2pkg  # dict(zip(pkg2int.values(), pkg2int.keys()))
-bidir = env.bidir_commits  # _convert_commits(pkgs)
+# print(pkg_versions)
+
+# init_config = {}
+# for pkg in pkgs:
+#     init_config[pkg.name] = (pkg.version, pkg.hierarchy)
+
+# # retrieve for each package (e.g. numpy, scipy, ...) the set of versions
+# _pkgs = liquid.pkg_versions(universe, init_config, pkg_versions, {})
+# env = liquid.MyEnv(universe, _pkgs)
+
+# # Alias
+# pkg2int = env.pkg2int  # dict(zip(universe, range(1, len(universe)+1)))
+# int2pkg = env.int2pkg  # dict(zip(pkg2int.values(), pkg2int.keys()))
+# bidir = env.bidir_commits  # _convert_commits(pkgs)
 
 
 
