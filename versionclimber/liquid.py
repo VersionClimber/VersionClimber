@@ -283,7 +283,10 @@ def pkg_versions(universe, init_config, versions, endof=None):
         iversion = init_config[pkg][0]
         nb_versions = init_config[pkg][1]
 
-        commits = versions[pkg][versions[pkg].index(iversion):]
+        if iversion is None:
+            commits = versions[pkg]
+        else:
+            commits = versions[pkg][versions[pkg].index(iversion):]
 
         if 'r' == commits[0][0]:
             commits = [ci[1:] for ci in commits]
