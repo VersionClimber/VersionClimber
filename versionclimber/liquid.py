@@ -418,6 +418,9 @@ class YAMLEnv(MyEnv):
     def __init__(self, config_file):
         self.pkgs, self.cmd = load_config(config_file)
 
+        if isinstance(self.cmd, list):
+            self.cmd = self.cmd[0]
+
         self.pkg_names = {pkg.name: pkg for pkg in self.pkgs}
 
         for pkg in self.pkgs:
@@ -441,6 +444,7 @@ class YAMLEnv(MyEnv):
         MyEnv.__init__(self, universe, _pkgs)
 
         self.knowcaller = False
+        self.error_file = 'error.txt'
 
 
     def checkout(self, pkg_name, commit):
@@ -461,11 +465,11 @@ class YAMLEnv(MyEnv):
         cmd = self.cmd
 
         status = sh(cmd)
-        if path(error_file).exists():
+        if path(self.error_file).exists():
             if liquidparser.knowcaller:
-                return parse_error(error_file)
+                return parse_error(self.error_file)
             else:
-                path(error_file).move(curdir/'errors'/error_file+str(count))
+                path(self.error_file).move(curdir/'errors'/self.error_file+str(count))
                 return -1, -1
         else:
             return status
