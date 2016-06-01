@@ -588,12 +588,12 @@ class YAMLEnv(MyEnv):
             endconfig = liquidparser.liquidclimber(constraints, todolist)
             # print liquidparser.memory
         finally:
-            env.restore()
+            self.restore()
 
         res = []
         for k, v in endconfig.iteritems():
-            pkg = env.int2pkg[k]
-            res.append('(%s,%s)'%(env.int2pkg[k], env.commits[env.int2pkg[k]][v-1]))
+            pkg = self.int2pkg[k]
+            res.append('(%s,%s)'%(self.int2pkg[k], self.commits[self.int2pkg[k]][v-1]))
 
 
         return res
