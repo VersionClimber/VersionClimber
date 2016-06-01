@@ -1,5 +1,5 @@
-# May 25, 2016:  
-# Put in logging. 
+# May 25, 2016:
+# Put in logging.
 # Study the question of return values and of parallelism.
 # Save good data that comes back.
 # Have some idea of exploration for the "as close to the present config as possible problem"
@@ -21,14 +21,14 @@
 
 # [x for x in temp if not x[0] in keepfixed]
 # May 10, 2015:
-# This version can be called as follows 
+# This version can be called as follows
 # python liquidparser.py 2 (the default)
 # which means that the caller and callee at the point of error is always known
 # or
 # python liquidparser.py 1
-# which means that the caller may not be known 
+# which means that the caller may not be known
 # The interface to works changes in its return value
-# 
+#
 # [True] -- everything is fine
 # [False, 0, callee, caller] -- if you know both; Must be used with option 2
 # [False, 1, callee] -- if compilation
@@ -38,10 +38,10 @@
 # Basic idea is this: False, 0 we handle now.
 # False 1 -- just eliminate that version of that package.
 # False 2 -- Because we are changing just one package at a time,
-# if we have a configuration in which Pj has no error and then 
+# if we have a configuration in which Pj has no error and then
 # we change Pi and Pj has an error, then Pi calls Pj.
-# In general, if we have a configuration C that has an error on 
-# Pj that has just been pushed 
+# In general, if we have a configuration C that has an error on
+# Pj that has just been pushed
 # and we push Pi where i != j to get configuration C'
 # and C' fails on Pk where i != k, then
 # Pi must precede Pj in the call stack and
@@ -55,7 +55,7 @@
 # If there is a configuration C'' that is a minimal pair with C except Pj
 # C1 that works.
 # C2 pushes Pj from C1 and Pk fails, then Pj --> Pk and that is minimal pair
-# C2 pushes Pj from C1 and Pj fails, then test each Pq 
+# C2 pushes Pj from C1 and Pj fails, then test each Pq
 #  by pushing from C2 giving C2_q
 #  and by pushing Pq from C1 as well giving C1_q
 #  If nothing fails in C2_q, then great.
@@ -64,23 +64,23 @@
 
 # Let's say we optimize in the order P3 then P1 and execution
 # order is PA, PB, P1, PC, P3, ...
-# Pushing P3 will result in an error. Pushing PA results in an error on PB. 
+# Pushing P3 will result in an error. Pushing PA results in an error on PB.
 # Pushing PB results in an error on PB.
-#  
-#     
-# 
+#
+#
+#
 # If we now take a case where we keep Pi pushed but unpush Pj and we
-# still get an error on Pk, then 
+# still get an error on Pk, then
 # If we then change Pj and there is still an error, Pi still calls Pj.
 # If we change Pj and there is an error on Pk, then Pj is the caller.
 # So, remember who the lastcaller and packagechanged are.
 # If the error is on packagechanged, then caller is lastcaller.
-# If the error is on a different package, then lastpackagechanged becomes 
+# If the error is on a different package, then lastpackagechanged becomes
 # the lastcaller
 # and the package in error is the callee.
 # The problem arises when we are pushing a priority version.
 # In that case, if the error occurs on that package P1, we have to test other
-# packages that do not precede P1 on the todo list. 
+# packages that do not precede P1 on the todo list.
 # Test package P2 with respect to the original setting of the given
 # package. If you do that and get an error in Px then P2 calls Px
 # (this is the only case we know for sure -- start in a good configuration
@@ -117,12 +117,12 @@
 # So, we advance in descending order of priority. If we fail on some Py,
 # then we apply this rule.
 # Always take the cross-product of downstream in priority.
-# If we start to get ideas about who calls whom, then we can 
+# If we start to get ideas about who calls whom, then we can
 # at least use the following heuristic: if I fail on Pw that I have
 # just pushed, then first
-# look at configurations in which some caller of package Pw changes. 
+# look at configurations in which some caller of package Pw changes.
 # So we need functions that push from successful configurations
-# and others that look at likely callers and evaluate the 
+# and others that look at likely callers and evaluate the
 # cross-product of those.
 # Can we do better than this?
 # A) P1.1., P2.1, P3.1 ... works
@@ -132,21 +132,21 @@
 # P1 calls P3.
 # D) P1.2, P2.1, P3.2, P4... fails on P4
 # P1.2 is compatible with P3.2 and P3 calls P4.
-# So we should remember who calls whom (so if we get a failure we have 
+# So we should remember who calls whom (so if we get a failure we have
 # an idea what to do). And we should remember where there are compatibilities
 # If we know who calls whom and a package can be called from several
 # calling packages, then when the package fails after being pushed,
 # we should play this game.
-# Procedure: if we push Px and get an error on Px, then play with 
+# Procedure: if we push Px and get an error on Px, then play with
 # potential callers of Px and see what you can do.
-# First look at callers of Px denoted Py and push those. See if you get 
+# First look at callers of Px denoted Py and push those. See if you get
 # an error on Px in which case you'll add that to memo.
 # Try pushed Py with pushed Px and see if you go beyond Px say to Pz.
-# 
+#
 # The reason we can't stay with the version of P1 that didn't work is that
 # we may never find out what calls P1.
 # May 5, 2015 version: includes strong monotonicity code
-# What we want: reprozip runs. 
+# What we want: reprozip runs.
 # packages are discovered.
 # user is asked any restrictions -- can click.
 # which to maximize
@@ -158,7 +158,7 @@
 # Eventually, we have to get a configuration file that holds (i) the constraints
 # (ii) the packages that we want to maximize in descending order of priority
 # (iii) the default configuration.
-# For now, please look at constraints = ... and  todolist = 
+# For now, please look at constraints = ... and  todolist =
 # and default =
 
 # To run this file simply run it without any further arguments, i.e.
@@ -169,18 +169,18 @@
 
 
 # The program:
-# 
+#
 # Simulator of acceptable versions.
 # (package1, versionlow1, versionhigh1, package2, versionlow2, versionhigh2)
-# Semantics are that any version 
+# Semantics are that any version
 # between versionlow1 and versionhigh1
-# of package 1 will work with any version 
+# of package 1 will work with any version
 # between versionlow2 and versionhigh2 of package 2.
-# 
+#
 # Some random ordering of package/version pairs in an execution.
-# 
-# If the next package/version is incompatible with the 
-# package/versions already seen then we have a failure with 
+#
+# If the next package/version is incompatible with the
+# package/versions already seen then we have a failure with
 # an announcement of where bad.
 
 
@@ -198,7 +198,7 @@ import collections
 import datetime
 import random
 from operator import itemgetter, attrgetter
-sys.setrecursionlimit(30000) 
+sys.setrecursionlimit(30000)
 
 
 now = datetime.datetime.now()
@@ -223,7 +223,7 @@ successful = [] # configurations that have been tried and worked at any time
 
 failedconfigs = [] # configurations that have failed
 
-nocompile = [] 
+nocompile = []
    # package-versions that don't compile, so should not be considered further
 
 sourcemap = {}
@@ -259,13 +259,13 @@ def compatible(packver1, packver2):
 	return True
   # print "in compatible, starting loop"
   for c in compatibilities:
-    if (c[0] == pack1) and (c[3] == pack2): 
+    if (c[0] == pack1) and (c[3] == pack2):
 	bydefault = False # the two packages are in the list of compatibilities
         # print "compatible, first if"
     	if (ver1 >= c[1]) and (ver1 <= c[2]) and (ver2 >= c[4]) and (ver2 <= c[5]):
         	logging.info( "compatible, first if about to return true")
 		return True
-    if (c[0] == pack2) and (c[3] == pack1): 
+    if (c[0] == pack2) and (c[3] == pack1):
         # print "compatible, second if"
 	bydefault = False # the two packages are in the list of compatibilities
     	if (ver1 >= c[4]) and (ver1 <= c[5]) and (ver2 >= c[1]) and (ver2 <= c[2]):
@@ -275,7 +275,7 @@ def compatible(packver1, packver2):
   return bydefault # if we've never encountered these packages, we'll return
 	# true, but if we have found the packages but no compatible versions,
 	# then we'll return False
-		
+
 
 # is ver1 of pack1 compatible with ver2 of pack2
 # If the packages are the same then return true
@@ -292,14 +292,14 @@ def cudftest(packver1, packver2):
   if pack1 == pack2:
 	return True
   for c in cudf:
-    if (c[0] == pack1) and (c[3] == pack2): 
+    if (c[0] == pack1) and (c[3] == pack2):
 	bydefault = False # the two packages are in the list of cudfs
     	if (ver1 >= c[1]) and (ver1 <= c[2]) and (ver2 >= c[4]):
 		return True
   return bydefault # if we've never encountered these packages, we'll return
 	# true, but if we have found the packages but no compatible versions,
 	# then we'll return False
-		
+
 # Given a new package-version pair newpackver,
 # is it compatible with the ones that are already there?
 def decidepackage(historyofpackversions, newpackver):
@@ -315,7 +315,7 @@ def decidepackage(historyofpackversions, newpackver):
 	# print "decidepackage: call on compatible from ", h, " to ", newpackver, " has returned value True."
    	return [True, newpackver[0]]
 
-# Does an execution work? If so return an empty list. 
+# Does an execution work? If so return an empty list.
 # If not, return the package that failed.
 def works(listofpackversions):
    history = []
@@ -329,9 +329,9 @@ def works(listofpackversions):
 		logging.info( "  Success up to: " + str(history))
 		logging.info( "  Failure on: "+ str(p) + ' ' + str( listofpackversions[p]))
 		if knowcaller:
-			return [False, 0, p, x[1]] 
+			return [False, 0, p, x[1]]
 		else: # if you know callee then state it, but if not, can replace p by -1
-			return [False, 2, p] 
+			return [False, 2, p]
 			# ??? changed the 0 to 2 to test out callee only
    logging.info( "In works, about to return true")
    return [True, 0, -1, -1] # -1 indicates all ok only use the True part
@@ -341,7 +341,7 @@ def works(listofpackversions):
 
 # given that we have just pushed package P,
 # find a minimal pair of current configuration with
-# a successful configuration, meaning a configuration in 
+# a successful configuration, meaning a configuration in
 # successful that is identical to current in pack-ver except in P.
 # Always return False
 def findminimalpair(P, currentconf):
@@ -385,7 +385,7 @@ def flatten(list):
 # whether a given call on newpackver from the last element of history
 # has already been determined to be incompatible
 # returns True if incompatibility else False if no trouble found
-# element of axiomlist has format 
+# element of axiomlist has format
 # (pack1, version1, lesseq/eq/greatereq, pack2, version2, lesseq/eq/greatereq)
 def testaxiom(axiomlist, h, new):
     for a in axiomlist:
@@ -482,7 +482,7 @@ def inmemstrong(callpackver, calleepackver, strongmemory):
    return False
 
 # First see whether we can determine that this won't work because
-# of what we remember. If we can, then return False, 
+# of what we remember. If we can, then return False,
 # identify the offending package
 # combinations and return a False indicating we did not need to to a real
 # execution.
@@ -538,7 +538,7 @@ def checkworks(listofpackversions, latestpackchanged):
 	failedconfigs.append([y, x[2], x[3]])
 	return [x[0], x[2], x[2], True]
      if (x[1] == 2):
-	if (not latestpackchanged == x[2]) and findminimalpair(latestpackchanged, y): 
+	if (not latestpackchanged == x[2]) and findminimalpair(latestpackchanged, y):
 	   # found minimal pair with respect to a successful configuration
 	   # that differs only in latestpackchanged
 	   # and callee is not the same as latestpackchanged
@@ -549,7 +549,7 @@ def checkworks(listofpackversions, latestpackchanged):
 	   return [x[0], x[2], -1, True]
 	else:
 	   return [x[0], x[2], -1, True]
-        
+
 
 
 # whichever version of badcallee is in temp is incompatible with
@@ -570,10 +570,10 @@ def mymed(mylist):
    return mylist[len(mylist) / 2]
 
 # hunter method of finding best configuration.
-# This method can degenerate into a cross-product method if we 
+# This method can degenerate into a cross-product method if we
 # are not careful. However we can try.
 def hunterOLD(searchedpackage, temp, newsourcemap, phase, previouscaller, lastpackchanged):
-   # First we try just pushing all packages except those in todo list 
+   # First we try just pushing all packages except those in todo list
    # that either precede or equal searchedpackage
    # until we get something that works.
    i = todolist.index(searchedpackage)
@@ -593,7 +593,7 @@ def hunterOLD(searchedpackage, temp, newsourcemap, phase, previouscaller, lastpa
 	returnnow = True
 	newallconfigs = copy.deepcopy(allconfigs)
 	logging.info( "hunter: newsourcemap: " + str( newsourcemap))
-	for c in allconfigs: 
+	for c in allconfigs:
 	 keepgoing = True
 	 while keepgoing:
 	   keepgoing = False
@@ -636,10 +636,10 @@ def hunterOLD(searchedpackage, temp, newsourcemap, phase, previouscaller, lastpa
    return {}
 
 # hunter method of finding best configuration.
-# This method can degenerate into a cross-product method if we 
+# This method can degenerate into a cross-product method if we
 # are not careful. However we can try.
 def hunter(searchedpackage, temp, newsourcemap, phase, previouscaller, lastpackchanged):
-   # First we try just pushing all packages except those in todo list 
+   # First we try just pushing all packages except those in todo list
    # that either precede or equal searchedpackage
    # until we get something that works.
    i = todolist.index(searchedpackage)
@@ -688,7 +688,7 @@ def hunter(searchedpackage, temp, newsourcemap, phase, previouscaller, lastpackc
 def trytomakework(searchedpackage, temp, newsourcemap, phase, previouscaller, lastpackchanged):
   logging.info( "        ")
   logging.info( "+++ Within trytomakework, on configuration " + str( temp))
-  x = checkworks(temp, lastpackchanged) 
+  x = checkworks(temp, lastpackchanged)
 	# searchedpackage acts both the role of previous caller and
 	# currently changed package
 	# we simulate this now, but in general
@@ -700,7 +700,7 @@ def trytomakework(searchedpackage, temp, newsourcemap, phase, previouscaller, la
      previouscaller = badcaller
      i = todolist.index(searchedpackage)
      keepfixed = todolist[:i+1] # don't change these
-     # if (x[3]) and (not badcallee == badcaller): 
+     # if (x[3]) and (not badcallee == badcaller):
 	# x[3] is true if we really did execute
 	# baddcallee == baddcaller if compile error
 	# Those have been added to nocompile already
@@ -735,15 +735,15 @@ def trytomakework(searchedpackage, temp, newsourcemap, phase, previouscaller, la
 		  x = trytomakework(searchedpackage, newtemp, newsourcemap, phase, previouscaller, lastpackchanged)
   	  	  logging.info( "++ Return value of: " + str( x))
 		  if 0 < len(x):
-			return x  
+			return x
      return {}
   else:
      return temp
-  
-	
 
 
-	
+
+
+
 
 # This implements the algorithm against our simulator, but eventually
 # against a real system
@@ -802,9 +802,9 @@ def liquidclimberworker(constraints, todolist, newsourcemap, phase):
 				ret = hunter(m, temp, newsourcemap, phase, m, m) # don't know the caller always
 			logging.info( "return value: " + str(ret) + " for config: " + str(temp))
 			if 0 < len(ret):
-				current = copy.deepcopy(ret) 
+				current = copy.deepcopy(ret)
 				found = True
-  return current 
+  return current
 
 
 
@@ -821,7 +821,7 @@ def adjustsource(newsourcemap, bestmonoconfig, todolist):
 	p = todolist[i]
 	if max(newsourcemap[p]) == bestmonoconfig[p]:
 		newsourcemap[p] = [bestmonoconfig[p]]
-	else: 
+	else:
 		flag = False
 	i+= 1
  return newsourcemap
@@ -832,7 +832,7 @@ def delblanks(myline):
   for s in mylineslim:
 	str+=s
   return str
-	
+
 # myconfig has the format:
 # knowcaller = True/False
 # todolist = [packages] # in descending order of priority
@@ -873,7 +873,7 @@ def parseconfig(myconfig):
 	logging.info( "Error in the default part of: "+ str( myconfig))
    logging.info( "default is:"+str(default))
    packagelevel = [] # This is going to be an array of quadruples
-	# where the quadruples hold 
+	# where the quadruples hold
 	# package, level (0 is major, 1 is minor etc),
 	# name (e.g. 12.1.2), and number (just consecutive integer
 	# within package)
@@ -934,10 +934,10 @@ def fillsourcemap(level, packagelevel, bestsofar):
    sourcemap = {} # initialized to empty
    currentpackage = ''
    currentpackageversions = []
-   sweetspot = False # when true then we are at a good point to record versions 
+   sweetspot = False # when true then we are at a good point to record versions
    havefounditematthislevel = False
    for p in packagelevel:
-	if (p[0] != currentpackage): 
+	if (p[0] != currentpackage):
 	   if (not currentpackage == ''):
 		sourcemap[currentpackage] = currentpackageversions
 			# take care of the previous package
@@ -946,9 +946,9 @@ def fillsourcemap(level, packagelevel, bestsofar):
 	   sweetspot = False
 	# So now currentpackage = p[0]
 	if (p[1] == (level-1)) and sweetspot :
-		sweetspot = False 
-		# we're done, because never got to 
-		# higher version at previous level 
+		sweetspot = False
+		# we're done, because never got to
+		# higher version at previous level
 	if (p[1] == (level-1)) and (bestsofar[p[0]] == p[2])  :
 		currentpackageversions.append(p[2]) # want that version too
 		sweetspot = True # can start getting versions
@@ -961,241 +961,240 @@ def fillsourcemap(level, packagelevel, bestsofar):
 	sourcemap[currentpackage] = currentpackageversions
    logging.info( "sourcemap is" +str( sourcemap))
    return havefounditematthislevel
-    
-
-
-# '''  # When transferring to Christophe
-# DATA
-
-# For simulator
-	
-	
-
-# compatibilities= []
-# compatibilities.append([1, 11, 13, 2, 21, 23])
-# compatibilities.append([1, 11, 13, 3, 31, 33])
-# compatibilities.append([1, 11, 13, 4, 41, 43])
-# compatibilities.append([1, 16, 19, 2, 27, 29])
-# compatibilities.append([1, 16, 19, 3, 37, 39])
-# compatibilities.append([1, 16, 19, 4, 47, 49])
-# compatibilities.append([2,21,24, 3, 31, 34])
-# compatibilities.append([2,27,29, 3, 36, 39])
-# compatibilities.append([2,21,24, 4, 41, 44])
-# compatibilities.append([2,27,29, 4, 46, 49])
-# compatibilities.append([3,31,34, 4, 41, 45])
-# compatibilities.append([3,36,37, 4, 46, 49])
-
-compatibilities= []
-compatibilities.append([1, 11, 13, 2, 21, 24])
-compatibilities.append([1, 18, 19, 2, 28, 29])
-compatibilities.append([1, 11, 13, 3, 31, 34])
-compatibilities.append([1, 18, 19, 3, 38, 39])
-compatibilities.append([1, 11, 13, 4, 41, 44])
-compatibilities.append([1, 18, 19, 4, 48, 49])
-compatibilities.append([2,21,29, 3, 31, 39])
-compatibilities.append([2,21,24, 4, 41, 44])
-compatibilities.append([2,28,29, 4, 48, 49])
-compatibilities.append([3,31,34, 4, 41, 45])
-compatibilities.append([3,38,39, 4, 48, 49])
-
-
-compatibilities= []
-compatibilities.append([1, 11, 11, 2, 21, 21])
-compatibilities.append([1, 12, 12, 2, 22, 22])
-compatibilities.append([1, 15, 15, 2, 24, 24])
-compatibilities.append([1, 11, 11, 3, 31, 31])
-compatibilities.append([1, 12, 12, 3, 32, 32])
-compatibilities.append([1, 15, 15, 3, 34, 34])
-compatibilities.append([1, 11, 11, 4, 41, 41])
-compatibilities.append([1, 12, 12, 4, 42, 42])
-compatibilities.append([1, 15, 15, 4, 44, 44])
-compatibilities.append([2, 21, 21, 3, 31, 31])
-compatibilities.append([2, 22, 22, 3, 32, 32])
-compatibilities.append([2, 24, 24, 3, 34, 34])
-compatibilities.append([2, 21, 21, 4, 41, 41])
-compatibilities.append([2, 22, 22, 4, 42, 42])
-compatibilities.append([2, 24, 24, 4, 44, 44])
-compatibilities.append([3, 31, 31, 4, 41, 41])
-compatibilities.append([3, 32, 32, 4, 42, 42])
-compatibilities.append([3, 34, 34, 4, 44, 44])
-
-compatibilities= []
-compatibilities.append([1, 11, 13, 2, 21, 24])
-compatibilities.append([1, 14, 17, 2, 25, 26])
-compatibilities.append([1, 11, 13, 3, 31, 34])
-compatibilities.append([1, 14, 17, 3, 35, 38])
-compatibilities.append([1, 11, 13, 4, 41, 44])
-compatibilities.append([1, 14, 17, 4, 45, 46])
-compatibilities.append([2,21,29, 3, 31, 39])
-compatibilities.append([2,21,24, 4, 41, 44])
-compatibilities.append([2,26,28, 4, 45, 49])
-compatibilities.append([3,31,34, 4, 41, 45])
-compatibilities.append([3,36,37, 4, 46, 49])
-
-compatibilities= []
-compatibilities.append([1, 11, 13, 2, 21, 24])
-compatibilities.append([1, 14, 17, 2, 25, 26])
-compatibilities.append([1, 11, 13, 3, 31, 34])
-compatibilities.append([1, 14, 17, 3, 35, 38])
-compatibilities.append([1, 11, 13, 4, 41, 44])
-compatibilities.append([1, 14, 17, 4, 45, 46])
-compatibilities.append([2,21,29, 3, 31, 39])
-compatibilities.append([2,21,24, 4, 41, 44])
-compatibilities.append([2,26,28, 4, 45, 49])
-compatibilities.append([3,31,34, 4, 41, 45])
-compatibilities.append([3,36,37, 4, 46, 49])
-
-compatibilities= []
-compatibilities.append([1, 11, 11, 2, 21, 21])
-compatibilities.append([1, 12, 12, 2, 22, 22])
-compatibilities.append([1, 19, 19, 2, 28, 28])
-compatibilities.append([1, 11, 11, 3, 31, 31])
-compatibilities.append([1, 12, 12, 3, 32, 32])
-compatibilities.append([1, 19, 19, 3, 38, 38])
-compatibilities.append([1, 11, 11, 4, 41, 41])
-compatibilities.append([1, 12, 12, 4, 42, 42])
-compatibilities.append([1, 19, 19, 4, 48, 48])
-compatibilities.append([2, 21, 21, 3, 31, 31])
-compatibilities.append([2, 22, 22, 3, 32, 32])
-compatibilities.append([2, 28, 28, 3, 38, 38])
-compatibilities.append([2, 21, 21, 4, 41, 41])
-compatibilities.append([2, 22, 22, 4, 42, 42])
-compatibilities.append([2, 28, 28, 4, 48, 48])
-compatibilities.append([3, 31, 31, 4, 41, 41])
-compatibilities.append([3, 32, 32, 4, 42, 42])
-compatibilities.append([3, 38, 38, 4, 48, 48])
-
-compatibilities= []
-compatibilities.append(['1', '11', '11', '2', '21', '21'])
-compatibilities.append(['1', '12', '12', '2', '22', '22'])
-compatibilities.append(['1', '15', '15', '2', '28', '28'])
-compatibilities.append(['1', '11', '11', '3', '31', '31'])
-compatibilities.append(['1', '12', '12', '3', '32', '32'])
-compatibilities.append(['1', '15', '15', '3', '38', '38'])
-compatibilities.append(['1', '11', '11', '4', '41', '41'])
-compatibilities.append(['1', '12', '12', '4', '42', '42'])
-compatibilities.append(['1', '15', '15', '4', '48', '48'])
-compatibilities.append(['2', '21', '21', '3', '31', '31'])
-compatibilities.append(['2', '22', '22', '3', '32', '32'])
-compatibilities.append(['2', '28', '28', '3', '38', '38'])
-compatibilities.append(['2', '21', '21', '4', '41', '41'])
-compatibilities.append(['2', '22', '22', '4', '42', '42'])
-compatibilities.append(['2', '28', '28', '4', '48', '48'])
-compatibilities.append(['3', '31', '31', '4', '41', '41'])
-compatibilities.append(['3', '32', '32', '4', '42', '42'])
-compatibilities.append(['3', '38', '38', '4', '48', '48'])
-
-compatibilities= []
-compatibilities.append(['1', 11, 11, '2', 21, 21])
-compatibilities.append(['1', 12, 12, '2', 22, 22])
-compatibilities.append(['1', 15, 15, '2', 28, 28])
-compatibilities.append(['1', 11, 11, '3', 31, 31])
-compatibilities.append(['1', 12, 12, '3', 32, 32])
-compatibilities.append(['1', 15, 15, '3', 38, 38])
-compatibilities.append(['1', 11, 11, '4', 41, 41])
-compatibilities.append(['1', 12, 12, '4', 42, 42])
-compatibilities.append(['1', 15, 15, '4', 48, 48])
-compatibilities.append(['2', 21, 21, '3', 31, 31])
-compatibilities.append(['2', 22, 22, '3', 32, 32])
-compatibilities.append(['2', 28, 28, '3', 38, 38])
-compatibilities.append(['2', 21, 21, '4', 41, 41])
-compatibilities.append(['2', 22, 22, '4', 42, 42])
-compatibilities.append(['2', 28, 28, '4', 48, 48])
-compatibilities.append(['3', 31, 31, '4', 41, 41])
-compatibilities.append(['3', 32, 32, '4', 42, 42])
-compatibilities.append(['3', 38, 38, '4', 48, 48])
 
 
 
+if __name__ == '__main__':
+    # When transferring to Christophe
+    # DATA
 
-# cudf is not used
-cudf= []
-cudf.append([1, 11, 12, 2, 21])
-cudf.append([1, 13, 15, 2, 24])
-cudf.append([1, 16, 19, 2, 27])
-cudf.append([1, 11, 12, 3, 31])
-cudf.append([1, 13, 19, 3, 36])
-cudf.append([1, 11, 12, 4, 41])
-cudf.append([1, 13, 19, 4, 46])
-cudf.append([2, 21, 22, 3, 31])
-cudf.append([2, 23, 29, 3, 36])
-cudf.append([2, 21, 24, 4, 41])
-cudf.append([2, 25, 29, 4, 47])
-cudf.append([3, 31, 34, 4, 41])
-cudf.append([3, 35, 39, 4, 47])
-cudf.append([4, 41, 42, 3, 31])
-cudf.append([4, 43, 49, 3, 36])
+    # For simulator
+
+
+
+    # compatibilities= []
+    # compatibilities.append([1, 11, 13, 2, 21, 23])
+    # compatibilities.append([1, 11, 13, 3, 31, 33])
+    # compatibilities.append([1, 11, 13, 4, 41, 43])
+    # compatibilities.append([1, 16, 19, 2, 27, 29])
+    # compatibilities.append([1, 16, 19, 3, 37, 39])
+    # compatibilities.append([1, 16, 19, 4, 47, 49])
+    # compatibilities.append([2,21,24, 3, 31, 34])
+    # compatibilities.append([2,27,29, 3, 36, 39])
+    # compatibilities.append([2,21,24, 4, 41, 44])
+    # compatibilities.append([2,27,29, 4, 46, 49])
+    # compatibilities.append([3,31,34, 4, 41, 45])
+    # compatibilities.append([3,36,37, 4, 46, 49])
+
+    compatibilities= []
+    compatibilities.append([1, 11, 13, 2, 21, 24])
+    compatibilities.append([1, 18, 19, 2, 28, 29])
+    compatibilities.append([1, 11, 13, 3, 31, 34])
+    compatibilities.append([1, 18, 19, 3, 38, 39])
+    compatibilities.append([1, 11, 13, 4, 41, 44])
+    compatibilities.append([1, 18, 19, 4, 48, 49])
+    compatibilities.append([2,21,29, 3, 31, 39])
+    compatibilities.append([2,21,24, 4, 41, 44])
+    compatibilities.append([2,28,29, 4, 48, 49])
+    compatibilities.append([3,31,34, 4, 41, 45])
+    compatibilities.append([3,38,39, 4, 48, 49])
+
+
+    compatibilities= []
+    compatibilities.append([1, 11, 11, 2, 21, 21])
+    compatibilities.append([1, 12, 12, 2, 22, 22])
+    compatibilities.append([1, 15, 15, 2, 24, 24])
+    compatibilities.append([1, 11, 11, 3, 31, 31])
+    compatibilities.append([1, 12, 12, 3, 32, 32])
+    compatibilities.append([1, 15, 15, 3, 34, 34])
+    compatibilities.append([1, 11, 11, 4, 41, 41])
+    compatibilities.append([1, 12, 12, 4, 42, 42])
+    compatibilities.append([1, 15, 15, 4, 44, 44])
+    compatibilities.append([2, 21, 21, 3, 31, 31])
+    compatibilities.append([2, 22, 22, 3, 32, 32])
+    compatibilities.append([2, 24, 24, 3, 34, 34])
+    compatibilities.append([2, 21, 21, 4, 41, 41])
+    compatibilities.append([2, 22, 22, 4, 42, 42])
+    compatibilities.append([2, 24, 24, 4, 44, 44])
+    compatibilities.append([3, 31, 31, 4, 41, 41])
+    compatibilities.append([3, 32, 32, 4, 42, 42])
+    compatibilities.append([3, 34, 34, 4, 44, 44])
+
+    compatibilities= []
+    compatibilities.append([1, 11, 13, 2, 21, 24])
+    compatibilities.append([1, 14, 17, 2, 25, 26])
+    compatibilities.append([1, 11, 13, 3, 31, 34])
+    compatibilities.append([1, 14, 17, 3, 35, 38])
+    compatibilities.append([1, 11, 13, 4, 41, 44])
+    compatibilities.append([1, 14, 17, 4, 45, 46])
+    compatibilities.append([2,21,29, 3, 31, 39])
+    compatibilities.append([2,21,24, 4, 41, 44])
+    compatibilities.append([2,26,28, 4, 45, 49])
+    compatibilities.append([3,31,34, 4, 41, 45])
+    compatibilities.append([3,36,37, 4, 46, 49])
+
+    compatibilities= []
+    compatibilities.append([1, 11, 13, 2, 21, 24])
+    compatibilities.append([1, 14, 17, 2, 25, 26])
+    compatibilities.append([1, 11, 13, 3, 31, 34])
+    compatibilities.append([1, 14, 17, 3, 35, 38])
+    compatibilities.append([1, 11, 13, 4, 41, 44])
+    compatibilities.append([1, 14, 17, 4, 45, 46])
+    compatibilities.append([2,21,29, 3, 31, 39])
+    compatibilities.append([2,21,24, 4, 41, 44])
+    compatibilities.append([2,26,28, 4, 45, 49])
+    compatibilities.append([3,31,34, 4, 41, 45])
+    compatibilities.append([3,36,37, 4, 46, 49])
+
+    compatibilities= []
+    compatibilities.append([1, 11, 11, 2, 21, 21])
+    compatibilities.append([1, 12, 12, 2, 22, 22])
+    compatibilities.append([1, 19, 19, 2, 28, 28])
+    compatibilities.append([1, 11, 11, 3, 31, 31])
+    compatibilities.append([1, 12, 12, 3, 32, 32])
+    compatibilities.append([1, 19, 19, 3, 38, 38])
+    compatibilities.append([1, 11, 11, 4, 41, 41])
+    compatibilities.append([1, 12, 12, 4, 42, 42])
+    compatibilities.append([1, 19, 19, 4, 48, 48])
+    compatibilities.append([2, 21, 21, 3, 31, 31])
+    compatibilities.append([2, 22, 22, 3, 32, 32])
+    compatibilities.append([2, 28, 28, 3, 38, 38])
+    compatibilities.append([2, 21, 21, 4, 41, 41])
+    compatibilities.append([2, 22, 22, 4, 42, 42])
+    compatibilities.append([2, 28, 28, 4, 48, 48])
+    compatibilities.append([3, 31, 31, 4, 41, 41])
+    compatibilities.append([3, 32, 32, 4, 42, 42])
+    compatibilities.append([3, 38, 38, 4, 48, 48])
+
+    compatibilities= []
+    compatibilities.append(['1', '11', '11', '2', '21', '21'])
+    compatibilities.append(['1', '12', '12', '2', '22', '22'])
+    compatibilities.append(['1', '15', '15', '2', '28', '28'])
+    compatibilities.append(['1', '11', '11', '3', '31', '31'])
+    compatibilities.append(['1', '12', '12', '3', '32', '32'])
+    compatibilities.append(['1', '15', '15', '3', '38', '38'])
+    compatibilities.append(['1', '11', '11', '4', '41', '41'])
+    compatibilities.append(['1', '12', '12', '4', '42', '42'])
+    compatibilities.append(['1', '15', '15', '4', '48', '48'])
+    compatibilities.append(['2', '21', '21', '3', '31', '31'])
+    compatibilities.append(['2', '22', '22', '3', '32', '32'])
+    compatibilities.append(['2', '28', '28', '3', '38', '38'])
+    compatibilities.append(['2', '21', '21', '4', '41', '41'])
+    compatibilities.append(['2', '22', '22', '4', '42', '42'])
+    compatibilities.append(['2', '28', '28', '4', '48', '48'])
+    compatibilities.append(['3', '31', '31', '4', '41', '41'])
+    compatibilities.append(['3', '32', '32', '4', '42', '42'])
+    compatibilities.append(['3', '38', '38', '4', '48', '48'])
+
+    compatibilities= []
+    compatibilities.append(['1', 11, 11, '2', 21, 21])
+    compatibilities.append(['1', 12, 12, '2', 22, 22])
+    compatibilities.append(['1', 15, 15, '2', 28, 28])
+    compatibilities.append(['1', 11, 11, '3', 31, 31])
+    compatibilities.append(['1', 12, 12, '3', 32, 32])
+    compatibilities.append(['1', 15, 15, '3', 38, 38])
+    compatibilities.append(['1', 11, 11, '4', 41, 41])
+    compatibilities.append(['1', 12, 12, '4', 42, 42])
+    compatibilities.append(['1', 15, 15, '4', 48, 48])
+    compatibilities.append(['2', 21, 21, '3', 31, 31])
+    compatibilities.append(['2', 22, 22, '3', 32, 32])
+    compatibilities.append(['2', 28, 28, '3', 38, 38])
+    compatibilities.append(['2', 21, 21, '4', 41, 41])
+    compatibilities.append(['2', 22, 22, '4', 42, 42])
+    compatibilities.append(['2', 28, 28, '4', 48, 48])
+    compatibilities.append(['3', 31, 31, '4', 41, 41])
+    compatibilities.append(['3', 32, 32, '4', 42, 42])
+    compatibilities.append(['3', 38, 38, '4', 48, 48])
 
 
 
 
-orderofpackages = ['1', '3', '4', '1', '2', '3', '4', '3', '2', '4']
-
-
-# outside of the simulator
-
-
-memory = {} # we will remember here the versions of package
-	# combinations that don't work, so we don't redo them
-	# we just keep exploring higher versions
-
-strongmemory = [] # these will be in the form 
-		# [callpack, callver, calleepack, calleever]
-
-axiom = {} # we use the historicity and failure monotonicity axioms
- # each element is keyed by two packages and has the format
- # (pack1, version1, lesseq/eq/greatereq, pack2, version2, lesseq/eq/greatereq)
-
-
-
-sourcemap = { '1': [11, 12, 13, 14, 15, 16, 17, 18, 19],
-'2': [21, 22, 23, 24, 25, 26, 27, 28, 29],
-'3': [31, 32, 33, 34, 35, 36, 37, 38, 39],
-'4': [41, 42, 43, 44, 45, 46, 47, 48, 49]}
-
-default = {'1':11,'2':21, '3':31, '4':41} # configuration that works
-
-# constraints indicate low and high versions
-# if no constraints, then take every one
-# constraints = { 1: [12, 15], 2:[21,27]}
-# map from package to low allowed version to high version inclusive
-constraints = { '1': [11, 19], '2':[21,29]}
-# constraints = { 1: [11, 15], 2:[21,21], 3:[38,38], 4:[40,49]}
-# ok when True and 1: [11,14]
-todolist = ['3','1']
-
-# ''' # When transferring to Christophe
-
-# EXECUTION
-
-logging.info( "Start with this: "+ str(default))
+    # cudf is not used
+    cudf= []
+    cudf.append([1, 11, 12, 2, 21])
+    cudf.append([1, 13, 15, 2, 24])
+    cudf.append([1, 16, 19, 2, 27])
+    cudf.append([1, 11, 12, 3, 31])
+    cudf.append([1, 13, 19, 3, 36])
+    cudf.append([1, 11, 12, 4, 41])
+    cudf.append([1, 13, 19, 4, 46])
+    cudf.append([2, 21, 22, 3, 31])
+    cudf.append([2, 23, 29, 3, 36])
+    cudf.append([2, 21, 24, 4, 41])
+    cudf.append([2, 25, 29, 4, 47])
+    cudf.append([3, 31, 34, 4, 41])
+    cudf.append([3, 35, 39, 4, 47])
+    cudf.append([4, 41, 42, 3, 31])
+    cudf.append([4, 43, 49, 3, 36])
 
 
 
-knowcaller = False # if you'll always know the caller, then set to True
-# can override with a command line argument
-configflag = False
-logging.info( "len(sys.argv) is:"+str( len(sys.argv)))
-if 1 < len(sys.argv):
-  if (sys.argv[1] == "False") or (sys.argv[1] == "1") or (sys.argv[1] == "false") or (sys.argv[1] == "FALSE"):
-     knowcaller = False
-     endconfig = liquidclimber(constraints, todolist)
-     logging.info( "End with this: " +str(endconfig))
-     logging.info( "successful: "+ str(successful))
-  elif (sys.argv[1] == "-f"):
-     configflag = True
-     packagelevel = parseconfig(sys.argv[2])
-     logging.info( "through packagelevel, we get "+str(  packagelevel))
-     logging.info( "about to do multipass:"+str(  multipass(packagelevel)))
-  else:
-     knowcaller = True
-     endconfig = liquidclimber(constraints, todolist)
-     logging.info( "End with this: "+str(endconfig))
-     logging.info( "successful: "+str(successful))
-else:
-     knowcaller = False
-     endconfig = liquidclimber(constraints, todolist)
-     logging.info( "End with this: "+str(endconfig))
-     logging.info( "successful: "+str(successful))
 
-logging.info( "Total configurations tested: "+str( totalconfigurationstested))
+    orderofpackages = ['1', '3', '4', '1', '2', '3', '4', '3', '2', '4']
+
+
+    # outside of the simulator
+
+
+    memory = {} # we will remember here the versions of package
+    	# combinations that don't work, so we don't redo them
+    	# we just keep exploring higher versions
+
+    strongmemory = [] # these will be in the form
+    		# [callpack, callver, calleepack, calleever]
+
+    axiom = {} # we use the historicity and failure monotonicity axioms
+     # each element is keyed by two packages and has the format
+     # (pack1, version1, lesseq/eq/greatereq, pack2, version2, lesseq/eq/greatereq)
+
+
+
+    sourcemap = { '1': [11, 12, 13, 14, 15, 16, 17, 18, 19],
+    '2': [21, 22, 23, 24, 25, 26, 27, 28, 29],
+    '3': [31, 32, 33, 34, 35, 36, 37, 38, 39],
+    '4': [41, 42, 43, 44, 45, 46, 47, 48, 49]}
+
+    default = {'1':11,'2':21, '3':31, '4':41} # configuration that works
+
+    # constraints indicate low and high versions
+    # if no constraints, then take every one
+    # constraints = { 1: [12, 15], 2:[21,27]}
+    # map from package to low allowed version to high version inclusive
+    constraints = { '1': [11, 19], '2':[21,29]}
+    # constraints = { 1: [11, 15], 2:[21,21], 3:[38,38], 4:[40,49]}
+    # ok when True and 1: [11,14]
+    todolist = ['3','1']
+
+    # When transferring to Christophe
+
+    # EXECUTION
+
+    logging.info( "Start with this: "+ str(default))
+
+    knowcaller = False # if you'll always know the caller, then set to True
+    # can override with a command line argument
+    configflag = False
+    logging.info( "len(sys.argv) is:"+str( len(sys.argv)))
+    if 1 < len(sys.argv):
+      if (sys.argv[1] == "False") or (sys.argv[1] == "1") or (sys.argv[1] == "false") or (sys.argv[1] == "FALSE"):
+         knowcaller = False
+         endconfig = liquidclimber(constraints, todolist)
+         logging.info( "End with this: " +str(endconfig))
+         logging.info( "successful: "+ str(successful))
+      elif (sys.argv[1] == "-f"):
+         configflag = True
+         packagelevel = parseconfig(sys.argv[2])
+         logging.info( "through packagelevel, we get "+str(  packagelevel))
+         logging.info( "about to do multipass:"+str(  multipass(packagelevel)))
+      else:
+         knowcaller = True
+         endconfig = liquidclimber(constraints, todolist)
+         logging.info( "End with this: "+str(endconfig))
+         logging.info( "successful: "+str(successful))
+    else:
+         knowcaller = False
+         endconfig = liquidclimber(constraints, todolist)
+         logging.info( "End with this: "+str(endconfig))
+         logging.info( "successful: "+str(successful))
+
+    logging.info( "Total configurations tested: "+str( totalconfigurationstested))
