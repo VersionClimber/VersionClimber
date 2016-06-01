@@ -299,8 +299,10 @@ def pkg_versions(universe, init_config, versions, endof=None):
         if nb_versions in ('major', 'minor', 'patch'):
             commits = replace_by_wrong_commits(pkg, commits, endof)
             commits = hversions(commits, nb_versions)
+        elif nb_versions == 'commit':
+            pass
         elif nb_versions == 1:
-                commits = commits[0]
+                commits = [commits[0]]
         elif nb_versions == 2:
             commits = [commits[0], commits[-1]]
         else:
