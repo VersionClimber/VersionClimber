@@ -23,9 +23,11 @@ def sh(cmd):
 
 
 def new_stat_file(exp='experiment'):
-    exp = exp
+    exp = path(exp)
     def next_id(exp=exp):
-        return max(int(x.basename().split('result')[1][0]) for x in exp.listdir('result*.txt'))+1
+        l = [int(x.basename().split('result')[1][0]) for x in exp.listdir('result*.txt')]
+        n = max(l)+1 if l else 1
+        return n
     stat_file = exp/'result%d.txt'%next_id()
     return stat_file
 

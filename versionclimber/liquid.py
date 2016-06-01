@@ -426,10 +426,11 @@ class YAMLEnv(MyEnv):
 
         _pkg_versions = {}
         for pkg in self.pkgs:
-            vers = pkg.versions()
+            tags = pkg.hierarchy != 'commit'
+            vers = pkg.versions(tags=tags)
             _pkg_versions[pkg.name] = vers
 
-        universe = [pkg.name for pkg in self.pkgs]
+        universe = self.universe = [pkg.name for pkg in self.pkgs]
 
         init_config = {}
         for pkg in self.pkgs:
@@ -554,7 +555,7 @@ class YAMLEnv(MyEnv):
         return works_yaml
 
 
-    def monkey_patch(self, liquidparser, universe, knowcaller=False):
+    def monkey_patch(self, liquidparser, knowcaller=False):
 
         works = self.works()
         universe = self.universe
@@ -576,7 +577,9 @@ class YAMLEnv(MyEnv):
 
         return constraints, todolist
 
-
+    def restore(self):
+        for pkg in self.pkgs:
+            pkg.restore()
 
 
 
