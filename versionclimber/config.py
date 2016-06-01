@@ -27,6 +27,8 @@ class Package(object):
         self.version = version
         self.hierarchy = hierarchy
         self.dir = path(directory).abspath()
+        if not self.dir.exists():
+            self.dir.makedirs()
 
     def __str__(self):
         return self.name
