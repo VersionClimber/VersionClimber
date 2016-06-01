@@ -1,30 +1,10 @@
 packages:
-    - name      : scikit-image
+    - name      : VersionClimber_test01
       vcs       : git
-      url       : https://github.com/scikit-image/scikit-image
+      url       : https://github.com/revesansparole/VersionClimber_test1.git
       cmd       : pip install --no-index --no-deps -U
-      version   : v0.11.0
-      hierarchy : patch
-      directory : /Users/pradal/devlp/git_cache
-
-    - name      : scikit-learn
-      vcs       : git
-      url       : https://github.com/scikit-learn/scikit-learn
-      cmd       : pip install --no-index --no-deps -U
-      version   : 0.16.0
-      hierarchy : patch
-      directory : /Users/pradal/devlp/git_cache
-
-    - name      : scipy
-      vcs       : pypi
-      version   : 0.13.0
-      hierarchy : minor
-
-    - name      : numpy
-      vcs       : pypi
-      version   : 0.9.6
-      hierarchy : minor
+      hierarchy : major
+      directory : git_cache
 
 run:
-    - python estimate_hog.py
-
+    - python test_function.py
