@@ -74,7 +74,8 @@ for pkg in pkgs:
 
 pkg_versions = {}
 for pkg in pkgs:
-    vers = pkg.versions()
+    tags = pkg.hierarchy != 'commit'
+    vers = pkg.versions(tags=tags)
     pkg_versions[pkg.name] = vers
 
 # Check validity of the default version of each package.
