@@ -8,14 +8,26 @@ import subprocess
 import re
 import json
 import urllib2
+import datetime
 from distutils.version import LooseVersion
 import multigit
+
+def clock():
+    """ Return the actual date. """
+    return datetime.datetime.now()
 
 
 def sh(cmd):
     print cmd
     return os.system(cmd)
 
+
+def new_stat_file(exp='experiment'):
+    exp = exp
+    def next_id(exp=exp):
+        return max(int(x.basename().split('result')[1][0]) for x in exp.listdir('result*.txt'))+1
+    stat_file = exp/'result%d.txt'%next_id()
+    return stat_file
 
 def clone(repo, pkg):
     cmd = 'git clone https://github.com/%s/%s' % (repo, pkg)

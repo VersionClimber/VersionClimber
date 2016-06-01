@@ -1,6 +1,6 @@
-"""
-Read the configuration from yaml description file.
+"""Read the configuration from yaml description file.
 
+This module implements a Package object that can retrieve the versions and activate it at different versions.
 """
 
 import yaml
@@ -64,6 +64,54 @@ class Package(object):
             else:
                 raise Exception('%s is not implemented yet'%self.vcs)
         return versions
+
+
+    def checkout_update(self, commit):
+        pp = self.dir/self.name
+        cwd = path('.').abspath()
+
+        if not pp.exists():
+            print('ERROR: %s has not been cloned (git) or checkout (svn).')
+
+        pp.chdir()
+        commit = str(commit)
+
+        if self.vcs == 'svn':
+            update_cmd = 'svn update -r %s' % commit
+        elif self.vcs == 'git':
+            update_cmd = 'git checkout %s' % commit
+        else:
+            raise Exception('%s is not implemented yet' % self.vcs)
+
+        status = sh(update_cmd)
+
+        cwd.chdir()
+
+        return status
+
+
+    def local_install(self, commit):
+        """ Checkout or update the package to a given commit version.
+        Install it with pip at this given revision.
+        """
+        pkg_path = (self.dir / self.name).abspath()
+        if self.vcs == 'pypi':
+            cmd = '%s %s == %s' % (self.cmd, self.name, commit)
+        else:
+            self.checkout_update(commit)
+            cmd = '%s %s' % (self.cmd, pkg_path)
+
+        status = sh(cmd)
+        return status
+
+
+    def restore(self):
+        """ Set the active commit version to HEAD or master. """
+        if self.vcs == 'svn':
+            self.checkout_update('HEAD')
+        elif self.vcs == 'git':
+            self.checkout_update('master')
+
 
 
 def load_config(yaml_filename):
