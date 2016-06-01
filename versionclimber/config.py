@@ -40,7 +40,7 @@ class Package(object):
             print '%s directory already exists. We use this version' % pp
             pp.chdir()
             if self.vcs == 'git':
-                cmd = 'git pull origin master'
+                cmd = 'git fetch -p; git pull origin master'
             elif self.vcs == 'svn':
                 cmd = 'svn update'
             sh(cmd)
