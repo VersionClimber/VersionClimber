@@ -1,0 +1,30 @@
+packages:
+    - name      : scikit-image
+      vcs       : git
+      url       : https://github.com/scikit-image/scikit-image
+      cmd       : pip install --no-index --no-deps -U
+#      version   : v0.4
+      hierarchy : patch
+      directory : /Users/pradal/devlp/git_cache
+
+    - name      : scikit-learn
+      vcs       : git
+      url       : https://github.com/scikit-learn/scikit-learn
+      cmd       : pip install --no-index --no-deps -U
+      version   : '0.8'
+      hierarchy : patch
+      directory : /Users/pradal/devlp/git_cache
+
+    - name      : scipy
+      vcs       : pypi
+      version   : 0.13.0
+      hierarchy : minor
+
+    - name      : numpy
+      vcs       : pypi
+      version   : 0.9.6
+      hierarchy : minor
+
+run:
+    - python estimate_hog.py
+
