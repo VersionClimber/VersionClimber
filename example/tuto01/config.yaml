@@ -1,0 +1,12 @@
+packages:
+    - name      : VersionClimber_tuto01
+      vcs       : git
+      url       : https://github.com/revesansparole/VersionClimber_tuto01.git
+      cmd       : pip install --no-index --no-deps -U
+      # version   : v0.4
+      hierarchy : commit
+      directory : git_cache
+
+run:
+    - python test_function.py
+
