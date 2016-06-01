@@ -108,7 +108,7 @@ class Package(object):
         """
         pkg_path = (self.dir / self.name).abspath()
         if self.vcs == 'pypi':
-            cmd = '%s %s == %s' % (self.cmd, self.name, commit)
+            cmd = '%s %s==%s' % (self.cmd, self.name, commit)
         else:
             self.checkout_update(commit)
             cmd = '%s %s' % (self.cmd, pkg_path)

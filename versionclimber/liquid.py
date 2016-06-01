@@ -516,7 +516,7 @@ class YAMLEnv(MyEnv):
                 print s
                 f.write(s)
                 if status != 0:
-                    res = [False, 0, pkg2int[pkg], pkg2int[pkg_first]]
+                    res = [False, 0, env.pkg2int[pkg], env.pkg2int[pkg_first]]
                     s = 'FAIL build %s\n'%pkg
                     f.write(s)
                     f.close()
