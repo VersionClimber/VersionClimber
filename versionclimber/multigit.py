@@ -24,7 +24,7 @@ def versions(path):
         print c.name_rev, ' : ', c.summary, '(%d)'%c.authored_date
         yield c
     """
-    l = [(c.authored_date, c.name_rev) for c in repo.iter_commits()]
+    l = [(c.authored_date, str(c)) for c in repo.iter_commits()]
     l.sort(key=lambda x: x[0])
     if l:
         res = zip(*l)[1]

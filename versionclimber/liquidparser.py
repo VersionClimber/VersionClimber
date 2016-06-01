@@ -543,7 +543,7 @@ def checkworks(listofpackversions, latestpackchanged):
             # that differs only in latestpackchanged
             # and callee is not the same as latestpackchanged
                 failedconfigs.append([y, x[2], latestpackchanged])
-                addtomemory(y, x[2], latestpackchanged)
+                #addtomemory(y, x[2], latestpackchanged)
                 return [x[0], x[2], latestpackchanged, True]
             elif x[2] > -1: # we know the package that crashed
                 return [x[0], x[2], -1, True]
