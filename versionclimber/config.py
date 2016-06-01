@@ -38,6 +38,14 @@ class Package(object):
         pp = self.dir/self.name
         if pp.exists():
             print '%s directory already exists. We use this version' % pp
+            pp.chdir()
+            if self.vcs == 'git':
+                cmd = 'git pull'
+            elif self.vcs == 'svn':
+                cmd = 'svn update'
+            sh(cmd)
+            cwd.chdir()
+
         elif self.vcs == 'pypi':
             pass
         else:
