@@ -13,6 +13,7 @@ def versions(path):
 
     """
     repo = git.Repo(path)
+    """
     try:
         print 'Branch : ', repo.active_branch.name
     except:
@@ -22,6 +23,15 @@ def versions(path):
     for c in commits:
         print c.name_rev, ' : ', c.summary, '(%d)'%c.authored_date
         yield c
+    """
+    l = [(c.authored_date, c.name_rev) for c in repo.iter_commits()]
+    l.sort(key=lambda x: x[0])
+    if l:
+        res = zip(*l)[1]
+        print res
+    else:
+        res = []
+    return res
 
 def tags(path):
     """
