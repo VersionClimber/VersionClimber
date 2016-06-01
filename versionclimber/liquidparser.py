@@ -1,11 +1,32 @@
+# May 25, 2016:  
+# Put in logging. 
+# Study the question of return values and of parallelism.
+# Save good data that comes back.
+# Have some idea of exploration for the "as close to the present config as possible problem"
+
+
+# November 28, 2015: if an argument is of form -f foobar, then we take foobar
+# to be a configuration file.
+# The configuration file has the packages in descending priority order
+# Then all packages in a descending lexicographic order
+# with the format: 0 preliminary dots for the highest level, then 1 dot
+# for next level etc.
+# Our strategy will be to translate these to integers for each package
+# and remember for each integer what its original package identifier was
+# and its level.
+# Then the algorithm will try the highest level first, then keep going down.
+
+# NOTES ON CONFIG FILE: package names must have no blanks. Versions must be integers.
+# NOTES ON THIS FILE: simulation code that should be removed is clearly delimited by '''  # When transferring to Christophe
+
 # [x for x in temp if not x[0] in keepfixed]
 # May 10, 2015:
 # This version can be called as follows 
-# python liquidparser.py 2
+# python liquidparser.py 2 (the default)
 # which means that the caller and callee at the point of error is always known
 # or
 # python liquidparser.py 1
-# which means that the caller may not be known (the default)
+# which means that the caller may not be known 
 # The interface to works changes in its return value
 # 
 # [True] -- everything is fine
@@ -164,6 +185,7 @@
 
 
 
+import logging
 import sys
 import math
 import csv
@@ -181,6 +203,8 @@ sys.setrecursionlimit(30000)
 
 now = datetime.datetime.now()
 currentyear = now.year
+logging.basicConfig(filename='versionclimber.log', level=logging.DEBUG)
+logging.info("Hello"+ 'world'+ str(5)+ str(4.1))
 
 #####################################
 # global variables Global GLOBAL
@@ -202,13 +226,14 @@ failedconfigs = [] # configurations that have failed
 nocompile = [] 
    # package-versions that don't compile, so should not be considered further
 
-knowcaller = False # if you'll always know the caller, then set to True
-# can override with a command line argument
-if 1 < len(sys.argv):
-  if (sys.argv[1] == "False") or (sys.argv[1] == "1") or (sys.argv[1] == "false") or (sys.argv[1] == "FALSE"):
-     knowcaller = False
-  else:
-     knowcaller = True
+sourcemap = {}
+
+totalconfigurationstested = 0
+constraints = {} # if the permitted versions are stated explicitly like this, then this is a fine initial value
+todolist = [] # filled in by the configuration file
+
+orderofpackages = [] # for simulation, so ignored in production
+default = {} # for simulation, so ignored in production
 
 
 
@@ -225,21 +250,28 @@ if 1 < len(sys.argv):
 # This is based on symmetric compatibilities
 def compatible(packver1, packver2):
   pack1 = packver1[0]
+  logging.info( "compatible, packver1 "+ str(packver1))
   ver1 = packver1[1]
   pack2 = packver2[0]
   ver2 = packver2[1]
   bydefault = True
   if pack1 == pack2:
 	return True
+  # print "in compatible, starting loop"
   for c in compatibilities:
     if (c[0] == pack1) and (c[3] == pack2): 
 	bydefault = False # the two packages are in the list of compatibilities
+        # print "compatible, first if"
     	if (ver1 >= c[1]) and (ver1 <= c[2]) and (ver2 >= c[4]) and (ver2 <= c[5]):
+        	logging.info( "compatible, first if about to return true")
 		return True
     if (c[0] == pack2) and (c[3] == pack1): 
+        # print "compatible, second if"
 	bydefault = False # the two packages are in the list of compatibilities
     	if (ver1 >= c[4]) and (ver1 <= c[5]) and (ver2 >= c[1]) and (ver2 <= c[2]):
+        	logging.info( "compatible, second if about to return true")
 		return True
+  logging.info( "in compatible, about to return bydefault: "+ str(bydefault))
   return bydefault # if we've never encountered these packages, we'll return
 	# true, but if we have found the packages but no compatible versions,
 	# then we'll return False
@@ -271,34 +303,37 @@ def cudftest(packver1, packver2):
 # Given a new package-version pair newpackver,
 # is it compatible with the ones that are already there?
 def decidepackage(historyofpackversions, newpackver):
-   print "decidepackage: historyofpackversions, newpackver:", historyofpackversions, newpackver
+   logging.info( "decidepackage: historyofpackversions, newpackver:"+str( historyofpackversions)+str( newpackver))
    if 0 == len(historyofpackversions):
 	return [True, newpackver[0]]
    h = historyofpackversions[-1] # only worry about the very last one
    if compatible(h, newpackver) == False: # ??? Changed for CUDF
    # if cudftest(h, newpackver) == False:
-	print "decidepackage: call for config from ", h, " to ", newpackver, " has return value False."
+	logging.info( "decidepackage: call for config from "+str( h) + " to "+str( newpackver)+ " has returned value False.")
 	return [False, h[0]]
    else:
-	# print "decidepackage: call on compatible from ", h, " to ", newpackver, " has return value True."
+	# print "decidepackage: call on compatible from ", h, " to ", newpackver, " has returned value True."
    	return [True, newpackver[0]]
 
 # Does an execution work? If so return an empty list. 
 # If not, return the package that failed.
 def works(listofpackversions):
    history = []
+   logging.info( "In works at top; orderofpackages:"+str( orderofpackages))
    for p in orderofpackages:
+	logging.info( "In works: "+ str(p)+ ' ' + str( orderofpackages) + ' ' + str( listofpackversions))
 	x = decidepackage(history, [p,listofpackversions[p]])
 	if x[0]:
 		history.append([p,listofpackversions[p]])
 	else:
-		print "  Success up to: ", history
-		print "  Failure on: ", p, listofpackversions[p]
+		logging.info( "  Success up to: " + str(history))
+		logging.info( "  Failure on: "+ str(p) + ' ' + str( listofpackversions[p]))
 		if knowcaller:
 			return [False, 0, p, x[1]] 
 		else: # if you know callee then state it, but if not, can replace p by -1
 			return [False, 2, p] 
 			# ??? changed the 0 to 2 to test out callee only
+   logging.info( "In works, about to return true")
    return [True, 0, -1, -1] # -1 indicates all ok only use the True part
 
 
@@ -308,19 +343,21 @@ def works(listofpackversions):
 # find a minimal pair of current configuration with
 # a successful configuration, meaning a configuration in 
 # successful that is identical to current in pack-ver except in P.
+# Always return False
 def findminimalpair(P, currentconf):
    i = 0
-   print "findminimal currentconf: ", currentconf
-   print "  findminimal P: ", P
+   logging.info( "findminimal currentconf: " +str( currentconf))
+   logging.info( "  findminimal P: " +str( P))
    while i < len(successful):
       s = successful[i]
-      print "  findminimal s: ", s
+      logging.info( "  findminimal s: "+str( s))
       flag = True
       for c in currentconf:
         if (not c == P) and (not currentconf[c] == s[c]):
              flag = False # no minmal pair
-      print "  findminimal flag: ", flag
+      logging.info( "  findminimal flag: "+str( flag))
       if flag:
+        logging.info( "  findminimal is returning True")
         return True
       i+= 1
    return False
@@ -379,20 +416,22 @@ def testaxiom(axiomlist, h, new):
 # and the axiom datastructures
 def memorydecidepackage(historyofpackversions, newpackver):
    if 0 == len(historyofpackversions):
+	logging.info( "--- memorydecidepackage historyofpackversions is empty")
 	return [True, newpackver[0]]
    for h in historyofpackversions:
 	if flatten(h) in memory.viewkeys():
 	   if newpackver in memory[flatten(h)]:
-		print "memorydecidepackage: memory call from  ", h, " to ", newpackver, " has return value False."
+		logging.info( "memorydecidepackage: memory call from  " +str( h) + " to " +str( newpackver)+ " has returned value False.")
 		return [False, h[0]]
 	   else:
-		print "memorydecidepackage: memory call from  ", h, " to ", newpackver, " has return value True."
-   print "+++ memorydecidepackage -- position 2"
+		logging.info( "+++ memorydecidepackage: memory[flatten(h)]" +str( memory[flatten(h)]))
+		logging.info( "+++ memorydecidepackage: memory call from  " + str( h) + " to " +str( newpackver) + " has returned value True.")
+   logging.info( "+++ memorydecidepackage -- position 2")
    h = historyofpackversions[-1]
    x = flatten([h[0], newpackver[0]])
    if x in axiom.viewkeys():
 	if testaxiom(axiom[x], h, newpackver):
-		print "axiom call for  ", h, " with ", newpackver, " has return value False because of ", axiom[x]
+		logging.info( "axiom call for  " + str( h) + " with " +str( newpackver)+ " has returned value False because of " +str( axiom[x]))
 		return [False, h[0]]
    return [True, newpackver[0]]
 
@@ -452,36 +491,40 @@ def inmemstrong(callpackver, calleepackver, strongmemory):
 # when possible
 # and return a True indicating we DID a real execution.
 def checkworks(listofpackversions, latestpackchanged):
-   print "--- checkworks listofpackversions, lastpackchanged:", listofpackversions, latestpackchanged
+   global totalconfigurationstested
+   logging.info( "--- checkworks listofpackversions, lastpackchanged:" +str( listofpackversions) + ' ' +str( latestpackchanged))
    if inconfig(listofpackversions, successful):
-	print "listofpackversions: ", listofpackversions
-	print "matching successful run: ", listofpackversions
+	logging.info( "listofpackversions: " +str( listofpackversions))
+	logging.info( "matching successful run: " +str( listofpackversions))
 	return [True, -1, -1, False] # already good. Didn't execute
    zz = inconfigfail(listofpackversions, failedconfigs)
    if zz[0]:
-	print "listofpackversions: ", listofpackversions
-	print "matching failedconfigs run: ", listofpackversions
+	logging.info( "listofpackversions: " +str( listofpackversions))
+	logging.info( "matching failedconfigs run: " +str( listofpackversions))
 	return [False, zz[1], zz[2], False] # already known to be bad. Didn't execute
    for x in listofpackversions:
 	if x in nocompile:
-		print "this pack-version doesn't compile:", x
+		logging.info( "this pack-version doesn't compile:"+ str( x))
 		return [False, x[0], x[0], False] # doesn't compile
    history = []
    for p in listofpackversions:
-   	print "--- checkworks package before : ", history, p
+   	logging.info( "--- checkworks package before : " + str( history) + ' ' + str( p))
 	x = memorydecidepackage(history, [p,listofpackversions[p]])
-   	print "--- checkworks package after : ", p
 	if x[0]:
+		logging.info( " -- checkworks memorydecidepackage returned true")
 		history.append([p,listofpackversions[p]])
 	else:
-		print "Have avoided an execution."
+		logging.info( "Have avoided an execution.")
 		return [False, p, x[1], False]
+   	logging.info( "--- checkworks package after : " +str( p))
    # using memory did not exclude the possibility that this would work
    x = works(listofpackversions)
-   print "Tested configuration in works: ", listofpackversions
+   logging.info( "Tested configuration in works: "+ str( listofpackversions))
+   totalconfigurationstested+= 1
+   logging.info( "Running number of configurations tested: " + str( totalconfigurationstested))
    y = copy.deepcopy(listofpackversions)
    if (x[0]):
-   	print "  Test successful!"
+   	logging.info( "  Test successful!")
    	successful.append(y)
 	z = -1
 	return [True, -1, -1, True]
@@ -516,7 +559,7 @@ def checkworks(listofpackversions, latestpackchanged):
 def addtomemory(temp, badcallee, badcaller):
    vercallee = temp[badcallee]
    vercaller = temp[badcaller]
-   print "caller: ", badcaller, vercaller, " and callee: ", badcallee, vercallee
+   logging.info( "caller: " +str( badcaller) + ' ' + str( vercaller) + " and callee: " + str( badcallee) + ' ' + str( vercallee))
    x = flatten([badcaller, vercaller])
    if x not in memory.viewkeys():
 	memory[x] = []
@@ -529,15 +572,15 @@ def mymed(mylist):
 # hunter method of finding best configuration.
 # This method can degenerate into a cross-product method if we 
 # are not careful. However we can try.
-def hunter(searchedpackage, temp, newsourcemap, phase, previouscaller, lastpackchanged):
+def hunterOLD(searchedpackage, temp, newsourcemap, phase, previouscaller, lastpackchanged):
    # First we try just pushing all packages except those in todo list 
    # that either precede or equal searchedpackage
    # until we get something that works.
    i = todolist.index(searchedpackage)
    keepfixed = todolist[:i+1] # don't change these
    packagestopush = [x for x in temp if not x in keepfixed]
-   print "hunter: packagestopush ", packagestopush
-   print "hunter: newsourcemap ", newsourcemap
+   logging.info( "hunter: packagestopush " +str( packagestopush))
+   logging.info( "hunter: newsourcemap " +str( newsourcemap))
    found = False
    temp2 = copy.deepcopy(temp)
    temp2_max = copy.deepcopy(temp2)
@@ -549,7 +592,7 @@ def hunter(searchedpackage, temp, newsourcemap, phase, previouscaller, lastpackc
    while not found:
 	returnnow = True
 	newallconfigs = copy.deepcopy(allconfigs)
-	print "hunter: newsourcemap: ", newsourcemap
+	logging.info( "hunter: newsourcemap: " + str( newsourcemap))
 	for c in allconfigs: 
 	 keepgoing = True
 	 while keepgoing:
@@ -571,9 +614,9 @@ def hunter(searchedpackage, temp, newsourcemap, phase, previouscaller, lastpackc
 		if temp3[p] > min(newsourcemap[p]):
 		   newver = max([v for v in newsourcemap[p] if v < temp3[p]])
 		   temp3[p] = newver
-		   print "hunter: temp3:", temp3
+		   logging.info( "hunter: temp3:" + str( temp3))
 		   if not  inconfig(temp3,newallconfigs):
-		     print "hunter: temp3 past inconfig"
+		     logging.info( "hunter: temp3 past inconfig")
 		     returnnow = False
 		     keepgoing = True
 		     t = copy.deepcopy(temp3)
@@ -581,17 +624,60 @@ def hunter(searchedpackage, temp, newsourcemap, phase, previouscaller, lastpackc
 		     ret = checkworks(temp3, p)
 		     # print "ret is: ", ret
 		     if ret[0]:
-			print "xxx successful config: ", temp3
+			logging.info( "xxx successful config: " + str(temp3))
 			return temp3
 		     # elif ret[1] in packagestopush:
 			# newstack.append(ret[1])
 	allconfigs = finduniqs(newallconfigs)
 	if returnnow:
 	   return {}
-	print "xxx len(allconfigs): ", len(allconfigs)
+	logging.info( "xxx len(allconfigs): " + str( len(allconfigs)))
 	# temp2 = copy.deepcopy(allconfigs[-1])
    return {}
 
+# hunter method of finding best configuration.
+# This method can degenerate into a cross-product method if we 
+# are not careful. However we can try.
+def hunter(searchedpackage, temp, newsourcemap, phase, previouscaller, lastpackchanged):
+   # First we try just pushing all packages except those in todo list 
+   # that either precede or equal searchedpackage
+   # until we get something that works.
+   i = todolist.index(searchedpackage)
+   keepfixed = todolist[:i+1] # don't change these
+   packagestopush = [x for x in temp if not x in keepfixed]
+	# These are all packages including ones we don't care about.
+   logging.info( "hunter: packagestopush " +str( packagestopush))
+   logging.info( "hunter: newsourcemap " +str( newsourcemap))
+   found = False
+   temp3 = copy.deepcopy(temp)
+   for p in packagestopush:
+	temp3[p] = max(newsourcemap[p])
+   # start temp3 and then go down one at a time from right to left
+   # in packages to push
+   while found == False:
+      logging.info( "trying temp3 : " +str( temp3))
+      ret = checkworks(temp3, p) # we in fact ignore the package
+      if ret[0]:
+	logging.info( "xxx successful config: " + str( temp3))
+	return temp3
+      i = 0
+      keeplooking = True # see if there are configurations left to try
+      while keeplooking and (i < len(packagestopush)):
+	p = packagestopush[i]
+        if temp3[p] > min(newsourcemap[p]):
+		keeplooking = False
+		newver= max([x for x in newsourcemap[p] if x < temp3[p]])
+		temp3[p] = newver
+		# reset the earlier packages to their maximum
+		j = 0
+		while (j < i):
+			q = packagestopush[j]
+			temp3[q] = max(newsourcemap[q])
+			j+= 1
+	else:
+		i+= 1
+		if (i == len(packagestopush)): # have not found anything
+			return {}
 
 # by advancing versions as needed, try to make a compatible set of
 # package-version pairs
@@ -600,14 +686,14 @@ def hunter(searchedpackage, temp, newsourcemap, phase, previouscaller, lastpackc
 # searchedpackage is the package that was pushed
 # Works well when we get caller and callee
 def trytomakework(searchedpackage, temp, newsourcemap, phase, previouscaller, lastpackchanged):
-  print "        "
-  print "+++ Within trytomakework, on configuration ", temp
+  logging.info( "        ")
+  logging.info( "+++ Within trytomakework, on configuration " + str( temp))
   x = checkworks(temp, lastpackchanged) 
 	# searchedpackage acts both the role of previous caller and
 	# currently changed package
 	# we simulate this now, but in general
 	# this involves the creation of a frozen virtual machine
-  print "++ Return value of: ", x
+  logging.info( "++ Return value of: " + str( x))
   if x[0] == False:
      badcallee = x[1] # callee
      badcaller = x[2] # caller
@@ -622,13 +708,14 @@ def trytomakework(searchedpackage, temp, newsourcemap, phase, previouscaller, la
      if badcaller in keepfixed:
 	posscallerversions = [temp[badcaller]]
      else:
-	posscallerversions = reversed(sorted(newsourcemap[badcaller]))
+	posscallerversions = (sorted(newsourcemap[badcaller]))[::-1] # reverses
+        logging.info( "newsourcemap[badcaller], sorted(newsourcemap[badcaller]), posscallerversions: " + str( newsourcemap[badcaller]) + ' ' + str( sorted(newsourcemap[badcaller])) + ' ' +  str( posscallerversions))
      if badcallee in keepfixed:
 	posscalleeversions = [temp[badcallee]]
      else:
-	posscalleeversions = reversed(sorted(newsourcemap[badcallee]))
-     print "calling package: ", badcaller, " with possible versions: ", posscallerversions
-     print "called package: ", badcallee, " with possible versions: ", posscalleeversions
+	posscalleeversions = (sorted(newsourcemap[badcallee]))[::-1] # reverses
+     logging.info( "calling package: " +str( badcaller) +  " with possible versions: " +str( posscallerversions))
+     logging.info( "called package: " +str( badcallee) +  " with possible versions: " +str( posscalleeversions))
      for c_er in posscallerversions:
      	for c_ee in posscalleeversions:
 	   if ((phase == 1) and (not inmemstrong([badcaller,c_er], [badcallee,c_ee], strongmemory))) or ((phase == 2) and (not inmem([badcaller,c_er], [badcallee,c_ee], memory))):
@@ -639,14 +726,14 @@ def trytomakework(searchedpackage, temp, newsourcemap, phase, previouscaller, la
 			lastpackchanged = badcaller
 		elif (not newtemp[badcallee] == temp[badcallee]):
 			lastpackchanged = badcallee
-  	  	print "        "
-  	  	print "+++ Within trytomakework deep, on configuration ", newtemp
-		print "inconfig(newtemp,successful):", inconfig(newtemp,successful)
-		print "inconfigfail(newtemp,failedconfigs):", inconfigfail(newtemp,failedconfigs)
+  	  	logging.info( "        ")
+  	  	logging.info( "+++ Within trytomakework deep, on configuration " + str( newtemp))
+		logging.info( "inconfig(newtemp,successful):" + str( inconfig(newtemp,successful)))
+		logging.info( "inconfigfail(newtemp,failedconfigs):" + str(inconfigfail(newtemp,failedconfigs)))
 		zz = inconfigfail(newtemp,failedconfigs)
 		if (not inconfig(newtemp,successful)) and (not zz[0]):
 		  x = trytomakework(searchedpackage, newtemp, newsourcemap, phase, previouscaller, lastpackchanged)
-  	  	  print "++ Return value of: ", x
+  	  	  logging.info( "++ Return value of: " + str( x))
 		  if 0 < len(x):
 			return x  
      return {}
@@ -669,12 +756,12 @@ def liquidclimber(constraints, todolist):
   if 0 < len(default):
     successful.append(y) # initially, we have a working configuration
   if knowcaller:
-    print "newsourcemap before monotonicity filtering: ", newsourcemap
+    logging.info( "newsourcemap before monotonicity filtering: " + str( newsourcemap))
     bestmonoconfig = liquidclimberworker(constraints, todolist, newsourcemap, 1)
-    print "best configuration after  monotonicity filtering: ", bestmonoconfig
+    logging.info( "best configuration after  monotonicity filtering: " + str( bestmonoconfig))
     newsourcemap = adjustsource(newsourcemap, bestmonoconfig, todolist)
-    print "newsourcemap after monotonicity filtering: ", newsourcemap
-    print "failed configurations: ", failedconfigs
+    logging.info( "newsourcemap after monotonicity filtering: " + str( newsourcemap))
+    logging.info( "failed configurations: "+ str( failedconfigs))
   # if knowcaller is false, come straight to here
   return liquidclimberworker(constraints, todolist, newsourcemap, 2)
 
@@ -693,25 +780,27 @@ def liquidclimberworker(constraints, todolist, newsourcemap, phase):
   for m in todolist: # todolist gives the packages to maximize
 	# in descending order of priority
 	maxmyversions = max(newsourcemap[m])
-	print "liquidclimberworker: current is: ", current, "phase is: ", phase
+	logging.info( "liquidclimberworker: current is: " +str( current) + "phase is: " +str( phase) + "todolist is: " +str( todolist))
+	logging.info( " liquidclimberworker: m, current[m], maxmyversions, (current[m] < maxmyversions)" +str(  m ) + ' ' +str(  current[m] ) + ' ' +str(  maxmyversions ) + ' ' +str(  (current[m] < maxmyversions)))
+	logging.info( " type(current[m]), type(maxmyversions)" +str(type(current[m])) + ' ' + str( type(maxmyversions)))
 	if (current[m] < maxmyversions):
 		versionstodo = [v for v in newsourcemap[m] if v > current[m]]
 		versionstodo.sort(reverse=True)
-		print "liquidclimberworker: package is: ",m
+		logging.info( "liquidclimberworker: package is: "+str(m))
 		print "liquidclimberworker: versionstodo is: ",versionstodo
 		# versions still to try
 		found = False
 		for v in versionstodo:
 		   if not found:
-			print "liquidclimberworker pack-ver: ", m, v
+			logging.info( "liquidclimberworker pack-ver: " + str(m) + str( v))
 			temp = copy.deepcopy(current)
 			temp[m] = v
 			if knowcaller:
 				ret = trytomakework(m, temp, newsourcemap, phase, m, m)
 			else:
-				print "liquidclimberworker calling hunter"
+				logging.info( "liquidclimberworker calling hunter")
 				ret = hunter(m, temp, newsourcemap, phase, m, m) # don't know the caller always
-			print "return value: ", ret, " for config: ", temp
+			logging.info( "return value: " + str(ret) + " for config: " + str(temp))
 			if 0 < len(ret):
 				current = copy.deepcopy(ret) 
 				found = True
@@ -737,10 +826,145 @@ def adjustsource(newsourcemap, bestmonoconfig, todolist):
 	i+= 1
  return newsourcemap
 
+def delblanks(myline):
+  mylineslim = [x for x in myline if not x in " \n"]
+  str = ''
+  for s in mylineslim:
+	str+=s
+  return str
 	
-	
+# myconfig has the format:
+# knowcaller = True/False
+# todolist = [packages] # in descending order of priority
+#          NB: packages should not have blanks because we delete blanks
+# default = {package:version...} # initial config
+def parseconfig(myconfig):
+   global knowcaller
+   global todolist
+   global default
+   global sourcemap # this will change over the course of the execution
+   myfile = open(myconfig,"r")
+   text = myfile.readlines()
+   myfile.close()
+   mylinearr = (delblanks(text[0])).split("=") # delete white space
+   if (mylinearr[0] == 'knowcaller') and (mylinearr[1] == 'True'):
+	knowcaller = True
+   elif (mylinearr[0] == 'knowcaller') and (mylinearr[1] == 'False'):
+	knowcaller = False
+   else:
+	logging.info( "Error in the knowcaller part of: " + str( myconfig))
+   logging.info( "knowcaller is: " +str( knowcaller))
+   mylinearr = (delblanks(text[1])).split("=") # delete white space
+   if (mylinearr[0] == 'todolist'):
+	todolist = ((mylinearr[1][1:])[:-1]).split(",")
+   else:
+	logging.info( "Error in the todolist part of: " +str(myconfig))
+   logging.info( "todolist is: " +str( todolist))
+   mylinearr = (delblanks(text[2])).split("=") # delete white space
+   default = {}
+   if (mylinearr[0] == 'default'):
+	defaultall = ((mylinearr[1][1:])[:-1]).split(",")
+	logging.info( "defaultall:"+ str( defaultall))
+	for d in defaultall:
+		packver = (delblanks(d)).split(":")
+		logging.info( "packver: "+str( packver))
+		default[packver[0]] = int(packver[1])
+   else:
+	logging.info( "Error in the default part of: "+ str( myconfig))
+   logging.info( "default is:"+str(default))
+   packagelevel = [] # This is going to be an array of quadruples
+	# where the quadruples hold 
+	# package, level (0 is major, 1 is minor etc),
+	# name (e.g. 12.1.2), and number (just consecutive integer
+	# within package)
+   packagename = ''
+   withinpacknum = 0
+   for t in text[3:]:
+	justfoundpackage = False
+	if (len(t) > 7):
+	  if (t[:7] == 'package'):
+		packagename = delblanks(t[7:])
+		withinpacknum = 0
+		justfoundpackage = True
+	if (justfoundpackage == False):
+	  withinpacknum += 1
+	  level = 0 # count number of period (.) symbols
+	  finddot = True
+	  while finddot and (level < len(t)):
+		if t[level] == '.':
+			level+= 1
+		else:
+			finddot = False
+		# level has the right number of dots
+	  x = delblanks(t[level:])
+	  packagelevel.append([packagename, level, int(x)])
+	  # must force version numbers to be ints
+   # print "packagelevel is:", packagelevel
+   return packagelevel
 
-'''  # When transferring to Christophe
+# Do the levels in turn. At the end, for each package p,
+# find the last version that works and first that doesn't work
+# for that level for p.
+# Then proceed to explore the next level.
+# When testing configurations, use the original package version numbers.
+# This means setting up sourcemap with the appropriate versions.
+# then call liquidclimber with no constraints.
+# call liquidclimber({}, todolist):
+# This will return an optimal set of versions at that level.
+def multipass(packagelevel):
+  level = 0
+  bestsofar = default
+  logging.info( "bestsofar is" +str( bestsofar ))
+  while True:
+  	moretodo = fillsourcemap(level, packagelevel, bestsofar)
+	logging.info( "moretodo is " +str( moretodo))
+	if moretodo:
+		bestsofar = liquidclimber({}, todolist)
+		logging.info( "bestsofar for level " +str( level) + " is " +str( bestsofar))
+		level+= 1
+	else: # no more at this level
+		return bestsofar
+
+# fill sourcemap with the versions appropriate to it based on level
+# and packagelevel and best configuration so far
+# packagelevel format: [packagename, level, versionnum, withinpacknum]
+# side effect to global sourcemap
+def fillsourcemap(level, packagelevel, bestsofar):
+   global sourcemap # side effect to this
+   sourcemap = {} # initialized to empty
+   currentpackage = ''
+   currentpackageversions = []
+   sweetspot = False # when true then we are at a good point to record versions 
+   havefounditematthislevel = False
+   for p in packagelevel:
+	if (p[0] != currentpackage): 
+	   if (not currentpackage == ''):
+		sourcemap[currentpackage] = currentpackageversions
+			# take care of the previous package
+	   currentpackage = p[0]
+	   currentpackageversions= []
+	   sweetspot = False
+	# So now currentpackage = p[0]
+	if (p[1] == (level-1)) and sweetspot :
+		sweetspot = False 
+		# we're done, because never got to 
+		# higher version at previous level 
+	if (p[1] == (level-1)) and (bestsofar[p[0]] == p[2])  :
+		currentpackageversions.append(p[2]) # want that version too
+		sweetspot = True # can start getting versions
+	if (level == 0) and (bestsofar[p[0]] == p[2])  :
+		sweetspot = True # can start getting versions
+	if (p[1] == level) and sweetspot  :
+		currentpackageversions.append(p[2])
+   		havefounditematthislevel = True
+   if(not currentpackage == ''):
+	sourcemap[currentpackage] = currentpackageversions
+   logging.info( "sourcemap is" +str( sourcemap))
+   return havefounditematthislevel
+    
+
+
+# '''  # When transferring to Christophe
 # DATA
 
 # For simulator
@@ -842,25 +1066,49 @@ compatibilities.append([3, 32, 32, 4, 42, 42])
 compatibilities.append([3, 38, 38, 4, 48, 48])
 
 compatibilities= []
-compatibilities.append([1, 11, 11, 2, 21, 21])
-compatibilities.append([1, 12, 12, 2, 22, 22])
-compatibilities.append([1, 15, 15, 2, 28, 28])
-compatibilities.append([1, 11, 11, 3, 31, 31])
-compatibilities.append([1, 12, 12, 3, 32, 32])
-compatibilities.append([1, 15, 15, 3, 38, 38])
-compatibilities.append([1, 11, 11, 4, 41, 41])
-compatibilities.append([1, 12, 12, 4, 42, 42])
-compatibilities.append([1, 15, 15, 4, 48, 48])
-compatibilities.append([2, 21, 21, 3, 31, 31])
-compatibilities.append([2, 22, 22, 3, 32, 32])
-compatibilities.append([2, 28, 28, 3, 38, 38])
-compatibilities.append([2, 21, 21, 4, 41, 41])
-compatibilities.append([2, 22, 22, 4, 42, 42])
-compatibilities.append([2, 28, 28, 4, 48, 48])
-compatibilities.append([3, 31, 31, 4, 41, 41])
-compatibilities.append([3, 32, 32, 4, 42, 42])
-compatibilities.append([3, 38, 38, 4, 48, 48])
+compatibilities.append(['1', '11', '11', '2', '21', '21'])
+compatibilities.append(['1', '12', '12', '2', '22', '22'])
+compatibilities.append(['1', '15', '15', '2', '28', '28'])
+compatibilities.append(['1', '11', '11', '3', '31', '31'])
+compatibilities.append(['1', '12', '12', '3', '32', '32'])
+compatibilities.append(['1', '15', '15', '3', '38', '38'])
+compatibilities.append(['1', '11', '11', '4', '41', '41'])
+compatibilities.append(['1', '12', '12', '4', '42', '42'])
+compatibilities.append(['1', '15', '15', '4', '48', '48'])
+compatibilities.append(['2', '21', '21', '3', '31', '31'])
+compatibilities.append(['2', '22', '22', '3', '32', '32'])
+compatibilities.append(['2', '28', '28', '3', '38', '38'])
+compatibilities.append(['2', '21', '21', '4', '41', '41'])
+compatibilities.append(['2', '22', '22', '4', '42', '42'])
+compatibilities.append(['2', '28', '28', '4', '48', '48'])
+compatibilities.append(['3', '31', '31', '4', '41', '41'])
+compatibilities.append(['3', '32', '32', '4', '42', '42'])
+compatibilities.append(['3', '38', '38', '4', '48', '48'])
 
+compatibilities= []
+compatibilities.append(['1', 11, 11, '2', 21, 21])
+compatibilities.append(['1', 12, 12, '2', 22, 22])
+compatibilities.append(['1', 15, 15, '2', 28, 28])
+compatibilities.append(['1', 11, 11, '3', 31, 31])
+compatibilities.append(['1', 12, 12, '3', 32, 32])
+compatibilities.append(['1', 15, 15, '3', 38, 38])
+compatibilities.append(['1', 11, 11, '4', 41, 41])
+compatibilities.append(['1', 12, 12, '4', 42, 42])
+compatibilities.append(['1', 15, 15, '4', 48, 48])
+compatibilities.append(['2', 21, 21, '3', 31, 31])
+compatibilities.append(['2', 22, 22, '3', 32, 32])
+compatibilities.append(['2', 28, 28, '3', 38, 38])
+compatibilities.append(['2', 21, 21, '4', 41, 41])
+compatibilities.append(['2', 22, 22, '4', 42, 42])
+compatibilities.append(['2', 28, 28, '4', 48, 48])
+compatibilities.append(['3', 31, 31, '4', 41, 41])
+compatibilities.append(['3', 32, 32, '4', 42, 42])
+compatibilities.append(['3', 38, 38, '4', 48, 48])
+
+
+
+
+# cudf is not used
 cudf= []
 cudf.append([1, 11, 12, 2, 21])
 cudf.append([1, 13, 15, 2, 24])
@@ -881,7 +1129,7 @@ cudf.append([4, 43, 49, 3, 36])
 
 
 
-orderofpackages = [1, 3, 4, 1, 2, 3, 4, 3, 2, 4]
+orderofpackages = ['1', '3', '4', '1', '2', '3', '4', '3', '2', '4']
 
 
 # outside of the simulator
@@ -900,30 +1148,54 @@ axiom = {} # we use the historicity and failure monotonicity axioms
 
 
 
-sourcemap = { 1: [11, 12, 13, 14, 15, 16, 17, 18, 19],
-2: [21, 22, 23, 24, 25, 26, 27, 28, 29],
-3: [31, 32, 33, 34, 35, 36, 37, 38, 39],
-4: [41, 42, 43, 44, 45, 46, 47, 48, 49]}
+sourcemap = { '1': [11, 12, 13, 14, 15, 16, 17, 18, 19],
+'2': [21, 22, 23, 24, 25, 26, 27, 28, 29],
+'3': [31, 32, 33, 34, 35, 36, 37, 38, 39],
+'4': [41, 42, 43, 44, 45, 46, 47, 48, 49]}
 
-default = {1:11,2:21, 3:31, 4:41} # configuration that works
-default = {} # configuration that works
+default = {'1':11,'2':21, '3':31, '4':41} # configuration that works
 
 # constraints indicate low and high versions
 # if no constraints, then take every one
 # constraints = { 1: [12, 15], 2:[21,27]}
 # map from package to low allowed version to high version inclusive
-constraints = { 1: [11, 19], 2:[21,29]}
+constraints = { '1': [11, 19], '2':[21,29]}
 # constraints = { 1: [11, 15], 2:[21,21], 3:[38,38], 4:[40,49]}
 # ok when True and 1: [11,14]
-todolist = [3,1]
+todolist = ['3','1']
+
+# ''' # When transferring to Christophe
 
 # EXECUTION
 
-print "Start with this: ",default
-
-endconfig = liquidclimber(constraints, todolist)
-print "End with this: ",endconfig
-print "successful: ",successful
+logging.info( "Start with this: "+ str(default))
 
 
-''' # When transferring to Christophe
+
+knowcaller = False # if you'll always know the caller, then set to True
+# can override with a command line argument
+configflag = False
+logging.info( "len(sys.argv) is:"+str( len(sys.argv)))
+if 1 < len(sys.argv):
+  if (sys.argv[1] == "False") or (sys.argv[1] == "1") or (sys.argv[1] == "false") or (sys.argv[1] == "FALSE"):
+     knowcaller = False
+     endconfig = liquidclimber(constraints, todolist)
+     logging.info( "End with this: " +str(endconfig))
+     logging.info( "successful: "+ str(successful))
+  elif (sys.argv[1] == "-f"):
+     configflag = True
+     packagelevel = parseconfig(sys.argv[2])
+     logging.info( "through packagelevel, we get "+str(  packagelevel))
+     logging.info( "about to do multipass:"+str(  multipass(packagelevel)))
+  else:
+     knowcaller = True
+     endconfig = liquidclimber(constraints, todolist)
+     logging.info( "End with this: "+str(endconfig))
+     logging.info( "successful: "+str(successful))
+else:
+     knowcaller = False
+     endconfig = liquidclimber(constraints, todolist)
+     logging.info( "End with this: "+str(endconfig))
+     logging.info( "successful: "+str(successful))
+
+logging.info( "Total configurations tested: "+str( totalconfigurationstested))
