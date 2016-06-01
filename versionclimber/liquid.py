@@ -288,7 +288,7 @@ def pkg_versions(universe, init_config, versions, endof=None):
         else:
             commits = versions[pkg][versions[pkg].index(iversion):]
 
-        if 'r' == commits[0][0]:
+        if isinstance(commits[0], basestring) and ('r' == commits[0][0]):
             commits = [ci[1:] for ci in commits]
         pkgs[pkg] = commits
 
