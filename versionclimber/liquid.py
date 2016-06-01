@@ -452,7 +452,7 @@ class YAMLEnv(MyEnv):
         return status
 
 
-    def run(self):
+    def one_run(self):
         """ Run just the command in a fixed environment.
 
         Either the program fail, or it returns an error.
@@ -519,7 +519,7 @@ class YAMLEnv(MyEnv):
                     return res
 
             t2 = clock()
-            status = env.run()
+            status = env.one_run()
             #status = 0
 
             t3 = clock()
@@ -581,5 +581,19 @@ class YAMLEnv(MyEnv):
         for pkg in self.pkgs:
             pkg.restore()
 
+    def run(self, liquidparser):
+        constraints, todolist = self.monkey_patch(liquidparser)
+
+        try:
+            endconfig = liquidparser.liquidclimber(constraints, todolist)
+            # print liquidparser.memory
+        finally:
+            env.restore()
+
+        res = []
+        for k, v in endconfig.iteritems():
+            pkg = env.int2pkg[k]
+            res.append('(%s,%s)'%(env.int2pkg[k], env.commits[env.int2pkg[k]][v-1]))
 
 
+        return res
