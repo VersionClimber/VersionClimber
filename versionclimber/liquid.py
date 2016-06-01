@@ -7,9 +7,10 @@ hoo : master
 
 import itertools
 # import git
-from .utils import sh, path
+from .utils import sh, path, new_stat_file, clock
 from . import multigit
 from .version import take, hversions
+from .config import load_config
 
 # Create a singleton defined once by the init method
 # replace all that stuff with Objects.
@@ -397,5 +398,180 @@ class MyEnv(object):
             commit = bidir[pkg][1][ci]
             semantic_config[pkg] = commit
         return semantic_config
+
+###############################################################################
+
+class YAMLEnv(MyEnv):
+    """ Environment built from a YAML configuration file.
+
+    Stages:
+        - read the configuration
+        - get locally the packages from git, svn or pypi
+        - get the set of versions
+
+    """
+    def __init__(self, config_file):
+        self.pkgs, self.cmd = load_config(config_file)
+
+        self.pkg_names = {pkg.name: pkg for pkg in self.pkgs}
+
+        for pkg in self.pkgs:
+            print('Get %s'%pkg)
+            pkg.clone()
+
+        _pkg_versions = {}
+        for pkg in self.pkgs:
+            vers = pkg.versions()
+            _pkg_versions[pkg.name] = vers
+
+        universe = [pkg.name for pkg in self.pkgs]
+
+        init_config = {}
+        for pkg in self.pkgs:
+            init_config[pkg.name] = (pkg.version, pkg.hierarchy)
+
+        # retrieve for each package (e.g. numpy, scipy, ...) the set of versions
+        _pkgs = pkg_versions(universe, init_config, _pkg_versions, {})
+        MyEnv.__init__(self, universe, _pkgs)
+
+        self.knowcaller = False
+
+
+    def checkout(self, pkg_name, commit):
+        """
+
+        """
+        pkg = self.pkg_names[pkg_name]
+        status = pkg.local_install(commit)
+        return status
+
+
+    def run(self):
+        """ Run just the command in a fixed environment.
+
+        Either the program fail, or it returns an error.
+        """
+
+        cmd = self.cmd
+
+        status = sh(cmd)
+        if path(error_file).exists():
+            if liquidparser.knowcaller:
+                return parse_error(error_file)
+            else:
+                path(error_file).move(curdir/'errors'/error_file+str(count))
+                return -1, -1
+        else:
+            return status
+
+
+    def works(self, log_dir='.'):
+        """ Get the function that will be evaluated by the algorithm.
+
+        Works take a set of versions, checkout each packages accordingly, and run a script.
+        It returns the success or failure of it.
+        """
+        self.count = 0
+
+        stat_file = new_stat_file(exp=log_dir)
+        pkg_first= self.universe[0]
+
+        def works_yaml(listofpackversions, stat_file=stat_file, env=self):
+            env.count += 1
+            count = env.count
+
+            config = listofpackversions
+
+            f = open(stat_file, 'a')
+            s = "\nConfiguration %d"%count
+            print s
+            f.write(s+'\n')
+
+            semantic_config = env.config2txt(config)
+
+            s = ', '.join(['%s: %s'%(pkg, commit) for pkg, commit in semantic_config.iteritems()])
+            print s
+            if s:
+                f.write(s+'\n'+'\n')
+
+            f.write('# Installation of packages'+'\n')
+
+            tx = clock()
+
+            for pkg, commit in semantic_config.iteritems():
+                t0 = clock()
+                status = env.checkout(pkg, commit)
+                t1 = clock()
+                s = 'Install (%s,%s) in %f s\n'%(pkg, commit,(t1-t0).total_seconds())
+                print s
+                f.write(s)
+                if status != 0:
+                    res = [False, 0, pkg2int[pkg], pkg2int[pkg_first]]
+                    s = 'FAIL build %s\n'%pkg
+                    f.write(s)
+                    f.close()
+                    return res
+
+            t2 = clock()
+            status = env.run()
+            #status = 0
+
+            t3 = clock()
+
+            s = 'Configuration execution in %f s \n'%(t3-t2).total_seconds()
+            f.write(s)
+            print s
+
+            if status:
+                s = 'Execution FAILED\n'
+                f.write('Execution FAILED\n')
+                print 'Status ', status
+
+
+            s = 'Total time: %f s\n'%(t3-tx).total_seconds()
+            f.write(s)
+            print s
+
+            f.close()
+
+            if status == 0:
+                res = [True, 0, -1, -1]
+            else:
+                try:
+                    if liquidparser.knowcaller:
+                        res = [False, 0, pkg2int[status[1]], pkg2int[status[0]]]
+                    else:
+                        res = [False, 2, -1, -1]
+                except:
+                    res = [False, 2, -1, -1]
+            return res
+
+        return works_yaml
+
+
+    def monkey_patch(self, liquidparser, universe, knowcaller=False):
+
+        works = self.works()
+        universe = self.universe
+
+        liquidparser.works = works
+        ordered_packages = universe
+
+        sourcemap, default, todolist = variables_for_parser(ordered_packages, env=self)
+        orderofpackages = [self.pkg2int[p] for p in ordered_packages]
+
+        liquidparser.compatibilities = []
+        liquidparser.orderofpackages = orderofpackages
+        liquidparser.default = default
+        liquidparser.sourcemap = sourcemap
+        liquidparser.strongmemory = []
+        constraints = {}
+        liquidparser.todolist = todolist
+        liquidparser.knowcaller = knowcaller
+
+        return constraints, todolist
+
+
+
 
 
