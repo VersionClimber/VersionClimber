@@ -1,3 +1,3 @@
-from VersionClimber_tuto01 import example as ex
+from VersionClimber_test1 import vclimb
 
-assert ex.example_func() == "beau texte"
+assert vclimb.main() == "a"
