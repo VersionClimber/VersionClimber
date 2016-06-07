@@ -200,11 +200,17 @@ import random
 from operator import itemgetter, attrgetter
 sys.setrecursionlimit(30000)
 
-
 now = datetime.datetime.now()
 currentyear = now.year
-logging.basicConfig(filename='versionclimber.log', level=logging.DEBUG)
-logging.info("Hello"+ 'world'+ str(5)+ str(4.1))
+
+# Christophe
+log_file = 'versionclimber.log'
+
+def start_logging(log_file=log_file):
+    logging.basicConfig(filename=log_file, level=logging.DEBUG)
+    logging.info("Hello"+ 'world'+ str(5)+ str(4.1))
+
+# End Christophe
 
 #####################################
 # global variables Global GLOBAL
@@ -965,26 +971,28 @@ def fillsourcemap(level, packagelevel, bestsofar):
 
 
 if __name__ == '__main__':
-        # When transferring to Christophe
-        # DATA
+    # When transferring to Christophe
+    # DATA
 
-        # For simulator
+    # For simulator
 
 
 
-        # compatibilities= []
-        # compatibilities.append([1, 11, 13, 2, 21, 23])
-        # compatibilities.append([1, 11, 13, 3, 31, 33])
-        # compatibilities.append([1, 11, 13, 4, 41, 43])
-        # compatibilities.append([1, 16, 19, 2, 27, 29])
-        # compatibilities.append([1, 16, 19, 3, 37, 39])
-        # compatibilities.append([1, 16, 19, 4, 47, 49])
-        # compatibilities.append([2,21,24, 3, 31, 34])
-        # compatibilities.append([2,27,29, 3, 36, 39])
-        # compatibilities.append([2,21,24, 4, 41, 44])
-        # compatibilities.append([2,27,29, 4, 46, 49])
-        # compatibilities.append([3,31,34, 4, 41, 45])
-        # compatibilities.append([3,36,37, 4, 46, 49])
+    # compatibilities= []
+    # compatibilities.append([1, 11, 13, 2, 21, 23])
+    # compatibilities.append([1, 11, 13, 3, 31, 33])
+    # compatibilities.append([1, 11, 13, 4, 41, 43])
+    # compatibilities.append([1, 16, 19, 2, 27, 29])
+    # compatibilities.append([1, 16, 19, 3, 37, 39])
+    # compatibilities.append([1, 16, 19, 4, 47, 49])
+    # compatibilities.append([2,21,24, 3, 31, 34])
+    # compatibilities.append([2,27,29, 3, 36, 39])
+    # compatibilities.append([2,21,24, 4, 41, 44])
+    # compatibilities.append([2,27,29, 4, 46, 49])
+    # compatibilities.append([3,31,34, 4, 41, 45])
+    # compatibilities.append([3,36,37, 4, 46, 49])
+
+    start_logging()
 
     compatibilities= []
     compatibilities.append([1, 11, 13, 2, 21, 24])

@@ -9,8 +9,11 @@ import re
 import json
 import urllib2
 import datetime
+import logging
 from distutils.version import LooseVersion
 import multigit
+
+logger = logging.getLogger(__name__)
 
 def clock():
     """ Return the actual date. """
@@ -18,7 +21,7 @@ def clock():
 
 
 def sh(cmd):
-    print cmd
+    logger.info(cmd)
     return os.system(cmd)
 
 

@@ -43,4 +43,5 @@ setup(
     setup_requires=setup_requires,
     install_requires=install_requires,
     dependency_links=dependency_links,
-     )
+    entry_points={"console_scripts": ["vclimb = versionclimber.vclimb:main"]},
+)

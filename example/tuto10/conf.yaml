@@ -1,0 +1,20 @@
+packages:
+    - name      : scikit-image
+      vcs       : git
+      url       : /Users/pradal/devlp/git_cache/scikit-image
+      cmd       : pip install --no-index --no-deps -U
+      version   : v0.11.0
+      hierarchy : patch
+      directory : .vclimb
+
+    - name      : scikit-learn
+      vcs       : git
+      url       : /Users/pradal/devlp/git_cache/scikit-learn
+      cmd       : pip install --no-index --no-deps -U
+      version   : 0.16.0
+      hierarchy : patch
+      directory : .vclimb
+
+run:
+    - python estimate_hog.py
+

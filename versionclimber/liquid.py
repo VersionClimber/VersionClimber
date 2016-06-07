@@ -6,6 +6,8 @@ hoo : master
 """
 
 import itertools
+import logging
+
 # import git
 from .utils import sh, path, new_stat_file, clock
 from . import multigit
@@ -15,6 +17,7 @@ from .config import load_config
 # Create a singleton defined once by the init method
 # replace all that stuff with Objects.
 
+logger = logging.getLogger(__name__)
 
 class Environment(object):
     empty = True
@@ -424,7 +427,7 @@ class YAMLEnv(MyEnv):
         self.pkg_names = {pkg.name: pkg for pkg in self.pkgs}
 
         for pkg in self.pkgs:
-            print('Get %s'%pkg)
+            logger.info('Get %s'%pkg)
             pkg.clone()
 
         _pkg_versions = {}
@@ -494,17 +497,18 @@ class YAMLEnv(MyEnv):
 
             f = open(stat_file, 'a')
             s = "\nConfiguration %d"%count
-            print s
+            logger.info(s)
             f.write(s+'\n')
 
             semantic_config = env.config2txt(config)
 
             s = ', '.join(['%s: %s'%(pkg, commit) for pkg, commit in semantic_config.iteritems()])
-            print s
+            logger.info(s)
             if s:
                 f.write(s+'\n'+'\n')
 
             f.write('# Installation of packages'+'\n')
+            logger.info('# Installation of packages')
 
             tx = clock()
 
@@ -513,11 +517,12 @@ class YAMLEnv(MyEnv):
                 status = env.checkout(pkg, commit)
                 t1 = clock()
                 s = 'Install (%s,%s) in %f s\n'%(pkg, commit,(t1-t0).total_seconds())
-                print s
+                logger.info(s)
                 f.write(s)
                 if status != 0:
                     res = [False, 0, env.pkg2int[pkg], env.pkg2int[pkg_first]]
                     s = 'FAIL build %s\n'%pkg
+                    logger.info(s)
                     f.write(s)
                     f.close()
                     return res
@@ -529,18 +534,18 @@ class YAMLEnv(MyEnv):
             t3 = clock()
 
             s = 'Configuration execution in %f s \n'%(t3-t2).total_seconds()
+            logger.info(s)
             f.write(s)
-            print s
 
             if status:
                 s = 'Execution FAILED\n'
                 f.write('Execution FAILED\n')
-                print 'Status ', status
+                logger.info('Status '+str(status))
 
 
             s = 'Total time: %f s\n'%(t3-tx).total_seconds()
             f.write(s)
-            print s
+            logger.info(s)
 
             f.close()
 

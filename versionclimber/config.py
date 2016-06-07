@@ -4,9 +4,11 @@ This module implements a Package object that can retrieve the versions and activ
 """
 
 import yaml
+import logging
 from path import path
 from versionclimber.utils import sh, pypi_versions, git_versions, svn_versions
 
+logger = logging.getLogger(__name__)
 
 class Package(object):
     """Package description
@@ -37,7 +39,7 @@ class Package(object):
         cwd = path('.').abspath()
         pp = self.dir/self.name
         if pp.exists():
-            print '%s directory already exists. We use this version' % pp
+            logger.info('%s directory already exists. We use this version' % pp)
             pp.chdir()
             if self.vcs == 'git':
                 cmd = 'git fetch -p'
@@ -67,7 +69,7 @@ class Package(object):
             versions = pypi_versions(self.name)
         else:
             if not pp.exists():
-                print('We clone the package to get the versions')
+                logger.info('We clone the package %s to get the versions'%self.name)
                 self.clone()
             if self.vcs == 'git':
                 versions = git_versions(pp, tags=tags)
@@ -83,7 +85,7 @@ class Package(object):
         cwd = path('.').abspath()
 
         if not pp.exists():
-            print('ERROR: %s has not been cloned (git) or checkout (svn).')
+            logger.warning('ERROR: %s has not been cloned (git) or checkout (svn).'%self.name)
 
         pp.chdir()
         commit = str(commit)
