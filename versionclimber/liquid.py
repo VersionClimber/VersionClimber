@@ -19,6 +19,8 @@ from .config import load_config
 
 logger = logging.getLogger(__name__)
 
+STAT_FILE = False
+
 class Environment(object):
     empty = True
 
@@ -286,8 +288,15 @@ def pkg_versions(universe, init_config, versions, endof=None):
         iversion = init_config[pkg][0]
         nb_versions = init_config[pkg][1]
 
+        # Manage versions -x to select the x last commits.
+        iversion = str(iversion)
+        negative_version = (iversion[0]== '-') and iversion[1:].isdigit()
+
         if iversion is None:
             commits = versions[pkg]
+        elif (iversion not in versions[pkg]) and negative_version:
+            iversion = int(iversion)
+            commits = versions[pkg][iversion:]
         else:
             commits = versions[pkg][versions[pkg].index(iversion):]
 
@@ -495,19 +504,20 @@ class YAMLEnv(MyEnv):
 
             config = listofpackversions
 
-            f = open(stat_file, 'a')
             s = "\nConfiguration %d"%count
             logger.info(s)
-            f.write(s+'\n')
+            if STAT_FILE:
+                f = open(stat_file, 'a')
+                f.write(s+'\n')
 
             semantic_config = env.config2txt(config)
 
             s = ', '.join(['%s: %s'%(pkg, commit) for pkg, commit in semantic_config.iteritems()])
             logger.info(s)
-            if s:
+            if s and STAT_FILE:
                 f.write(s+'\n'+'\n')
+                f.write('# Installation of packages'+'\n')
 
-            f.write('# Installation of packages'+'\n')
             logger.info('# Installation of packages')
 
             tx = clock()
@@ -518,13 +528,15 @@ class YAMLEnv(MyEnv):
                 t1 = clock()
                 s = 'Install (%s,%s) in %f s\n'%(pkg, commit,(t1-t0).total_seconds())
                 logger.info(s)
-                f.write(s)
+                if STAT_FILE:
+                    f.write(s)
                 if status != 0:
                     res = [False, 0, env.pkg2int[pkg], env.pkg2int[pkg_first]]
                     s = 'FAIL build %s\n'%pkg
                     logger.info(s)
-                    f.write(s)
-                    f.close()
+                    if STAT_FILE:
+                        f.write(s)
+                        f.close()
                     return res
 
             t2 = clock()
@@ -535,19 +547,19 @@ class YAMLEnv(MyEnv):
 
             s = 'Configuration execution in %f s \n'%(t3-t2).total_seconds()
             logger.info(s)
-            f.write(s)
+            if STAT_FILE: f.write(s)
 
             if status:
                 s = 'Execution FAILED\n'
-                f.write('Execution FAILED\n')
+                if STAT_FILE: f.write('Execution FAILED\n')
                 logger.info('Status '+str(status))
 
 
             s = 'Total time: %f s\n'%(t3-tx).total_seconds()
-            f.write(s)
+            if STAT_FILE: f.write(s)
             logger.info(s)
 
-            f.close()
+            if STAT_FILE: f.close()
 
             if status == 0:
                 res = [True, 0, -1, -1]

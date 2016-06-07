@@ -21,7 +21,7 @@ class Package(object):
                  cmd='pip install -U',
                  version=None,
                  hierarchy='commit',
-                 directory='.'):
+                 directory='.vclimb'):
         self.name = name
         self.vcs = vcs
         self.url = url
