@@ -25,7 +25,7 @@ Example
 
     parser = OptionParser(usage=usage)
 
-    parser.add_option("--conf", dest='config', default=None,
+    parser.add_option("--conf", dest='config', default='config.yaml',
         help="YAML configuration file")
     parser.add_option("--log", dest='log_file', default='versionclimber.log',
         help="Store logging information in this file")

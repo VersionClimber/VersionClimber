@@ -289,16 +289,19 @@ def pkg_versions(universe, init_config, versions, endof=None):
         nb_versions = init_config[pkg][1]
 
         # Manage versions -x to select the x last commits.
-        iversion = str(iversion)
-        negative_version = (iversion[0]== '-') and iversion[1:].isdigit()
+        iversion = str(iversion) if iversion is not None else None
+
 
         if iversion is None:
             commits = versions[pkg]
-        elif (iversion not in versions[pkg]) and negative_version:
-            iversion = int(iversion)
-            commits = versions[pkg][iversion:]
         else:
-            commits = versions[pkg][versions[pkg].index(iversion):]
+            negative_version = (iversion[0]== '-') and iversion[1:].isdigit()
+
+            if (iversion not in versions[pkg]) and negative_version:
+                iversion = int(iversion)
+                commits = versions[pkg][iversion:]
+            else:
+                commits = versions[pkg][versions[pkg].index(iversion):]
 
         if isinstance(commits[0], basestring) and ('r' == commits[0][0]):
             commits = [ci[1:] for ci in commits]
