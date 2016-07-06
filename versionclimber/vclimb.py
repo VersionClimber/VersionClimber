@@ -7,12 +7,11 @@ from optparse import OptionParser
 from versionclimber import liquid, liquidparser
 
 def main():
-    """This function is called by alea_create_package script that is installed
-    on your system when installing OpenAlea.PkgBuilder package.
+    """This function is called by vclimb
 
     To obtain specific help, type::
 
-        alea_create_package --help
+        vclimb --help
 
 
     """
@@ -21,12 +20,12 @@ def main():
 vclimb traverse the versions of the packages and get the optimal one.
 Example
 
-       vclimb --config config.yaml --log vclimb.log
+       vclimb --conf config.yaml --log vclimb.log
 """
 
     parser = OptionParser(usage=usage)
 
-    parser.add_option("--conf", dest='config', default=None,
+    parser.add_option("--conf", dest='config', default='config.yaml',
         help="YAML configuration file")
     parser.add_option("--log", dest='log_file', default='versionclimber.log',
         help="Store logging information in this file")

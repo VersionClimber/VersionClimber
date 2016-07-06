@@ -4,7 +4,7 @@ packages:
       url       : https://github.com/revesansparole/VersionClimber_test1.git
       cmd       : pip install --no-index --no-deps -U
       hierarchy : major
-      directory : git_cache
+      #directory : git_cache
 
 run:
     - python test_function.py
