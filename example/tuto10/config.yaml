@@ -5,6 +5,7 @@ packages:
       cmd       : pip install --no-index --no-deps -U
       version   : v0.11.0
       hierarchy : patch
+      directory : .vclimb
 
     - name      : scikit-learn
       vcs       : git

@@ -1,7 +1,7 @@
 packages:
     - name      : scikit-image
       vcs       : git
-      url       : /Users/pradal/devlp/git_cache/scikit-image
+      url       : https://github.com/scikit-image/scikit-image
       cmd       : pip install --no-index --no-deps -U
       version   : v0.11.0
       hierarchy : patch
@@ -9,7 +9,7 @@ packages:
 
     - name      : scikit-learn
       vcs       : git
-      url       : /Users/pradal/devlp/git_cache/scikit-learn
+      url       : https://github.com/scikit-learn/scikit-learn
       cmd       : pip install --no-index --no-deps -U
       version   : 0.16.0
       hierarchy : patch
