@@ -69,9 +69,50 @@ Create a virtual environment
     $ virtualenv venv
     $ source venv/bin/activate
 
+Install VersionClimber
+++++++++++++++++++++++
+
+::
+
+    python setup.py install
+
 
 YAML specification for VersionClimber
 +++++++++++++++++++++++++++++++++++++
 
-.. litteralinclude:: example/tuto10/config.yaml
+Define a file called config.yaml:
 
+::
+
+    packages:
+        - name      : scikit-image
+          vcs       : git
+          url       : https://github.com/scikit-image/scikit-image
+          cmd       : pip install --no-index --no-deps -U
+          version   : v0.11.0
+          hierarchy : patch
+          directory : /Users/pradal/devlp/git_cache
+
+        - name      : scikit-learn
+          vcs       : git
+          url       : https://github.com/scikit-learn/scikit-learn
+          cmd       : pip install --no-index --no-deps -U
+          version   : 0.16.0
+          hierarchy : patch
+          directory : /Users/pradal/devlp/git_cache
+
+    run:
+        - python my_script.py
+
+Running Version Climber
++++++++++++++++++++++++
+
+To run version climber, just run the following command::
+
+    $ vclimb
+
+What happens?
+    - First, the different packages are checkout in the folder ``.vclimb``
+    - Then, all the package versions are retrieved from git, PyPi or svn
+    - The cmd (run) is tested on several configurations (combinations of packages)
+    - The log is written in a file names versionclimber.log
