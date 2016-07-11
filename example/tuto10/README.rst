@@ -30,6 +30,7 @@ You can (or comment) packages, default version, ...
   * Test the script when installing the dependencies
 
 ::
+
     $ pip install -U pip
     $ pip install path.py
     $ pip install gitpython
