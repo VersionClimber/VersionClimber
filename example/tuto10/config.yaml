@@ -5,7 +5,6 @@ packages:
       cmd       : pip install --no-index --no-deps -U
       version   : v0.11.0
       hierarchy : patch
-      directory : /Users/pradal/devlp/git_cache
 
     - name      : scikit-learn
       vcs       : git
@@ -13,7 +12,6 @@ packages:
       cmd       : pip install --no-index --no-deps -U
       version   : 0.16.0
       hierarchy : patch
-      directory : /Users/pradal/devlp/git_cache
 
     - name      : scipy
       vcs       : pypi
