@@ -1,11 +1,11 @@
-VersionClimber 
+VersionClimber
 ==============
 
 **Authors** : Christophe Pradal, Sarah Cohen-Boulakia, Patrick Valduriez, Dennis Shasha
 
-**Institutes** : CIRAD / INRIA / NYU   
+**Institutes** : CIRAD / INRIA / NYU
 
-**Status** : Python package 
+**Status** : Python package
 
 **License** : Cecill-C
 
@@ -39,20 +39,39 @@ Requirements
     pip install gitpython
     pip install pyyaml
 
+    # optional
+    pip install virtualenv
+
 
 Installation
 ++++++++++++
-
-
-Usage
-+++++
 
 ::
 
     python setup.py install
 
+Usage
++++++
+
+
 
 Documentation
 -------------
 
-TODO
+Create a virtual environment
+++++++++++++++++++++++++++++
+
+(see http://docs.python-guide.org/en/latest/dev/virtualenvs/)
+
+::
+
+    $ cd my_project_folder
+    $ virtualenv venv
+    $ source venv/bin/activate
+
+
+YAML specification for VersionClimber
++++++++++++++++++++++++++++++++++++++
+
+.. litteralinclude:: example/tuto10/config.yaml
+
