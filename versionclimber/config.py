@@ -20,6 +20,7 @@ class Package(object):
                  url=None,
                  cmd='pip install -U',
                  version=None,
+                 conda=False,
                  hierarchy='commit',
                  directory='.vclimb'):
         self.name = name
@@ -28,6 +29,7 @@ class Package(object):
         self.cmd = cmd
         self.version = version
         self.hierarchy = hierarchy
+        self.conda = False
         self.dir = path(directory).abspath()
         if not self.dir.exists():
             self.dir.makedirs()
