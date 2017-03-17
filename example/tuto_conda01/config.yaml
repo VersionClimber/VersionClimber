@@ -1,9 +1,11 @@
 packages:
-    - name      : VersionClimber_test01
+    - name      : boost
       vcs       : git
-      url       : https://github.com/revesansparole/VersionClimber_test1.git
-      cmd       : pip install --no-index --no-deps -U
+      url       : https://github.com/boostorg/boost.git
+      cmd       : conda build recipes/boost
       conda     : True
+      recipe    : recipes/boost
+      hierarchy : minor
       #directory : git_cache
 
 run:
