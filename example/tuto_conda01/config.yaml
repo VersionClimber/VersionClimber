@@ -6,7 +6,14 @@ packages:
       conda     : True
       recipe    : recipes/boost
       hierarchy : minor
-      #directory : git_cache
+
+    - name      : protobuf
+      vcs       : git
+      url       : https://github.com/google/protobuf.git
+      cmd       : conda build recipes/protobuf
+      conda     : True
+      recipe    : recipes/protobuf
+      hierarchy : major
 
 run:
     - python test_function.py
