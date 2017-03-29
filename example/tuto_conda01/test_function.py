@@ -1,3 +1,3 @@
-#import google.protobuf
-#from google.protobuf import pyext, internal
-print True
+import google.protobuf
+from google.protobuf import pyext, internal
+#print True

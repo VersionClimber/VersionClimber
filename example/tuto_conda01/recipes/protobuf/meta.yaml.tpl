@@ -35,20 +35,6 @@ requirements:
         - ordereddict        # [py26]
         - unittest2          # [py26]
 
-test:
-    commands:
-        - protoc --help
-        - test -f ${PREFIX}/lib/libprotobuf.a                           # [unix]
-        - test -f ${PREFIX}/lib/libprotobuf.dylib                       # [osx]
-        - test -f ${PREFIX}/lib/libprotobuf.so                          # [linux]
-        - if not exist %PREFIX%\\Library\\lib\\libprotobuf.lib exit 1   # [win]
-
-    imports:
-        - google
-        - google.protobuf
-        - google.protobuf.internal
-        - google.protobuf.pyext
-
 about:
     home: https://developers.google.com/protocol-buffers/
     license: New BSD License
