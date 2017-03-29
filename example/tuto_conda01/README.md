@@ -1,9 +1,10 @@
 # Tutorial: Testing conda packages with Version Climber
 
 ## Overview
-In this tutorial, you will learn how to use VersionClimber when your script depends on conda packages that are already available. 
-The first step is to define a configuration file. Then, you will have to adapt the original conda recipes. 
-Finally, VersionClimber will find automatically the correct version of each package.
+In this tutorial, you will learn how to use VersionClimber when your script depends on conda packages that are already available (i.e. you don't need to create new recipes). 
+The first step is to define a configuration file which will include the priorities of different packages. 
+Then, you will have to adapt the original conda recipes. 
+Finally, VersionClimber will automatically find the correct version of each package in priority order.
 
 ## Before you start
 
@@ -27,18 +28,18 @@ Now you are ready to define a configuration file for VersionClimber.
 ## Classical layout of a project
 
 To reproduce an execution by using VersionClimber, you will create a directory containing two files and a directory.
-Lets named tutorial this directory. It will contain:
+Let's name this directory tutorial. It will contain:
 - **config.yaml:** the VersionClimber configuration file
 - **test_function.py:** a python file (or another script) to test the validity of one configuration
 - **recipes: ** a directory that will contain one recipe per dependency package.
 
 ## Definition of a simple configuration file
 
-VersionClimber use declarative configuration file to indicate which packages have to be tested and how.
+VersionClimber uses the declarative configuration file to indicate which packages have to be tested and how.
 
-In this section you are going to define a configuration file that use two rather complex conda packages, namely boost and protobuf.
+In this section you are going to define a configuration file that uses two rather complex conda packages, namely boost and protobuf.
 
-The configuration file [config.yaml](https://github.com/pradal/VersionClimber/blob/conda/example/tuto_conda01/config.yaml) is as follow:
+The configuration file [config.yaml](https://github.com/pradal/VersionClimber/blob/conda/example/tuto_conda01/config.yaml) is as follow (here boost has a higher priority than protobuf because boost comes first):
 ```yaml
 packages:
     - name      : boost
@@ -62,8 +63,8 @@ run:
 ```
 
 It is divided into two sections, namely **packages** and **run**:
-- **packages:** list the different packages, their location (e.g. git repository), how to build them and which git commit or tags will be considered.
-- **run:** indicate how to test the different packages together to know if one combination is valid.
+- **packages:** list the different packages, their location (e.g. git repository), how to build them and which git commit or tags will be considered (in hierarchy, as explained below). 
+- **run:** indicate how to test the different packages together to know if one combination is valid. Typically (as in this example), this will be the name of a driver file.
 
 ### Packages
 
@@ -75,8 +76,13 @@ The *packages* section list the different packages that will be tested by the ru
 - **conda** is an optional argument to indicate if the package is managed by conda (`True`) or pip (`False`)
 - **recipe** is the local path where the recipe is defined
 - **hierarchy** is the strategy use to select the different versions of the package from the *vcs*. 
-If *hierarchy* is `major`, `minor`, or `patch`, only the versions of the tags will be selected. Otherelse (`commit`) all the commits of the origin or master branch will be tested by VersionClimber.
+If *hierarchy* is `major`, `minor`, or `patch`, the versions of the tags will be selected for that indentation level and higher. Otherwise, (`commit`) all the commits of the origin or master branch will be tested by VersionClimber. In this example, because minor packages are of the  form x.y, VersionClimber will take the most recent patch associated with each x.y. So, if a package is identified as 5.4.3 and there is no higher patch number among the patches that begin with 5.4, then VersionClimber will select 5.4.3.
 
 
-### Run command
+### Run command in config.yaml
 
+This is the script (usually) after run: in that file. In our example, python test_function.py
+
+### Invocation
+
+vclimb -- will fetch the packages from git, retrieve all the versions, install each configuration (set of package-version pairs) suggested by the Version Climber software, then invoke the run part of the config.yaml on that installed configuration. The output is configuration that works sorted based on the priorities in config.yaml
