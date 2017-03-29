@@ -83,6 +83,12 @@ If *hierarchy* is `major`, `minor`, or `patch`, the versions of the tags will be
 
 This is the script (usually) after run: in that file. In our example, python test_function.py
 
-### Invocation
+## Adaptation of conda recipes for Version Climber
+
+### boost recipe
+
+### Protobuf recipe
+
+## Invocation of VersionClimber
 
 vclimb -- will fetch the packages from git, retrieve all the versions, install each configuration (set of package-version pairs) suggested by the Version Climber software, then invoke the run part of the config.yaml on that installed configuration. The output is configuration that works sorted based on the priorities in config.yaml
