@@ -24,6 +24,14 @@ python setup.py install --user=$CONDA_PREFIX
 
 Now you are ready to define a configuration file for VersionClimber.
 
+## Classical layout of a project
+
+To reproduce an execution by using VersionClimber, you will create a directory containing two files and a directory.
+Lets named tutorial this directory. It will contain:
+- **config.yaml:** the VersionClimber configuration file
+- **test_function.py:** a python file (or another script) to test the validity of one configuration
+- **recipes: ** a directory that will contain one recipe per dependency package.
+
 ## Definition of a simple configuration file
 
 VersionClimber use declarative configuration file to indicate which packages have to be tested and how.
