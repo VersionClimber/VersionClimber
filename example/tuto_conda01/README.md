@@ -96,37 +96,29 @@ All the modified recipes are located in the recipes directory.
 
 First, we get the [boost recipe](https://github.com/conda/conda-recipes/tree/master/boost) from conda-recipes.
 
-The initial meta.yaml file looks like
+The *meta.yaml* file is copied into a template file (named *meta.yaml.tpl*) and is modified as follow:
 ```yaml
 package:
   name: boost
-  version: 1.61.0
+  # REPLACE version 
+  # version: 1.61.0 
+  # BY
+  # VersionClimber version
+  version: "$version" 
 
 source:
-  fn:  boost_1_61_0.tar.bz2
-  url: http://sourceforge.net/projects/boost/files/boost/1.61.0/boost_1_61_0.tar.bz2
-  md5: 6095876341956f65f9d35939ccea1a9f
-
-build:
-  features:
-
-...
-```
-
-We move this file into a template file (named *meta.yaml.tpl*) and modify it:
-```yaml
-package:
-  name: boost
-  version: "$version"
-
-source:
-  path : ../../.vclimb/boost
+  # OLD SOURCE LOCATION
+  # fn:  boost_1_61_0.tar.bz2
+  # url: http://sourceforge.net/projects/boost/files/boost/1.61.0/boost_1_61_0.tar.bz2
+  # md5: 6095876341956f65f9d35939ccea1a9f
+  
+  # NEW VersionClimber SOURCE LOCATION
+  path : ../../.vclimb/boost 
  
 build:
   features:
 
 ...
-
 ```
 
 The **package** and the **source** sections are modified:
