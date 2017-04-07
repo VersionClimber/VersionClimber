@@ -96,7 +96,7 @@ All the modified recipes are located in the recipes directory.
 
 First, we get the [boost recipe](https://github.com/conda/conda-recipes/tree/master/boost) from conda-recipes.
 
-The *meta.yaml* file is copied into a template file (named *meta.yaml.tpl*) and is modified as follow:
+The *meta.yaml* file is copied into a template file (named [*meta.yaml.tpl*](./recipes/boost/meta.yaml.tpl)) and is modified as follow:
 ```yaml
 package:
   name: boost
@@ -130,27 +130,35 @@ The **package** and the **source** sections are modified:
 
 The [Protobuf recipe](https://github.com/conda-forge/protobuf-feedstock/blob/master/recipe) is retrieved from [conda-forge](https://github.com/conda-forge).
 
-We simplify it by removing the header and the tests that can be done in the driver file. The [meta.yaml.tpl](./recipes/protobuf/metayaml.tpl)looks like : 
+We simplify it by removing the header and the tests that can be done in the driver file. The [meta.yaml.tpl](./recipes/protobuf/meta.yaml.tpl) looks like : 
 
 ```yaml
+# REMOVE THESE LINES
+# {% set name = "protobuf" %}
+# {% set version = "3.2.0" %}
+# {% set sha256 = "2a25c2b71c707c5552ec9afdfb22532a93a339e1ca5d38f163fe4107af08c54c" %}
+
 package:
-  name: boost
-  # OLD RECIPE version (remove it)
-  version: 1.61.0 # To be replaced by:
-  # NEW VersionClimber version
-  version: "$version" 
+  name: "protobuf"
+  # REPLACE
+  version: {{ version }}
+  # BY VERSIONCLIMBER template flag
+  version : "$version"
 
 source:
-  # OLD SOURCE LOCATION (remove it)
-  fn:  boost_1_61_0.tar.bz2
-  url: http://sourceforge.net/projects/boost/files/boost/1.61.0/boost_1_61_0.tar.bz2
-  md5: 6095876341956f65f9d35939ccea1a9f
-  
-  # NEW VersionClimber SOURCE LOCATION
-  path : ../../.vclimb/boost 
+  # REPLACE
+  fn: {{ name }}-{{ version }}.tar.gz
+  url: https://github.com/google/protobuf/archive/v{{ version }}/{{ name }}-v{{ version }}.tar.gz
+  sha256: {{ sha256 }}
+  # BY new VERSIONCLIMBER protobuf location
+  path : ../../.vclimb/protobuf
  
 build:
   features:
+
+...
+# REMOVE ALL THE SECTION
+test: 
 
 ...
 ```
