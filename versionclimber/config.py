@@ -8,6 +8,9 @@ import logging
 from path import path
 from versionclimber.utils import sh, pypi_versions, git_versions, svn_versions
 
+from string import Template
+import re
+
 logger = logging.getLogger(__name__)
 
 class Package(object):
@@ -20,6 +23,8 @@ class Package(object):
                  url=None,
                  cmd='pip install -U',
                  version=None,
+                 conda=False,
+                 recipe=None,
                  hierarchy='commit',
                  directory='.vclimb'):
         self.name = name
@@ -28,7 +33,9 @@ class Package(object):
         self.cmd = cmd
         self.version = version
         self.hierarchy = hierarchy
+        self.conda = bool(conda)
         self.dir = path(directory).abspath()
+        self.recipe_dir = path(recipe).abspath()
         if not self.dir.exists():
             self.dir.makedirs()
 
@@ -97,9 +104,31 @@ class Package(object):
         else:
             raise Exception('%s is not implemented yet' % self.vcs)
 
+        logger.info('Checkout %s: %s'%(self.name, update_cmd))
+
         status = sh(update_cmd)
 
         cwd.chdir()
+
+        if self.conda:
+            recipe_dir = self.recipe_dir
+            conda_recipe_tpl = recipe_dir/'meta.yaml.tpl'
+
+            _version = self.get_version(commit)
+
+            src = open(conda_recipe_tpl).read()
+            src = Template(src)
+            src = src.substitute(dict(version=_version))
+
+            print src
+
+            conda_recipe = recipe_dir/'meta.yaml'
+
+            f = open(conda_recipe, 'w')
+            f.write(src)
+            f.close()
+
+            logger.info('Write %s from %s'%(conda_recipe, conda_recipe_tpl))
 
         return status
 
@@ -115,6 +144,14 @@ class Package(object):
             self.checkout_update(commit)
             cmd = '%s %s' % (self.cmd, pkg_path)
 
+            if self.conda:
+                cmd = 'conda build %s'%(self.recipe_dir)
+                status = sh(cmd)
+                if status:
+                    return status
+
+                _version = self.get_version(commit)
+                cmd = 'conda install -y --use-local %s=%s'%(self.name, _version)
         status = sh(cmd)
         return status
 
@@ -127,6 +164,13 @@ class Package(object):
             self.checkout_update('master')
 
 
+    def get_version(self, commit):
+
+        my_group = re.search(r'([\d.]+)', commit)
+        if my_group:
+            return my_group.group(1)
+        else:
+            return commit
 
 def load_config(yaml_filename):
     """ Create an environment from a yaml file.

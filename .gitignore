@@ -1,3 +1,7 @@
+# VersionClimber files
+.vclimb
+versionclimber.log
+
 # Python files
 *.py[cod]
 
