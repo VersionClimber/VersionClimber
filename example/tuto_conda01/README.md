@@ -81,11 +81,59 @@ If *hierarchy* is `major`, `minor`, or `patch`, the versions of the tags will be
 
 ### Run command in config.yaml
 
-This is the script (usually) after run: in that file. In our example, python test_function.py
+This is the script (usually) after run: in that file. In our example, 
+`python test_function.py`
 
 ## Adaptation of conda recipes for Version Climber
 
+Conda recipes of major packages can be found on different repository, such as [conda-recipes](https://github.com/conda/conda-recipes).
+In this example, we depends on two packages: [boost](http://www.boost.org) and [protobuf](https://developers.google.com/protocol-buffers).
+
+VersionClimber needs modified conda recipes to build all the packages together locally from different versions of git source code.
+All the modified recipes are located in the recipes directory.
+
 ### boost recipe
+
+First, we get the [boost recipe](https://github.com/conda/conda-recipes/tree/master/boost) from conda-recipes.
+
+The initial meta.yaml file looks like
+```yaml
+package:
+  name: boost
+  version: 1.61.0
+
+source:
+  fn:  boost_1_61_0.tar.bz2
+  url: http://sourceforge.net/projects/boost/files/boost/1.61.0/boost_1_61_0.tar.bz2
+  md5: 6095876341956f65f9d35939ccea1a9f
+
+build:
+  features:
+
+...
+```
+
+We move this file into a template file (named *meta.yaml.tpl*) and modify it:
+```yaml
+package:
+  name: boost
+  version: "$version"
+
+source:
+  path : ../../.vclimb/boost
+ 
+build:
+  features:
+
+...
+
+```
+
+The **package** and the **source** sections are modified:
+- **package**: the **version** variable must be equal to **"$version"**. VersionClimber will replaced the **"$version"** variable by the git tag or the git commit value.
+- **source**: the **url** value is replaced by a local location where VersionClimber will clone the boost package (i.e. **../../.vclimb/boost**).
+
+
 
 ### Protobuf recipe
 
