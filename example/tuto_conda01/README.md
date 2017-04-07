@@ -100,17 +100,16 @@ The *meta.yaml* file is copied into a template file (named *meta.yaml.tpl*) and 
 ```yaml
 package:
   name: boost
-  # REPLACE version 
-  # version: 1.61.0 
-  # BY
-  # VersionClimber version
+  # OLD RECIPE version (remove it)
+  version: 1.61.0 # To be replaced by:
+  # NEW VersionClimber version
   version: "$version" 
 
 source:
-  # OLD SOURCE LOCATION
-  # fn:  boost_1_61_0.tar.bz2
-  # url: http://sourceforge.net/projects/boost/files/boost/1.61.0/boost_1_61_0.tar.bz2
-  # md5: 6095876341956f65f9d35939ccea1a9f
+  # OLD SOURCE LOCATION (remove it)
+  fn:  boost_1_61_0.tar.bz2
+  url: http://sourceforge.net/projects/boost/files/boost/1.61.0/boost_1_61_0.tar.bz2
+  md5: 6095876341956f65f9d35939ccea1a9f
   
   # NEW VersionClimber SOURCE LOCATION
   path : ../../.vclimb/boost 
