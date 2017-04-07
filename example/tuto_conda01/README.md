@@ -128,6 +128,35 @@ The **package** and the **source** sections are modified:
 
 ### Protobuf recipe
 
+The [Protobuf recipe](https://github.com/conda-forge/protobuf-feedstock/blob/master/recipe) is retrieved from [conda-forge](https://github.com/conda-forge).
+
+We simplify it by removing the header and the tests that can be done in the driver file. The [meta.yaml.tpl](./recipes/protobuf/metayaml.tpl)looks like : 
+
+```yaml
+package:
+  name: boost
+  # OLD RECIPE version (remove it)
+  version: 1.61.0 # To be replaced by:
+  # NEW VersionClimber version
+  version: "$version" 
+
+source:
+  # OLD SOURCE LOCATION (remove it)
+  fn:  boost_1_61_0.tar.bz2
+  url: http://sourceforge.net/projects/boost/files/boost/1.61.0/boost_1_61_0.tar.bz2
+  md5: 6095876341956f65f9d35939ccea1a9f
+  
+  # NEW VersionClimber SOURCE LOCATION
+  path : ../../.vclimb/boost 
+ 
+build:
+  features:
+
+...
+```
+
+
+
 ## Invocation of VersionClimber
 
 vclimb -- will fetch the packages from git, retrieve all the versions, install each configuration (set of package-version pairs) suggested by the Version Climber software, then invoke the run part of the config.yaml on that installed configuration. The output is configuration that works sorted based on the priorities in config.yaml
