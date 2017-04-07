@@ -4,7 +4,7 @@
 In this tutorial, you will learn how to use VersionClimber when your script depends on conda packages that are already available (i.e. you don't need to create new recipes). 
 The first step is to define a configuration file which will include the priorities of different packages. 
 Then, you will have to adapt the original conda recipes. 
-Finally, VersionClimber will automatically find the correct version of each package in priority order.
+Finally, VersionClimber will automatically find a configuration that works having the highest version of each package in (package) priority order. So the highest version possible of the highest priority package, then the highest version of the next highest priority package etc. 
 
 ## Before you start
 
