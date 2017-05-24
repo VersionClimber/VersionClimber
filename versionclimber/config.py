@@ -44,6 +44,10 @@ class Package(object):
 
     def clone(self):
         cwd = path('.').abspath()
+
+        if self.vcs == 'path':
+            path_pkg = path(self.url).abspath()
+
         pp = self.dir/self.name
         if pp.exists():
             logger.info('%s directory already exists. We use this version' % pp)
@@ -54,12 +58,15 @@ class Package(object):
                 cmd = 'git pull origin master'
             elif self.vcs == 'svn':
                 cmd = 'svn update'
+            elif self.vcs == 'path':
+                (pp/'..').chdir()
+                pp.rmtree()
             sh(cmd)
             cwd.chdir()
 
         elif self.vcs == 'pypi':
             pass
-        else:
+        elif self.vcs in ('git', 'svn'):
             if self.vcs == 'git':
                 cmd = 'git clone %s %s' % (self.url, self.name)
             elif self.vcs == 'svn':
@@ -68,6 +75,11 @@ class Package(object):
             self.dir.chdir()
             sh(cmd)
             cwd.chdir()
+
+        if self.vcs == 'path':
+            # copy tree url into pp
+            path_pkg.copytree(pp)
+
 
     def versions(self, tags=True):
         pp = self.dir/self.name
@@ -82,8 +94,15 @@ class Package(object):
                 versions = git_versions(pp, tags=tags)
             elif self.vcs == 'svn':
                 versions = svn_versions(pp)
+            elif self.vcs == 'path':
+                versions = ['1.0']
             else:
                 raise Exception('%s is not implemented yet'%self.vcs)
+
+        print '+++++++++++++++++++++++++++++++++++++++++++++++++++++++++'
+        print 'VERSIONS (%s): '%(self.name), versions
+        print '+++++++++++++++++++++++++++++++++++++++++++++++++++++++++'
+
         return versions
 
 
@@ -91,24 +110,26 @@ class Package(object):
         pp = self.dir/self.name
         cwd = path('.').abspath()
 
+        commit = str(commit)
+
         if not pp.exists():
             logger.warning('ERROR: %s has not been cloned (git) or checkout (svn).'%self.name)
 
-        pp.chdir()
-        commit = str(commit)
+        if self.vcs != 'path': # When package is under svn or git
+            pp.chdir()
 
-        if self.vcs == 'svn':
-            update_cmd = 'svn update -r %s' % commit
-        elif self.vcs == 'git':
-            update_cmd = 'git checkout %s' % commit
-        else:
-            raise Exception('%s is not implemented yet' % self.vcs)
+            if self.vcs == 'svn':
+                update_cmd = 'svn update -r %s' % commit
+            elif self.vcs == 'git':
+                update_cmd = 'git checkout %s' % commit
+            else:
+                raise Exception('%s is not implemented yet' % self.vcs)
 
-        logger.info('Checkout %s: %s'%(self.name, update_cmd))
+            logger.info('Checkout %s: %s'%(self.name, update_cmd))
 
-        status = sh(update_cmd)
+            status = sh(update_cmd)
 
-        cwd.chdir()
+            cwd.chdir()
 
         if self.conda:
             recipe_dir = self.recipe_dir
@@ -119,8 +140,6 @@ class Package(object):
             src = open(conda_recipe_tpl).read()
             src = Template(src)
             src = src.substitute(dict(version=_version))
-
-            print src
 
             conda_recipe = recipe_dir/'meta.yaml'
 
@@ -171,6 +190,7 @@ class Package(object):
             return my_group.group(1)
         else:
             return commit
+
 
 def load_config(yaml_filename):
     """ Create an environment from a yaml file.
