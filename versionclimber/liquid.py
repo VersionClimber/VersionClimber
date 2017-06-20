@@ -9,7 +9,7 @@ import itertools
 import logging
 
 # import git
-from .utils import sh, path, new_stat_file, clock
+from .utils import sh, Path, new_stat_file, clock
 from . import multigit
 from .version import take, hversions
 from .config import load_config
@@ -35,9 +35,9 @@ class Environment(object):
                     self.d[pkg].insert(0,endof[pkg])
 
         self.universe = self.d.keys()
-        self.curdir = path('.').abspath()
+        self.curdir = Path('.').abspath()
 
-        self.pkg_dir = path(dir)
+        self.pkg_dir = Path(dir)
 
         self.branch_names = multigit.branch_names(env.pkg_dir, universe)
         self.error_file = 'error.txt'
@@ -180,7 +180,7 @@ def parse_error(error_file):
     lines = lines[-i - 1:]
     l = lines[0]
     filename = l.split(',')[0].split(' ')[-1].strip('"')
-    src = str(path(filename).namebase)
+    src = str(Path(filename).namebase)
     msg = '\n'.join(lines[1:])
     for pkg in env.universe:
         if pkg in msg:
@@ -368,9 +368,9 @@ class MyEnv(object):
 
         self.d = self.commits = versions  # multigit.universe_versions(dir, universe, Tags=Tags)
         self.universe = universe
-        # self.curdir = path('.').abspath()
+        # self.curdir = Path('.').abspath()
 
-        # self.pkg_dir = path(dir)
+        # self.pkg_dir = Path(dir)
 
         # self.branch_names = multigit.branch_names(env.pkg_dir, universe)
         # self.error_file = 'error.txt'
@@ -480,11 +480,11 @@ class YAMLEnv(MyEnv):
         cmd = self.cmd
 
         status = sh(cmd)
-        if path(self.error_file).exists():
+        if Path(self.error_file).exists():
             if liquidparser.knowcaller:
                 return parse_error(self.error_file)
             else:
-                path(self.error_file).move(curdir/'errors'/self.error_file+str(count))
+                Path(self.error_file).move(curdir/'errors'/self.error_file+str(count))
                 return -1, -1
         else:
             return status

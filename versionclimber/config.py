@@ -5,11 +5,11 @@ This module implements a Package object that can retrieve the versions and activ
 
 import yaml
 import logging
-from path import path
-from versionclimber.utils import sh, pypi_versions, git_versions, svn_versions
 
 from string import Template
 import re
+
+from versionclimber.utils import sh, pypi_versions, git_versions, svn_versions, Path
 
 logger = logging.getLogger(__name__)
 
@@ -34,8 +34,12 @@ class Package(object):
         self.version = version
         self.hierarchy = hierarchy
         self.conda = bool(conda)
-        self.dir = path(directory).abspath()
-        self.recipe_dir = path(recipe).abspath()
+        self.dir = Path(directory).abspath()
+        if conda and recipe:
+            self.recipe_dir = Path(recipe).abspath()
+        else:
+            self.recipe_dir = None
+
         if not self.dir.exists():
             self.dir.makedirs()
 
@@ -43,10 +47,10 @@ class Package(object):
         return self.name
 
     def clone(self):
-        cwd = path('.').abspath()
+        cwd = Path('.').abspath()
 
         if self.vcs == 'path':
-            path_pkg = path(self.url).abspath()
+            path_pkg = Path(self.url).abspath()
 
         pp = self.dir/self.name
         if pp.exists():
@@ -108,7 +112,7 @@ class Package(object):
 
     def checkout_update(self, commit):
         pp = self.dir/self.name
-        cwd = path('.').abspath()
+        cwd = Path('.').abspath()
 
         commit = str(commit)
 
