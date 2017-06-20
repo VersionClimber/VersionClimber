@@ -20,7 +20,7 @@ requirements:
 
   run:
     - python
-    - path.py ==8.2.1
+    - path.py
     - gitpython
     - pyyaml
 
