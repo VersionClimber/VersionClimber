@@ -3,7 +3,11 @@
 """
 
 import os
-from path import path
+try:
+    from path import Path
+except ImportError:
+    from path import path as Path
+
 import subprocess
 import re
 import json
@@ -26,7 +30,7 @@ def sh(cmd):
 
 
 def new_stat_file(exp='experiment'):
-    exp = path(exp)
+    exp = Path(exp)
     def next_id(exp=exp):
         l = [int(x.basename().split('result')[1][0]) for x in exp.listdir('result*.txt')]
         n = max(l)+1 if l else 1
@@ -67,8 +71,8 @@ def svn_versions(package_path):
     """ Extract all the svn versions of a given directory
 
     """
-    cwd = path('.').abspath()
-    pp = path(package_path)
+    cwd = Path('.').abspath()
+    pp = Path(package_path)
     if pp.exists():
         pp.chdir()
     else:

@@ -5,7 +5,10 @@ Task 3: Report the version graph for each particular package
 
 import os
 import git
-from path import path
+try:
+    from path import Path
+except ImportError:
+    from path import path as Path
 
 
 def versions(path):
@@ -52,7 +55,7 @@ def tags(path):
 def test():
     from versionclimber.utils import path, clone
 
-    pkgs = path('pkgs').abspath()
+    pkgs = Path('pkgs').abspath()
 
 
     sklearn = ('scikit-learn', 'scikit-learn')
@@ -75,7 +78,7 @@ def test():
     return _tags, _versions
 
 def universe_versions(dir='simple', universe=('foo', 'goo', 'hoo'), Tags=False):
-    pkgs = path(dir).abspath()
+    pkgs = Path(dir).abspath()
 
     res = {}
     for pkg in universe:
@@ -88,7 +91,7 @@ def universe_versions(dir='simple', universe=('foo', 'goo', 'hoo'), Tags=False):
     return res
 
 def branch_names(dir='simple', universe=('foo', 'goo', 'hoo')):
-    _dir = path(dir)
+    _dir = Path(dir)
 
     res = {}
     for pkg in universe:
