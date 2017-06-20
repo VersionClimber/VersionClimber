@@ -99,9 +99,9 @@ class Package(object):
             else:
                 raise Exception('%s is not implemented yet'%self.vcs)
 
-        print '+++++++++++++++++++++++++++++++++++++++++++++++++++++++++'
-        print 'VERSIONS (%s): '%(self.name), versions
-        print '+++++++++++++++++++++++++++++++++++++++++++++++++++++++++'
+        # print '+++++++++++++++++++++++++++++++++++++++++++++++++++++++++'
+        # print 'VERSIONS (%s): '%(self.name), versions
+        # print '+++++++++++++++++++++++++++++++++++++++++++++++++++++++++'
 
         return versions
 
