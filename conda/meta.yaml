@@ -1,0 +1,44 @@
+{% set version = "1.0.0" %}
+
+package:
+  name: versionclimber
+  version: {{ version }}
+
+source:
+  path: ..
+
+build:
+  number: 0
+  entry_points:
+    - vclimb = versionclimber.vclimb:main
+  script: python setup.py install --single-version-externally-managed --record record.txt
+
+requirements:
+  build:
+    - python
+    - setuptools
+
+  run:
+    - python
+    - path.py ==8.2.1
+    - gitpython
+    - pyyaml
+
+test:
+  imports:
+    - versionclimber
+    - versionclimber.utils
+    - versionclimber.liquid
+    - versionclimber.liquidparser
+
+  commands:
+    - vclimb --help
+
+about:
+  home: http://hdfscli.readthedocs.org
+  license: Cecill-C
+  summary: 'Version Climber is a system for package evolution for Data Science.'
+
+extra:
+  recipe-maintainers:
+    - pradal
