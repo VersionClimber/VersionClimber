@@ -1,6 +1,7 @@
 """ Version utilities
 
 """
+from collections import OrderedDict
 
 
 # Select major, minor, patch and commit versions
@@ -31,7 +32,7 @@ def hversions(seq, type='major'):
 
     if '.' in seq[0]:
         f = _major if type == 'major' else _minor if type == 'minor' else _patch
-        for v in seq:
+        for v in reversed(seq):
             ver = f(v)
             if ver not in _versions:
                 _versions[ver] = v
@@ -39,14 +40,40 @@ def hversions(seq, type='major'):
     else:
         digit = -3 if type == 'major' else -2 if type == 'minor' else -1
         f = _version
-        for v in seq:
+        for v in reversed(seq):
             ver = f(v, digit)
             if ver not in _versions:
                 _versions[ver] = v
                 _result.append(v)
 
+    _result = list(reversed(_result))
+    # print '+++++++++++++++++++++++++++++++++++++++++++++++++++++++++'
+    # print 'HIERARCHICAL VERSIONS: ', _result
+    # print '+++++++++++++++++++++++++++++++++++++++++++++++++++++++++'
     return _result
 
+
+def hierarchical_versions(seq, type='major'):
+    """ Returns a list of versions selected depending on its types (major, minor, patch)
+    """
+    _versions = OrderedDict()
+
+    if '.' in seq[0]:
+        f = _major if type == 'major' else _minor if type == 'minor' else _patch
+        for v in reversed(seq):
+            ver = f(v)
+            if ver not in _versions:
+                _versions[ver] = v
+
+    else:
+        digit = -3 if type == 'major' else -2 if type == 'minor' else -1
+        f = _version
+        for v in reversed(seq):
+            ver = f(v, digit)
+            if ver not in _versions:
+                _versions[ver] = v
+
+    return OrderedDict(zip(reversed(_versions.keys(), _versions.values())))
 
 def majors(seq):
     return hversions(seq, type='major')
