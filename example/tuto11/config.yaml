@@ -1,0 +1,33 @@
+packages:
+    - name      : scikit-image
+      vcs       : conda
+      cmd       : conda install -y
+      channels  :
+        - conda-forge
+      hierarchy : patch
+      directory : .vclimb
+
+    - name      : scikit-learn
+      vcs       : conda
+      cmd       : conda install -y
+      channels  :
+        - conda-forge
+      hierarchy : patch
+
+    - name      : scipy
+      vcs       : conda
+      cmd       : conda install -y
+      channels  :
+        - conda-forge
+      hierarchy : minor
+
+    - name      : numpy
+      vcs       : conda
+      cmd       : conda install -y
+      channels  :
+        - conda-forge
+      hierarchy : minor
+
+run:
+    - python estimate_hog.py
+

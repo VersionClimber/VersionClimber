@@ -9,6 +9,7 @@ except ImportError:
     from path import path as Path
 
 import subprocess
+from subprocess import Popen, PIPE
 import re
 import json
 import urllib2
@@ -55,6 +56,30 @@ def pypi_versions(package_name):
 
     return versions
 
+def conda_versions(package_name, channels=[], build='py27'):
+    """ Retrieve the different versions of a package on anaconda.
+
+    Returns the versions as a sorted list.
+    """
+    cmd = 'conda search -f %s --json'%(package_name,)
+    cmd_list = cmd.split()
+
+    for channel in channels:
+        cmd_list.append('-c')
+        cmd_list.append(channel)
+
+    json_data = call_and_parse(cmd_list)
+    if package_name not in json_data:
+        return []
+
+    pkgs = json_data[package_name]
+
+    versions = [d['version'] for d in pkgs if ('py' not in d['build']) or (build in d['build'])]
+    versions = list(set(versions))
+    versions.sort(key=LooseVersion)
+
+    return versions
+
 
 def git_versions(package_path, tags=False):
     """ Return a list of git versions of a package.
@@ -89,3 +114,11 @@ def svn_versions(package_path):
     cwd.chdir()
 
     return revisions
+
+def call_and_parse(cmd_list):
+    p = Popen(cmd_list, stdout=PIPE, stderr=PIPE)
+    stdout, stderr = p.communicate()
+    if stderr.decode().strip():
+        raise Exception('conda %r:\nSTDERR:\n%s\nEND' % (cmd_list,
+                                                         stderr.decode()))
+    return json.loads(stdout.decode())

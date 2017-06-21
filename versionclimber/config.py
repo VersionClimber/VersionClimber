@@ -9,7 +9,7 @@ import logging
 from string import Template
 import re
 
-from versionclimber.utils import sh, pypi_versions, git_versions, svn_versions, Path
+from versionclimber.utils import sh, pypi_versions, git_versions, svn_versions, conda_versions, Path
 
 logger = logging.getLogger(__name__)
 
@@ -25,6 +25,7 @@ class Package(object):
                  version=None,
                  conda=False,
                  recipe=None,
+                 channels=None,
                  hierarchy='commit',
                  directory='.vclimb'):
         self.name = name
@@ -35,6 +36,7 @@ class Package(object):
         self.hierarchy = hierarchy
         self.conda = bool(conda)
         self.dir = Path(directory).abspath()
+        self.conda_channels = [] if not channels else channels
         if conda and recipe:
             self.recipe_dir = Path(recipe).abspath()
         else:
@@ -68,7 +70,7 @@ class Package(object):
             sh(cmd)
             cwd.chdir()
 
-        elif self.vcs == 'pypi':
+        elif self.vcs in ('pypi', 'conda'):
             pass
         elif self.vcs in ('git', 'svn'):
             if self.vcs == 'git':
@@ -90,6 +92,8 @@ class Package(object):
         versions = []
         if self.vcs == 'pypi':
             versions = pypi_versions(self.name)
+        elif self.vcs == 'conda':
+            versions = conda_versions(self.name, channels= self.conda_channels)
         else:
             if not pp.exists():
                 logger.info('We clone the package %s to get the versions'%self.name)
@@ -110,7 +114,7 @@ class Package(object):
         return versions
 
 
-    def checkout_update(self, commit):
+    def checkout_update(self, commit, version=None):
         pp = self.dir/self.name
         cwd = Path('.').abspath()
 
@@ -136,10 +140,13 @@ class Package(object):
             cwd.chdir()
 
         if self.conda:
+            if self.vcs == 'git' and commit=='master':
+                return
+
             recipe_dir = self.recipe_dir
             conda_recipe_tpl = recipe_dir/'meta.yaml.tpl'
 
-            _version = self.get_version(commit)
+            _version = self.get_version(commit, version=version)
 
             src = open(conda_recipe_tpl).read()
             src = Template(src)
@@ -156,25 +163,34 @@ class Package(object):
         return status
 
 
-    def local_install(self, commit):
+    def local_install(self, commit, version=None):
         """ Checkout or update the package to a given commit version.
         Install it with pip at this given revision.
         """
+        channels = ' '.join(['-c '+ channel for channel in self.conda_channels])
         pkg_path = (self.dir / self.name).abspath()
         if self.vcs == 'pypi':
             cmd = '%s %s==%s' % (self.cmd, self.name, commit)
+        elif self.vcs == 'conda':
+            cmd_list = [self.cmd]
+            cmd_list.append(channels)
+
+            cmd_list.append('%s=%s' % (self.name, commit))
+
+            cmd = ' '.join(cmd_list)
+
         else:
-            self.checkout_update(commit)
+            self.checkout_update(commit, version=version)
             cmd = '%s %s' % (self.cmd, pkg_path)
 
             if self.conda:
-                cmd = 'conda build %s'%(self.recipe_dir)
+                cmd = 'conda build %s %s'%(channels, self.recipe_dir)
                 status = sh(cmd)
                 if status:
                     return status
 
-                _version = self.get_version(commit)
-                cmd = 'conda install -y --use-local %s=%s'%(self.name, _version)
+                _version = self.get_version(commit, version=version)
+                cmd = 'conda install -y -f --no-deps --use-local %s=%s'%(self.name, _version)
         status = sh(cmd)
         return status
 
@@ -187,8 +203,10 @@ class Package(object):
             self.checkout_update('master')
 
 
-    def get_version(self, commit):
-
+    def get_version(self, commit, version=None):
+        if (self.vcs == 'git') and (len(commit) == 40):
+            return version
+            # git commit that can not
         my_group = re.search(r'([\d.]+)', commit)
         if my_group:
             return my_group.group(1)
