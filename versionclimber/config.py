@@ -25,7 +25,7 @@ class Package(object):
                  version=None,
                  conda=False,
                  recipe=None,
-                 conda_channels=None,
+                 channels=None,
                  hierarchy='commit',
                  directory='.vclimb'):
         self.name = name
@@ -36,7 +36,7 @@ class Package(object):
         self.hierarchy = hierarchy
         self.conda = bool(conda)
         self.dir = Path(directory).abspath()
-        self.conda_channels = [] if not conda_channels else conda_channels
+        self.conda_channels = [] if not channels else channels
         if conda and recipe:
             self.recipe_dir = Path(recipe).abspath()
         else:
