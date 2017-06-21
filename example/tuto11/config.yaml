@@ -2,26 +2,26 @@ packages:
     - name      : scikit-image
       vcs       : conda
       cmd       : conda install -y
-      version   : v0.11.0
+#      version   : v0.11.0
       hierarchy : patch
       directory : .vclimb
 
     - name      : scikit-learn
       vcs       : conda
       cmd       : conda install -y
-      version   : 0.16.0
+#      version   : 0.16.0
       hierarchy : patch
 
     - name      : scipy
       vcs       : conda
       cmd       : conda install -y
-      version   : 0.13.0
+#      version   : 0.13.0
       hierarchy : minor
 
     - name      : numpy
       vcs       : conda
       cmd       : conda install -y
-      version   : 0.9.6
+#      version   : 0.9.6
       hierarchy : minor
 
 run:

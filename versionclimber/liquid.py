@@ -467,7 +467,8 @@ class YAMLEnv(MyEnv):
 
         """
         pkg = self.pkg_names[pkg_name]
-        status = pkg.local_install(commit)
+        version = self.bidir_commits[pkg_name][0][commit]
+        status = pkg.local_install(commit,version=version)
         return status
 
 

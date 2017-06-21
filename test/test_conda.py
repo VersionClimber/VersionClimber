@@ -1,4 +1,4 @@
-""" Test version recovery of Scikit.Learn and Scikit.Image """
+""" Test version recovery of Scikit.Learn and Scikit.Image on conda"""
 
 from versionclimber import utils
 
