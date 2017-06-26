@@ -55,8 +55,11 @@ class Package(object):
             path_pkg = Path(self.url).abspath()
 
         pp = self.dir/self.name
-        if pp.exists():
+        if self.vcs in ('pypi', 'conda'):
+            pass
+        elif pp.exists():
             logger.info('%s directory already exists. We use this version' % pp)
+            cmd = ''
             pp.chdir()
             if self.vcs == 'git':
                 cmd = 'git fetch -p'
@@ -67,11 +70,10 @@ class Package(object):
             elif self.vcs == 'path':
                 (pp/'..').chdir()
                 pp.rmtree()
+
             sh(cmd)
             cwd.chdir()
 
-        elif self.vcs in ('pypi', 'conda'):
-            pass
         elif self.vcs in ('git', 'svn'):
             if self.vcs == 'git':
                 cmd = 'git clone %s %s' % (self.url, self.name)
@@ -190,7 +192,7 @@ class Package(object):
                     return status
 
                 _version = self.get_version(commit, version=version)
-                cmd = 'conda install -y -f --no-deps --use-local %s=%s'%(self.name, _version)
+                cmd = 'conda install -y --use-local %s=%s'%(self.name, _version)
         status = sh(cmd)
         return status
 
