@@ -135,8 +135,9 @@ Classical layout of a project
 To reproduce an execution by using VersionClimber, you will create a directory containing two files.
 Let's name this directory tutorial.
 It will contain:
-  - **config.yaml:** the VersionClimber configuration file
-  - **test_function.py:** a executable script (python file or another script) to test the validity of one configuration
+
+- **config.yaml:** the VersionClimber configuration file
+- **test_function.py:** a executable script (python file or another script) to test the validity of one configuration
 
 Definition of a simple configuration file
 *****************************************
@@ -145,7 +146,7 @@ VersionClimber uses the declarative configuration file to indicate which package
 
 In this section you are going to define a configuration file that uses two well-knowned scientific Python packages, namely Scikit-Learn and Scikit-Image.
 
-The configuration file [config.yaml](https://github.com/VersionClimber/VersionClimber/blob/conda/example/tuto11/config.yaml) is as follow (here scikit-image has a higher priority than scikit-learn because scikit-image comes first):
+The configuration file `config.yaml <https://github.com/VersionClimber/VersionClimber/blob/conda/example/tuto11/config.yaml>`_ is as follow (here scikit-image has a higher priority than scikit-learn because scikit-image comes first):
 
 ::
 
