@@ -36,7 +36,7 @@ Installation
 ++++++++++++
 
 Installing conda
-%%%%%%%%%%%%%%%%%
+*****************
 
 %TODO
 You should already have installed [Miniconda](https://conda.io/docs/install/quick.html) or
@@ -44,7 +44,7 @@ You should already have installed [Miniconda](https://conda.io/docs/install/quic
 
 
 Using conda on Linux, Mac or Windows
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+*************************************
 
 ::
 
@@ -53,7 +53,7 @@ Using conda on Linux, Mac or Windows
 
 
 Using pip
-%%%%%%%%%
+**********
 
 ::
 
@@ -61,7 +61,7 @@ Using pip
 
 
 From the source code
-%%%%%%%%%%%%%%%%%%%%
+*********************
 
 ::
 
