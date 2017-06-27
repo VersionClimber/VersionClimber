@@ -38,9 +38,8 @@ Installation
 Installing conda
 *****************
 
-%TODO
-You should already have installed [Miniconda](https://conda.io/docs/install/quick.html) or
-[Anaconda](https://docs.continuum.io/anaconda/install) for Python 2.7.
+You should already have installed `Miniconda <https://conda.io/docs/install/quick.html>`_ or
+`Anaconda <https://docs.continuum.io/anaconda/install>`_ for Python 2.7.
 
 
 Using conda on Linux, Mac or Windows
@@ -68,7 +67,6 @@ From the source code
     python setup.py install
 
 Source code Requirements:
-
 
 ::
 
@@ -100,10 +98,11 @@ in conda.
 
 VersionClimber can build packages under **git** or **subversion**.
 
-VersionClimber can consider also **binary** packages released on public repository such as PyPi (link TODO) or Anaconda (link TODO).
+VersionClimber can consider also **binary** packages released on public repository such as `PyPi <https://pypi.python.org/pypi>`_ or `conda-forge <https://conda-forge.github.io/>`_.
 
-While not mandatory, packages with semantic version tags are prefered to traverse efficiently and hierarchcally
-the possible landscape of versions.
+The versions of a package are formed by all the commits on *git* or *svn*. 
+However, if the package have been released and versionned with `Semantic Versionning <http://semver.org/>`_, these tags can be retrieve and version can be explored hierarchically.
+
 
 2. order the packages from highest priority to lowest where more recent
 versions of higher priority packages are preferred over more recent
@@ -120,7 +119,7 @@ versions of lower priority ones.
 
     vclimb
 
-Case Study 1: simple two packages both in python from github
+Case Study 1: simple two python packages from github
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 To run this case study, first create a new conda environment, and install VersionClimber.
