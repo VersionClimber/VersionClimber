@@ -178,15 +178,17 @@ Packages
 ********
 
 The *packages* section list the different packages that will be tested by the run command:
-- **name** is the name of the package
-- **vcs** define which type of version control system the package use (i.e. git or svn).
+    - **name** is the name of the package
+    - **vcs** define which type of version control system the package use (i.e. git or svn).
+
 If we want to consider binary packages rather than source one, we can define a package repository (i.e. pypi or conda)
-- **url** is the address where the package will be cloned or checkout
-- **cmd** is the command to build the package
-- **conda** is an optional argument to indicate if the package is managed by conda (`True`) or pip (`False`)
-- **recipe** is the local path where the conda recipe is defined
-- **channels** is a list of priority channels to consider when installing with conda
-- **hierarchy** is the strategy use to select the different versions of the package from the *vcs*.
+    - **url** is the address where the package will be cloned or checkout
+    - **cmd** is the command to build the package
+    - **conda** is an optional argument to indicate if the package is managed by conda (`True`) or pip (`False`)
+    - **recipe** is the local path where the conda recipe is defined
+    - **channels** is a list of priority channels to consider when installing with conda
+    - **hierarchy** is the strategy use to select the different versions of the package from the *vcs*.
+
 If *hierarchy* is `major`, `minor`, or `patch`, the versions of the tags will be selected for that indentation level and higher. Otherwise, (`commit`) all the commits of the origin or master branch will be tested by VersionClimber. In this example, because minor packages are of the  form x.y, VersionClimber will take the most recent patch associated with each x.y. So, if a package is identified as 5.4.3 and there is no higher patch number among the patches that begin with 5.4, then VersionClimber will select 5.4.3.
 
 
@@ -310,7 +312,7 @@ Like in the previous case study, we can extend the configuration file by adding 
         - python test_function.py
 
 
-Case Study 2: OpenAlea
+Case Study 3: OpenAlea
 +++++++++++++++++++++++++
 
 In this case study, we want to found a valid configurationof various packages from OpenAlea, a scientific project developed to study multiscale plant modelling.
@@ -320,70 +322,6 @@ First, we will consider PlantGL (ref TODO), a large 3D C++ library with various 
 Then we will explore an example obtained from the combina
 
 
-Create a conda environment
-++++++++++++++++++++++++++++
-
-(see CONDA INSTALLATION (TODO))
-
-::
-
-    $ conda create -n tutorial_vclimb python2
-    $ source activate tutorial_vclimb
-    $ conda install versionclimber -c openalea
-
-
-(Or) Create a virtual environment
-++++++++++++++++++++++++++++++++++
-
-(see http://docs.python-guide.org/en/latest/dev/virtualenvs/)
-
-::
-
-    $ cd my_project_folder
-    $ virtualenv venv
-    $ source venv/bin/activate
-
-Install VersionClimber
-++++++++++++++++++++++
-
-::
-
-    python setup.py install
-
-
-YAML specification for VersionClimber
-+++++++++++++++++++++++++++++++++++++
-
-Define a file called config.yaml:
-
-::
-
-    packages:
-        - name      : scikit-image
-          vcs       : git
-          url       : https://github.com/scikit-image/scikit-image
-          cmd       : pip install --no-index --no-deps -U
-          version   : v0.11.0
-          hierarchy : patch
-          directory : /Users/pradal/devlp/git_cache
-
-        - name      : scikit-learn
-          vcs       : git
-          url       : https://github.com/scikit-learn/scikit-learn
-          cmd       : pip install --no-index --no-deps -U
-          version   : 0.16.0
-          hierarchy : patch
-          directory : /Users/pradal/devlp/git_cache
-
-    run:
-        - python my_script.py
-
-Running Version Climber
-+++++++++++++++++++++++
-
-To run version climber, just run the following command::
-
-    $ vclimb
 
 What happens?
     - First, the different packages are checkout in the folder ``.vclimb``
