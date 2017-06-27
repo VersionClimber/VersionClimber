@@ -92,7 +92,7 @@ Documentation
 
 You as the user have to do the following:
 
-1. for each package in your system,
+1. For each package in your system,
 you have to provide access to the versions you want VersionClimber to consider
 in conda.
 
@@ -104,9 +104,10 @@ The versions of a package are formed by all the commits on *git* or *svn*.
 However, if the package have been released and versionned with `Semantic Versionning <http://semver.org/>`_, these tags can be retrieve and version can be explored hierarchically.
 
 
-2. order the packages from highest priority to lowest where more recent
+2. Order the packages from highest priority to lowest where more recent
 versions of higher priority packages are preferred over more recent
 versions of lower priority ones.
+
 
 3. Installing VersionClimber as follows ::
 
@@ -115,9 +116,11 @@ versions of lower priority ones.
     conda install versionclimber -c openalea
     conda install numpy scipy cython
 
+
 4. Invoke VersionClimber as follows::
 
     vclimb
+
 
 Case Study 1: simple two python packages from github
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
