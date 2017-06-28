@@ -113,7 +113,7 @@ You as the user have to do the following:
 Case Study 1: simple two python packages from github
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-This case study is defined `here <> 
+This case study is defined `here <https://github.com/VersionClimber/VersionClimber/tree/master/example/tuto_usecase1>`_. 
 To run this case study, first create a new conda environment, and install VersionClimber.
 
 Now you are ready to define a configuration file for VersionClimber.
