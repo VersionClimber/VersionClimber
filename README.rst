@@ -60,22 +60,17 @@ Using pip
 
 From the source code
 *********************
+Source code Requirements (conda env)::
 
-::
+    conda install path.py gitpython pyyaml
+    
+or (in a virtualenv)::
+
+    pip install path.py gitpython pyyaml
+
+Install from source VersionClimber::
 
     python setup.py install
-
-Source code Requirements:
-
-::
-
-    pip install ipython
-    pip install path.py
-    pip install gitpython
-    pip install pyyaml
-
-    # optional
-    pip install virtualenv
 
 
 
