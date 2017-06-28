@@ -103,7 +103,6 @@ You as the user have to do the following:
     conda create -n tutorial_vclimb python2
     source activate tutorial_vclimb
     conda install versionclimber -c openalea
-    conda install numpy scipy cython
 
 
 4. Invoke VersionClimber as follows::
@@ -114,6 +113,7 @@ You as the user have to do the following:
 Case Study 1: simple two python packages from github
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
+This case study is defined `here <> 
 To run this case study, first create a new conda environment, and install VersionClimber.
 
 Now you are ready to define a configuration file for VersionClimber.
