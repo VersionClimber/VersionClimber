@@ -48,7 +48,6 @@ Using conda on Linux, Mac or Windows
 ::
 
     conda install versionclimber -c openalea
-    python setup.py install
 
 
 Using pip
