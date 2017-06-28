@@ -114,9 +114,14 @@ Case Study 1: simple two python packages from github
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 This case study is defined `here <https://github.com/VersionClimber/VersionClimber/tree/master/example/tuto_usecase1>`_. 
-To run this case study, first create a new conda environment, and install VersionClimber.
+To run this case study, first create a new conda environment, and install VersionClimber::
 
-Now you are ready to define a configuration file for VersionClimber.
+    conda create -n tutorial_usecase1 python2
+    source activate tutorial_usecase1
+    conda install versionclimber -c openalea
+    
+
+Now you are ready to define a configuration file for VersionClimber in a directory.
 
 Classical layout of a project
 ******************************
@@ -125,8 +130,8 @@ To reproduce an execution by using VersionClimber, you will create a directory c
 Let's name this directory tutorial.
 It will contain:
 
-- **config.yaml:** the VersionClimber configuration file
-- **test_function.py:** a executable script (python file or another script) to test the validity of one configuration
+- `config.yaml <https://github.com/VersionClimber/VersionClimber/blob/master/example/tuto_usecase1/config.yaml>`_: the VersionClimber configuration file
+- `test_function.py <https://github.com/VersionClimber/VersionClimber/blob/master/example/tuto_usecase1/test_function.py>`_: a executable script (python file or another script) to test the validity of one configuration
 
 Definition of a simple configuration file
 *****************************************
