@@ -91,21 +91,16 @@ Documentation
 
 You as the user have to do the following:
 
-1. For each package in your system,
-  you have to provide access to the versions you want VersionClimber to consider
-  in conda.
-
-  VersionClimber can build packages under **git** or **subversion**.
-
-  VersionClimber can consider also **binary** packages released on public repository such as `PyPi <https://pypi.python.org/pypi>`_ or       `conda-forge <https://conda-forge.github.io/>`_.
-
-  The versions of a package are formed by all the commits on *git* or *svn*. 
-  However, if the package have been released and versionned with `Semantic Versionning <http://semver.org/>`_, these tags can be retrieve   and version can be explored hierarchically.
+1. For each package in your system, you have to provide access to the versions you want VersionClimber to consider in conda.
+    VersionClimber can build packages under **git** or **subversion**.
+    VersionClimber can consider also **binary** packages released on public repository such as `PyPi <https://pypi.python.org/pypi>`_ or       `conda-forge <https://conda-forge.github.io/>`_.
+    
+    The versions of a package are formed by all the commits on *git* or *svn*. 
+    However, if the package have been released and versionned with `Semantic Versionning <http://semver.org/>`_, these tags can be 
+    retrieve and version can be explored hierarchically.
 
 
-2. Order the packages from highest priority to lowest where more recent
-  versions of higher priority packages are preferred over more recent
-  versions of lower priority ones.
+2. Order the packages from highest priority to lowest where more recent versions of higher priority packages are preferred over more recent versions of lower priority ones.
 
 
 3. Installing VersionClimber as follows ::
@@ -170,6 +165,7 @@ The configuration file `config.yaml <https://github.com/VersionClimber/VersionCl
 
 
 It is divided into two sections, namely **packages** and **run**:
+
 - **packages:** list the different packages, their location (e.g. git repository), how to build them and which git commit or tags will be considered (in hierarchy, as explained below).
 - **run:** indicate how to test the different packages together to know if one combination is valid. Typically (as in this example), this will be the name of a driver file.
 
@@ -195,14 +191,14 @@ If *hierarchy* is `major`, `minor`, or `patch`, the versions of the tags will be
 Run command in *config.yaml*
 ****************************
 
-This is the script (usually) after run: in that file. In our example,
-`python test_function.py`
+This is the script (usually) after run: in that `file <https://github.com/VersionClimber/VersionClimber/blob/master/example/tuto11/estimate_hog.py>`_. 
+In our example `python test_function.py`.
 
 
 Invocation of VersionClimber
 ****************************
 
-vclimb -- will fetch the packages from git, retrieve all the versions, install each configuration (set of package-version pairs) suggested by the Version Climber software, then invoke the run part of the config.yaml on that installed configuration. The output is configuration that works sorted based on the priorities in config.yaml
+**vclimb** -- will fetch the packages from git, retrieve all the versions, install each configuration (set of package-version pairs) suggested by the Version Climber software, then invoke the run part of the config.yaml on that installed configuration. The output is configuration that works sorted based on the priorities in config.yaml
 
 
 If we want to vary all the main dependencies of **scikit-learn** and **scikit-image**, we can extend the config.yaml file with other packages obtained from PyPi:
@@ -272,9 +268,47 @@ You can explore the available versions using the command
 
 ::
 
-    vclimb --versions
+    vclimb -v
 
-.. TODO:: Give the output of vclimb
+    --------------------------------------------------------------------------------
+    Versions of scikit-image scikit-learn
+
+
+    Versions of  scikit-image
+    ------------------------
+    0.7.2
+    0.8.0
+    0.8.2
+    0.9.1
+    0.9.3
+    0.10.0
+    0.10.1
+    0.11.0
+    0.11.2
+    0.11.3
+    0.12.3
+    0.13.0
+
+
+    Versions of  scikit-learn
+    ------------------------
+    0.11
+    0.12.1
+    0.13
+    0.13.1
+    0.14.1
+    0.15.0
+    0.15.0b1
+    0.15.0b2
+    0.15.1
+    0.15.2
+    0.16.0
+    0.16.1
+    0.17
+    0.17.1
+    0.18
+    0.18.1
+    0.18.2
 
 Like in the previous case study, we can extend the configuration file by adding numpy and scipy packages, but installed from conda.
 ::
