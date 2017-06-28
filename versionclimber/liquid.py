@@ -622,3 +622,20 @@ class YAMLEnv(MyEnv):
 
 
         return res
+
+    def print_versions(self):
+        """ Print all the versions of the different packages."""
+
+        versions = self.commits
+
+        print "-"*80
+        pkg_names = [pkg.name for pkg in self.pkgs]
+        print "Versions of", ' '.join(pkg_names)
+        for name in pkg_names:
+            print '\n'
+            print 'Versions of ', name
+            print '-'*(12+len(name))
+            print '\n'.join(versions[name])
+
+
+
