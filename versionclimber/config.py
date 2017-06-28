@@ -22,6 +22,7 @@ class Package(object):
                  vcs='pypi',
                  url=None,
                  cmd='pip install -U',
+                 build_cmd=None,
                  version=None,
                  conda=False,
                  recipe=None,
@@ -32,6 +33,7 @@ class Package(object):
         self.vcs = vcs
         self.url = url
         self.cmd = cmd
+        self.build_cmd = build_cmd
         self.version = version
         self.hierarchy = hierarchy
         self.conda = bool(conda)
@@ -186,13 +188,19 @@ class Package(object):
             cmd = '%s %s' % (self.cmd, pkg_path)
 
             if self.conda:
-                cmd = 'conda build %s %s'%(channels, self.recipe_dir)
+                cmd_list = [self.build_cmd]
+                cmd_list.append(channels)
+                cmd_list.append(self.recipe_dir)
+                build_cmd = ' '.join(cmd_list)
+
                 status = sh(cmd)
                 if status:
                     return status
 
                 _version = self.get_version(commit, version=version)
                 cmd = 'conda install -y --use-local %s=%s'%(self.name, _version)
+                cmd = '%s -y %s %s=%s'%(self.cmd, channels, self.name, _version)
+
         status = sh(cmd)
         return status
 

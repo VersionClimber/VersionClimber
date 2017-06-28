@@ -21,6 +21,10 @@ vclimb traverse the versions of the packages and get the optimal one.
 Example
 
        vclimb --conf config.yaml --log vclimb.log
+
+vclimb can also print all the versions of the packages
+
+        vclimb --conf config.yaml  --version
 """
 
     parser = OptionParser(usage=usage)
@@ -29,6 +33,8 @@ Example
         help="YAML configuration file")
     parser.add_option("--log", dest='log_file', default='versionclimber.log',
         help="Store logging information in this file")
+    parser.add_option("-v", "--version", action="store_true", dest="version", default=False,
+        help="Print versions of all packages")
 
     (opts, args)= parser.parse_args()
 
@@ -36,14 +42,18 @@ Example
     if opts.config == None:
         raise ValueError("""--conf must be provided. See help (--help)""")
 
-
-    liquidparser.start_logging(opts.log_file)
+    if not opts.version:
+        liquidparser.start_logging(opts.log_file)
 
     env = liquid.YAMLEnv(opts.config)
-    solutions = env.run(liquidparser)
 
-    print('\n' * 3)
-    print('Solution is:')
-    for sol in solutions:
-        print(sol)
+    print 'version ', opts.version
+    if not opts.version:
+        solutions = env.run(liquidparser)
 
+        print('\n' * 3)
+        print('Solution is:')
+        for sol in solutions:
+            print(sol)
+    else:
+        env.print_versions()
