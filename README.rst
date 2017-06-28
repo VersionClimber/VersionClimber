@@ -16,10 +16,10 @@ About
 Description
 +++++++++++
 
-Version Climber is a system for package evolution for Data Science.
+Version Climber is a system primarily aimed at Data Scientists to make package evolution efficient and automatic.
 
 VersionClimber will help you upgrade a multi-package software
-system to a version that works.
+system to a configuration that works.
 
 
 Content
@@ -92,13 +92,13 @@ You as the user have to do the following:
     
     The versions of a package are formed by all the commits on *git* or *svn*. 
     However, if the package have been released and versionned with `Semantic Versionning <http://semver.org/>`_, these tags can be 
-    retrieve and version can be explored hierarchically.
+    retrieve and versions can be explored hierarchically.
 
 
 2. Order the packages from highest priority to lowest where more recent versions of higher priority packages are preferred over more recent versions of lower priority ones.
 
 
-3. Installing VersionClimber as follows ::
+3. Install VersionClimber as follows ::
 
     conda create -n tutorial_vclimb python2
     source activate tutorial_vclimb
@@ -135,7 +135,7 @@ VersionClimber uses the declarative configuration file to indicate which package
 
 In this section you are going to define a configuration file that uses two well-knowned scientific Python packages, namely Scikit-Learn and Scikit-Image.
 
-The configuration file `config.yaml <https://github.com/VersionClimber/VersionClimber/blob/conda/example/tuto11/config.yaml>`_ is as follow (here scikit-image has a higher priority than scikit-learn because scikit-image comes first):
+The configuration file `config.yaml <https://github.com/VersionClimber/VersionClimber/blob/conda/example/tuto11/config.yaml>`_ is as follow (in this example, scikit-image has a higher priority than scikit-learn so scikit-image is first):
 
 ::
 
@@ -258,7 +258,7 @@ but conda binary versions of the packages will be assemble rather than building 
     run:
         - python test_function.py
 
-In this example, the set of versions of each package is retrieve from anaconda default channel and the conda-forge (ref TODO) one.
+In this example, the set of versions of each package is retrieved from anaconda default channel and the conda-forge (ref TODO) one.
 You can explore the available versions using the command
 
 ::
@@ -305,7 +305,7 @@ You can explore the available versions using the command
     0.18.1
     0.18.2
 
-Like in the previous case study, we can extend the configuration file by adding numpy and scipy packages, but installed from conda.
+As in the previous case study, we can extend the configuration file by adding numpy and scipy packages, but installed from conda.
 ::
 
     packages:
