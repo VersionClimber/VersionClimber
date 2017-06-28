@@ -92,20 +92,20 @@ Documentation
 You as the user have to do the following:
 
 1. For each package in your system,
-you have to provide access to the versions you want VersionClimber to consider
-in conda.
+  you have to provide access to the versions you want VersionClimber to consider
+  in conda.
 
-VersionClimber can build packages under **git** or **subversion**.
+  VersionClimber can build packages under **git** or **subversion**.
 
-VersionClimber can consider also **binary** packages released on public repository such as `PyPi <https://pypi.python.org/pypi>`_ or `conda-forge <https://conda-forge.github.io/>`_.
+  VersionClimber can consider also **binary** packages released on public repository such as `PyPi <https://pypi.python.org/pypi>`_ or       `conda-forge <https://conda-forge.github.io/>`_.
 
-The versions of a package are formed by all the commits on *git* or *svn*. 
-However, if the package have been released and versionned with `Semantic Versionning <http://semver.org/>`_, these tags can be retrieve and version can be explored hierarchically.
+  The versions of a package are formed by all the commits on *git* or *svn*. 
+  However, if the package have been released and versionned with `Semantic Versionning <http://semver.org/>`_, these tags can be retrieve   and version can be explored hierarchically.
 
 
 2. Order the packages from highest priority to lowest where more recent
-versions of higher priority packages are preferred over more recent
-versions of lower priority ones.
+  versions of higher priority packages are preferred over more recent
+  versions of lower priority ones.
 
 
 3. Installing VersionClimber as follows ::
