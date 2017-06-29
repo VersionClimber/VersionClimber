@@ -195,8 +195,7 @@ Run command in *config.yaml*
 
 This is the script (usually) after run: in that `file  <https://github.com/VersionClimber/VersionClimber/blob/master/example/tuto_usecase1/test_function.py>`_
 
-This script (*test_function.py*) aims at estimating a classifier from the MNIST database of handwritten digits
-to recognise using scikit-learn hand-written digits.
+This script (*test_function.py*) extract HOG features of each digits of the MNIST database of handwritten digits using scikit-image and train a Linear SVM classifier to recognise hand-written digits.
 
 
 Invocation of VersionClimber
