@@ -100,7 +100,7 @@ You as the user have to do the following:
 
 3. Install VersionClimber as follows ::
 
-    conda create -n tutorial_vclimb python2
+    conda create -n tutorial_vclimb python=2
     source activate tutorial_vclimb
     conda install versionclimber -c openalea
 
