@@ -116,9 +116,10 @@ Case Study 1: simple two python packages from github
 This case study is defined `here <https://github.com/VersionClimber/VersionClimber/tree/master/example/tuto_usecase1>`_. 
 To run this case study, first create a new conda environment, and install VersionClimber::
 
-    conda create -n tutorial_usecase1 python=2
+    conda create -n tutorial_usecase1 python=2 -y
     source activate tutorial_usecase1
-    conda install versionclimber -c openalea
+    conda install versionclimber -c openalea -y
+    conda install numpy scipy cython -y
     
 
 Now you are ready to define a configuration file for VersionClimber in a directory.
@@ -140,7 +141,7 @@ VersionClimber uses the declarative configuration file to indicate which package
 
 In this section you are going to define a configuration file that uses two well-knowned scientific Python packages, namely Scikit-Learn and Scikit-Image.
 
-The configuration file `config.yaml <https://github.com/VersionClimber/VersionClimber/blob/conda/example/tuto11/config.yaml>`_ is as follow (in this example, scikit-image has a higher priority than scikit-learn so scikit-image is first):
+The configuration file `config.yaml <https://github.com/VersionClimber/VersionClimber/blob/master/example/tuto_usecase1/config.yaml>`_ is as follow (in this example, scikit-image has a higher priority than scikit-learn so scikit-image is first):
 
 ::
 
