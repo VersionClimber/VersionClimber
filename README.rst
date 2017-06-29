@@ -116,7 +116,7 @@ Case Study 1: simple two python packages from github
 This case study is defined `here <https://github.com/VersionClimber/VersionClimber/tree/master/example/tuto_usecase1>`_. 
 To run this case study, first create a new conda environment, and install VersionClimber::
 
-    conda create -n tutorial_usecase1 python2
+    conda create -n tutorial_usecase1 python=2
     source activate tutorial_usecase1
     conda install versionclimber -c openalea
     
