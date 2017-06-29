@@ -120,7 +120,7 @@ To run this case study, first create a new conda environment, and install Versio
     
 We also install dependencies that are needed for building our simple example ::
 
-    conda install numpy scipy cython -y
+    conda install numpy scipy cython six -y
     
 
 Now you are ready to define a configuration file for VersionClimber in a directory.
