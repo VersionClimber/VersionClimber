@@ -99,9 +99,7 @@ You as the user have to do the following:
 
 
 3. Install VersionClimber as follows ::
-
-    conda create -n tutorial_vclimb python=2
-    source activate tutorial_vclimb
+    # In a conda environment
     conda install versionclimber -c openalea
 
 
@@ -119,6 +117,9 @@ To run this case study, first create a new conda environment, and install Versio
     conda create -n tutorial_usecase1 python=2 -y
     source activate tutorial_usecase1
     conda install versionclimber -c openalea -y
+    
+We also install dependencies that are needed for building our simple example ::
+
     conda install numpy scipy cython -y
     
 
@@ -192,8 +193,10 @@ If *hierarchy* is `major`, `minor`, or `patch`, the versions of the tags will be
 Run command in *config.yaml*
 ****************************
 
-This is the script (usually) after run: in that `file <https://github.com/VersionClimber/VersionClimber/blob/master/example/tuto11/estimate_hog.py>`_. 
-In our example `python test_function.py`.
+This is the script (usually) after run: in that `file  <https://github.com/VersionClimber/VersionClimber/blob/master/example/tuto_usecase1/test_function.py>`_
+
+This script (*test_function.py*) aims at estimating a classifier from the MNIST database of handwritten digits
+to recognise using scikit-learn hand-written digits.
 
 
 Invocation of VersionClimber
