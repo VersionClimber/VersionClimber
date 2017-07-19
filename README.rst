@@ -243,8 +243,8 @@ All the minor versions of numpy and scipy will be considered (0.19, 0.18, ...). 
 Case Study 2: simple two packages both in python from conda
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-In this example, we consider the same packages that in the previous case study (i.e. scikits-learn and scikit-image),
-but conda binary versions of the packages will be assemble rather than building the packages from github.
+In this example, we consider the same packages that in the previous case study (i.e. scikit-learn and scikit-image),
+but conda binary versions of the packages will be assembled rather than building the packages from github.
 
 ::
 
@@ -352,7 +352,7 @@ As in the previous case study, we can extend the configuration file by adding nu
 Case Study 3: OpenAlea
 +++++++++++++++++++++++++
 
-In this case study, we want to found a valid configurationof various packages from OpenAlea, a scientific project developed to study multiscale plant modelling.
+In this case study, we want to find a valid configuration of various packages from OpenAlea, a scientific project developed to study multiscale plant modeling.
 
 Packages in OpenAlea are implemented in different languages (mainly, C++, Python and R).
 First, we will consider PlantGL (ref TODO), a large 3D C++ library with various dependencies.
@@ -361,7 +361,7 @@ Then we will explore an example obtained from the combina
 
 
 What happens?
-    - First, the different packages are checkout in the folder ``.vclimb``
+    - First, the different packages are checked out in the folder ``.vclimb``
     - Then, all the package versions are retrieved from git, PyPi or svn
     - The cmd (run) is tested on several configurations (combinations of packages)
     - The log is written in a file names versionclimber.log
