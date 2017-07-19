@@ -91,8 +91,8 @@ You as the user have to do the following:
     VersionClimber can consider also **binary** packages released on public repository such as `PyPi <https://pypi.python.org/pypi>`_ or       `conda-forge <https://conda-forge.github.io/>`_.
     
     The versions of a package are formed by all the commits on *git* or *svn*. 
-    However, if the package have been released and versionned with `Semantic Versionning <http://semver.org/>`_, these tags can be 
-    retrieve and versions can be explored hierarchically.
+    However, if the package have been released and versioned with `Semantic Versioning <http://semver.org/>`_, these tags can be 
+    retrieved and versions can be explored hierarchically.
 
 
 2. Order the packages from highest priority to lowest where more recent versions of higher priority packages are preferred over more recent versions of lower priority ones.
@@ -108,7 +108,7 @@ You as the user have to do the following:
     vclimb
 
 
-Case Study 1: simple two python packages from github
+Case Study 1:  two python packages from github
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 This case study is defined `here <https://github.com/VersionClimber/VersionClimber/tree/master/example/tuto_usecase1>`_. 
@@ -142,7 +142,7 @@ VersionClimber uses the declarative configuration file to indicate which package
 
 In this section you are going to define a configuration file that uses two well-knowned scientific Python packages, namely Scikit-Learn and Scikit-Image.
 
-The configuration file `config.yaml <https://github.com/VersionClimber/VersionClimber/blob/master/example/tuto_usecase1/config.yaml>`_ is as follow (in this example, scikit-image has a higher priority than scikit-learn so scikit-image is first):
+The configuration file `config.yaml <https://github.com/VersionClimber/VersionClimber/blob/master/example/tuto_usecase1/config.yaml>`_ is as follows (in this example, scikit-image has a higher priority than scikit-learn so scikit-image is first):
 
 ::
 
