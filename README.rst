@@ -92,16 +92,14 @@ You as the user have to do the following:
 
     The versions of a package are formed by all the commits on *git* or *svn*.
     However, if the package have been released and versionned with `Semantic Versionning <http://semver.org/>`_, these tags can be
-    retrieve and versions can be explored hierarchically.
+    retrieve and versions
 
 
 2. Order the packages from highest priority to lowest where more recent versions of higher priority packages are preferred over more recent versions of lower priority ones.
 
 
 3. Install VersionClimber as follows ::
-
-    conda create -n tutorial_vclimb python2
-    source activate tutorial_vclimb
+    # In a conda environment
     conda install versionclimber -c openalea
 
 
@@ -110,19 +108,19 @@ You as the user have to do the following:
     vclimb
 
 
-Case Study 1: simple two python packages from github
+Case Study 1:  two python packages from github
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 This case study is defined `here <https://github.com/VersionClimber/VersionClimber/tree/master/example/tuto_usecase1>`_.
 To run this case study, first create a new conda environment, and install VersionClimber::
 
-    conda create -n tutorial_usecase1 python2
+    conda create -n tutorial_usecase1 python=2 -y
     source activate tutorial_usecase1
-    conda install versionclimber -c openalea
+    conda install versionclimber -c openalea -y
 
-We install also some dependencies we want to fix, such as NumPy, SciPy and Cython::
+We install also some dependencies we want to fix, such as NumPy, SciPy, Cython and six::
 
-    conda install numpy scipy cython
+    conda install numpy scipy cython six -y
 
 
 Now you are ready to define a configuration file for VersionClimber in a directory.
@@ -144,7 +142,7 @@ VersionClimber uses the declarative configuration file to indicate which package
 
 In this section you are going to define a configuration file that uses two well-knowned scientific Python packages, namely Scikit-Learn and Scikit-Image.
 
-The configuration file `config.yaml <https://github.com/VersionClimber/VersionClimber/blob/conda/example/tuto11/config.yaml>`_ is as follow (in this example, scikit-image has a higher priority than scikit-learn so scikit-image is first):
+The configuration file `config.yaml <https://github.com/VersionClimber/VersionClimber/blob/master/example/tuto_usecase1/config.yaml>`_ is as follows (in this example, scikit-image has a higher priority than scikit-learn so scikit-image is first):
 
 ::
 
@@ -195,8 +193,9 @@ If *hierarchy* is `major`, `minor`, or `patch`, the versions of the tags will be
 Run command in *config.yaml*
 ****************************
 
-This is the script (usually) after run: in that `file <https://github.com/VersionClimber/VersionClimber/blob/master/example/tuto11/estimate_hog.py>`_.
-In our example `python test_function.py`.
+This is the script (usually) after run: in that `file  <https://github.com/VersionClimber/VersionClimber/blob/master/example/tuto_usecase1/test_function.py>`_
+
+This script (*test_function.py*) extract HOG features of each digits of the MNIST database of handwritten digits using scikit-image and train a Linear SVM classifier to recognise hand-written digits.
 
 
 Invocation of VersionClimber
@@ -244,8 +243,8 @@ All the minor versions of numpy and scipy will be considered (0.19, 0.18, ...). 
 Case Study 2: simple two packages both in python from conda
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-In this example, we consider the same packages that in the previous case study (i.e. scikits-learn and scikit-image),
-but conda binary versions of the packages will be assemble rather than building the packages from github.
+In this example, we consider the same packages that in the previous case study (i.e. scikit-learn and scikit-image),
+but conda binary versions of the packages will be assembled rather than building the packages from github.
 
 ::
 
@@ -353,7 +352,7 @@ As in the previous case study, we can extend the configuration file by adding nu
 Case Study 3: OpenAlea
 +++++++++++++++++++++++++
 
-In this case study, we want to found a valid configurationof various packages from OpenAlea, a scientific project developed to study multiscale plant modelling.
+In this case study, we want to find a valid configuration of various packages from OpenAlea, a scientific project developed to study multiscale plant modeling.
 
 Packages in OpenAlea are implemented in different languages (mainly, C++, Python and R).
 First, we will consider PlantGL (ref TODO), a large 3D C++ library with various dependencies.
@@ -362,7 +361,7 @@ Then we will explore an example obtained from the combina
 
 
 What happens?
-    - First, the different packages are checkout in the folder ``.vclimb``
+    - First, the different packages are checked out in the folder ``.vclimb``
     - Then, all the package versions are retrieved from git, PyPi or svn
     - The cmd (run) is tested on several configurations (combinations of packages)
     - The log is written in a file names versionclimber.log

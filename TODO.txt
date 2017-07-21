@@ -1,5 +1,0 @@
-This file can be used to document future development
-
- * document the Sconstruct file of the VFlexQL package
- * add a build_cmd in the config.py for building conda packages (create an issue).
- * add documentation to save an environment (conda export)
