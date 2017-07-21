@@ -63,7 +63,7 @@ From the source code
 Source code Requirements (conda env)::
 
     conda install path.py gitpython pyyaml
-    
+
 or (in a virtualenv)::
 
     pip install path.py gitpython pyyaml
@@ -89,9 +89,9 @@ You as the user have to do the following:
 1. For each package in your system, you have to provide access to the versions you want VersionClimber to consider in conda.
     VersionClimber can build packages under **git** or **subversion**.
     VersionClimber can consider also **binary** packages released on public repository such as `PyPi <https://pypi.python.org/pypi>`_ or       `conda-forge <https://conda-forge.github.io/>`_.
-    
-    The versions of a package are formed by all the commits on *git* or *svn*. 
-    However, if the package have been released and versionned with `Semantic Versionning <http://semver.org/>`_, these tags can be 
+
+    The versions of a package are formed by all the commits on *git* or *svn*.
+    However, if the package have been released and versionned with `Semantic Versionning <http://semver.org/>`_, these tags can be
     retrieve and versions can be explored hierarchically.
 
 
@@ -113,13 +113,17 @@ You as the user have to do the following:
 Case Study 1: simple two python packages from github
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-This case study is defined `here <https://github.com/VersionClimber/VersionClimber/tree/master/example/tuto_usecase1>`_. 
+This case study is defined `here <https://github.com/VersionClimber/VersionClimber/tree/master/example/tuto_usecase1>`_.
 To run this case study, first create a new conda environment, and install VersionClimber::
 
     conda create -n tutorial_usecase1 python2
     source activate tutorial_usecase1
     conda install versionclimber -c openalea
-    
+
+We install also some dependencies we want to fix, such as NumPy, SciPy and Cython::
+
+    conda install numpy scipy cython
+
 
 Now you are ready to define a configuration file for VersionClimber in a directory.
 
@@ -191,7 +195,7 @@ If *hierarchy* is `major`, `minor`, or `patch`, the versions of the tags will be
 Run command in *config.yaml*
 ****************************
 
-This is the script (usually) after run: in that `file <https://github.com/VersionClimber/VersionClimber/blob/master/example/tuto11/estimate_hog.py>`_. 
+This is the script (usually) after run: in that `file <https://github.com/VersionClimber/VersionClimber/blob/master/example/tuto11/estimate_hog.py>`_.
 In our example `python test_function.py`.
 
 
