@@ -5,9 +5,8 @@ This file can be used to document future development
    * Extend VersionClimber configuration with pre and post steps
 
 Add **post-install step** that construct from the winning configuration:
-  - A docker file
-  - reprozip image
-  - mac app (only with conda)
+  - conda export environment -> mac app (conda) 
+  - A docker file: trace the different steps to obtain a given configuration
   
 **Documentation**
 - Sphinx (use pkglts)
