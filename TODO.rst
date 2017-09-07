@@ -16,4 +16,4 @@ Add **post-install step** that construct from the winning configuration:
 **Use template using conda build 3**
  - https://www.continuum.io/blog/developer-blog/package-better-conda-build-3
  
-
+**Panta example**
