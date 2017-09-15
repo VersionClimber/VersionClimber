@@ -431,7 +431,11 @@ class YAMLEnv(MyEnv):
 
     """
     def __init__(self, config_file):
-        self.pkgs, self.cmd = load_config(config_file)
+        config = load_config(config_file)
+        self.pkgs = config['packages']
+        self.cmd = config['run']
+        self.pre_stage = config['pre']
+        self.post_stage = config['post']
 
         if isinstance(self.cmd, list):
             self.cmd = self.cmd[0]
@@ -609,11 +613,17 @@ class YAMLEnv(MyEnv):
     def run(self, liquidparser):
         constraints, todolist = self.monkey_patch(liquidparser)
 
+        if self.pre_stage:
+            status = sh(self.pre_stage)
+
         try:
             endconfig = liquidparser.liquidclimber(constraints, todolist)
             # print liquidparser.memory
         finally:
             self.restore()
+
+        if self.post_stage:
+            status = sh(self.post_stage)
 
         res = []
         for k, v in endconfig.iteritems():
