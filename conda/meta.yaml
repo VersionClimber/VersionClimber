@@ -35,7 +35,7 @@ test:
     - vclimb --help
 
 about:
-  home: http://hdfscli.readthedocs.org
+  home: https://github.com/VersionClimber/VersionClimber
   license: Cecill-C
   summary: 'Version Climber is a system for package evolution for Data Science.'
 
