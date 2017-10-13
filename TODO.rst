@@ -17,3 +17,13 @@ Add **post-install step** that construct from the winning configuration:
  - https://www.continuum.io/blog/developer-blog/package-better-conda-build-3
  
 **Panta example**
+
+Roadmap
+
+27/10
+  - travis and version climber
+  - infraphenogrid:
+    - matplotlib
+    - openalea
+    - openalea-components
+
