@@ -43,5 +43,5 @@ before_script:
 
   - conda install -c conda-forge nose
 
-#script:
-#  - nosetests
+script:
+  - nosetests
