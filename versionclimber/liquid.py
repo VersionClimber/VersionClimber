@@ -623,6 +623,7 @@ class YAMLEnv(MyEnv):
             self.restore()
 
         if self.post_stage:
+            # Activate the last configuration that works and then run the postb step.
             status = sh(self.post_stage)
 
         res = []
