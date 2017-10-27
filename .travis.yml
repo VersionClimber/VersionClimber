@@ -45,4 +45,6 @@ before_script:
   - conda install -c conda-forge nose
 
 script:
-  - nosetests
+  - cd example/tuto11
+  - vclimb -h
+  - vclimb
