@@ -1,3 +1,6 @@
+.. image:: https://travis-ci.org/VersionClimber/VersionClimber.svg.svg?branch=master
+    :target: https://travis-ci.org/VersionClimber/VersionClimber
+
 VersionClimber
 ==============
 
