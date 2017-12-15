@@ -229,6 +229,7 @@ def load_config(yaml_filename):
 
     TODO: manage errors
     """
+    config = {}
     f = open(yaml_filename)
     stream = f.read()
 
@@ -239,7 +240,13 @@ def load_config(yaml_filename):
         packages.append(Package(**pkg))
 
     run_cmd = data.get('run')
-    return packages, run_cmd
+
+    config['packages'] = packages
+    config['run'] = run_cmd
+    config['pre'] = data.get('pre')
+    config['post'] = data.get('post')
+
+    return config
 
 #if __name__ == '__main__':
 #    load_config('../examples/config.yaml')
