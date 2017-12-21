@@ -1,5 +1,7 @@
 """Script to run versionclimber from a configuration file."""
 
+from __future__ import absolute_import
+from __future__ import print_function
 import sys
 import os
 from optparse import OptionParser
@@ -47,11 +49,11 @@ vclimb can also print all the versions of the packages
 
     env = liquid.YAMLEnv(opts.config)
 
-    print 'version ', opts.version
+    print('version ', opts.version)
     if not opts.version:
         solutions = env.run(liquidparser)
 
-        print('\n' * 3)
+        print(('\n' * 3))
         print('Solution is:')
         for sol in solutions:
             print(sol)
