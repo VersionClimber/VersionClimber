@@ -1,5 +1,6 @@
 """ Test version recovery of Scikit.Learn and Scikit.Image """
 
+from __future__ import absolute_import
 from versionclimber import utils
 
 

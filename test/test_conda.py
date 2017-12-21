@@ -1,5 +1,6 @@
-""" Test version recovery of Scikit.Learn and Scikit.Image on conda"""
+"""Test version recovery of Scikit.Learn and Scikit.Image on conda."""
 
+from __future__ import absolute_import
 from versionclimber import utils
 
 
@@ -7,7 +8,6 @@ def test_sklearn():
     versions = utils.conda_versions('scikit-learn')
     assert versions[0] == '0.11'
     assert len(versions) >= 16
-
 
 
 def test_skimage():
