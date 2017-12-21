@@ -13,6 +13,9 @@ VersionClimber
 **License** : Cecill-C
 
 
+:Release: |release|
+:Date: |today|
+
 About
 -----
 
@@ -25,10 +28,6 @@ VersionClimber will help you upgrade a multi-package software
 system to a configuration that works.
 
 
-Content
-+++++++
-
-The Version Climber package contains :
 
 
 Installation
@@ -36,7 +35,7 @@ Installation
 
 
 .. toctree::
-    :maxdepth: 3
+    :maxdepth: 2
 
    ./source/install/index.rst
 
@@ -46,7 +45,7 @@ Tutorials
 
 
 .. toctree::
-    :maxdepth: 3
+    :maxdepth: 2
 
     ./source/tutorial/index.rst
 
@@ -55,7 +54,7 @@ User Documentation
 ------------------
 
 .. toctree::
-    :maxdepth: 3
+    :maxdepth: 2
 
     ./source/doc/index.rst
 
@@ -64,7 +63,7 @@ Developper Documentation
 ------------------------
 
 .. toctree::
-    :maxdepth: 3
+    :maxdepth: 2
 
     ./source/references/index.rst
 

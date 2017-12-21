@@ -1,5 +1,5 @@
-Use Cases
-==========
+.. Use Cases
+
 
 :Release: |release|
 :Date: |today|
@@ -8,5 +8,5 @@ Use Cases
 .. toctree::
 
     case1.rst
-..    case2.rst
+    case2.rst
 ..    case3.rst
