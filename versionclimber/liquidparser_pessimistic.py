@@ -164,6 +164,8 @@
 
 
 
+from __future__ import absolute_import
+from __future__ import print_function
 import sys
 import math
 import csv
@@ -176,6 +178,7 @@ import collections
 import datetime
 import random
 from operator import itemgetter, attrgetter
+import six
 sys.setrecursionlimit(30000) 
 
 
@@ -271,13 +274,13 @@ def cudftest(packver1, packver2):
 # Given a new package-version pair newpackver,
 # is it compatible with the ones that are already there?
 def decidepackage(historyofpackversions, newpackver):
-   print "decidepackage: historyofpackversions, newpackver:", historyofpackversions, newpackver
+   print("decidepackage: historyofpackversions, newpackver:", historyofpackversions, newpackver)
    if 0 == len(historyofpackversions):
 	return [True, newpackver[0]]
    h = historyofpackversions[-1] # only worry about the very last one
    if compatible(h, newpackver) == False: # ??? Changed for CUDF
    # if cudftest(h, newpackver) == False:
-	print "decidepackage: call for config from ", h, " to ", newpackver, " has return value False."
+	print("decidepackage: call for config from ", h, " to ", newpackver, " has return value False.")
 	return [False, h[0]]
    else:
 	# print "decidepackage: call on compatible from ", h, " to ", newpackver, " has return value True."
@@ -292,8 +295,8 @@ def works(listofpackversions):
 	if x[0]:
 		history.append([p,listofpackversions[p]])
 	else:
-		print "  Success up to: ", history
-		print "  Failure on: ", p, listofpackversions[p]
+		print("  Success up to: ", history)
+		print("  Failure on: ", p, listofpackversions[p])
 		if knowcaller:
 			return [False, 0, p, x[1]] 
 		else: # if you know callee then state it, but if not, can replace p by -1
@@ -310,16 +313,16 @@ def works(listofpackversions):
 # successful that is identical to current in pack-ver except in P.
 def findminimalpair(P, currentconf):
    i = 0
-   print "findminimal currentconf: ", currentconf
-   print "  findminimal P: ", P
+   print("findminimal currentconf: ", currentconf)
+   print("  findminimal P: ", P)
    while i < len(successful):
       s = successful[i]
-      print "  findminimal s: ", s
+      print("  findminimal s: ", s)
       flag = True
       for c in currentconf:
         if (not c == P) and (not currentconf[c] == s[c]):
              flag = False # no minmal pair
-      print "  findminimal flag: ", flag
+      print("  findminimal flag: ", flag)
       if flag:
         return True
       i+= 1
@@ -328,9 +331,9 @@ def findminimalpair(P, currentconf):
 # filter the source based on constraints and output the result
 def filtermap(sourcemap, constraints):
 	out = {}
-	for s in sourcemap.viewkeys():
+	for s in six.viewkeys(sourcemap):
 		vals = sourcemap[s]
-		if s in constraints.viewkeys():
+		if s in six.viewkeys(constraints):
 			vals = [v for v in vals if (v >= constraints[s][0]) and (v <= constraints[s][1])]
 		out[s] = copy.deepcopy(vals)
 	return out
@@ -381,18 +384,18 @@ def memorydecidepackage(historyofpackversions, newpackver):
    if 0 == len(historyofpackversions):
 	return [True, newpackver[0]]
    for h in historyofpackversions:
-	if flatten(h) in memory.viewkeys():
+	if flatten(h) in six.viewkeys(memory):
 	   if newpackver in memory[flatten(h)]:
-		print "memorydecidepackage: memory call from  ", h, " to ", newpackver, " has return value False."
+		print("memorydecidepackage: memory call from  ", h, " to ", newpackver, " has return value False.")
 		return [False, h[0]]
 	   else:
-		print "memorydecidepackage: memory call from  ", h, " to ", newpackver, " has return value True."
-   print "+++ memorydecidepackage -- position 2"
+		print("memorydecidepackage: memory call from  ", h, " to ", newpackver, " has return value True.")
+   print("+++ memorydecidepackage -- position 2")
    h = historyofpackversions[-1]
    x = flatten([h[0], newpackver[0]])
-   if x in axiom.viewkeys():
+   if x in six.viewkeys(axiom):
 	if testaxiom(axiom[x], h, newpackver):
-		print "axiom call for  ", h, " with ", newpackver, " has return value False because of ", axiom[x]
+		print("axiom call for  ", h, " with ", newpackver, " has return value False because of ", axiom[x])
 		return [False, h[0]]
    return [True, newpackver[0]]
 
@@ -426,7 +429,7 @@ def inconfigfail(newconfig, listofconfigs_packs):
 # version are in memory
 def inmem(callpackver, calleepackver, memory):
    x = flatten(callpackver)
-   if x not in memory.viewkeys():
+   if x not in six.viewkeys(memory):
 	return False
    for e in memory[x]:
 	if ((e[0] == calleepackver[0]) and (e[1] == calleepackver[1])):
@@ -452,36 +455,36 @@ def inmemstrong(callpackver, calleepackver, strongmemory):
 # when possible
 # and return a True indicating we DID a real execution.
 def checkworks(listofpackversions, latestpackchanged):
-   print "--- checkworks listofpackversions, lastpackchanged:", listofpackversions, latestpackchanged
+   print("--- checkworks listofpackversions, lastpackchanged:", listofpackversions, latestpackchanged)
    if inconfig(listofpackversions, successful):
-	print "listofpackversions: ", listofpackversions
-	print "matching successful run: ", listofpackversions
+	print("listofpackversions: ", listofpackversions)
+	print("matching successful run: ", listofpackversions)
 	return [True, -1, -1, False] # already good. Didn't execute
    zz = inconfigfail(listofpackversions, failedconfigs)
    if zz[0]:
-	print "listofpackversions: ", listofpackversions
-	print "matching failedconfigs run: ", listofpackversions
+	print("listofpackversions: ", listofpackversions)
+	print("matching failedconfigs run: ", listofpackversions)
 	return [False, zz[1], zz[2], False] # already known to be bad. Didn't execute
    for x in listofpackversions:
 	if x in nocompile:
-		print "this pack-version doesn't compile:", x
+		print("this pack-version doesn't compile:", x)
 		return [False, x[0], x[0], False] # doesn't compile
    history = []
    for p in listofpackversions:
-   	print "--- checkworks package before : ", history, p
+   	print("--- checkworks package before : ", history, p)
 	x = memorydecidepackage(history, [p,listofpackversions[p]])
-   	print "--- checkworks package after : ", p
+   	print("--- checkworks package after : ", p)
 	if x[0]:
 		history.append([p,listofpackversions[p]])
 	else:
-		print "Have avoided an execution."
+		print("Have avoided an execution.")
 		return [False, p, x[1], False]
    # using memory did not exclude the possibility that this would work
    x = works(listofpackversions)
-   print "Tested configuration in works: ", listofpackversions
+   print("Tested configuration in works: ", listofpackversions)
    y = copy.deepcopy(listofpackversions)
    if (x[0]):
-   	print "  Test successful!"
+   	print("  Test successful!")
    	successful.append(y)
 	z = -1
 	return [True, -1, -1, True]
@@ -516,9 +519,9 @@ def checkworks(listofpackversions, latestpackchanged):
 def addtomemory(temp, badcallee, badcaller):
    vercallee = temp[badcallee]
    vercaller = temp[badcaller]
-   print "caller: ", badcaller, vercaller, " and callee: ", badcallee, vercallee
+   print("caller: ", badcaller, vercaller, " and callee: ", badcallee, vercallee)
    x = flatten([badcaller, vercaller])
-   if x not in memory.viewkeys():
+   if x not in six.viewkeys(memory):
 	memory[x] = []
    memory[x].append([badcallee, vercallee])
    strongmemory.append([badcaller, vercaller, badcallee, vercallee])
@@ -536,8 +539,8 @@ def hunter(searchedpackage, temp, newsourcemap, phase, previouscaller, lastpackc
    i = todolist.index(searchedpackage)
    keepfixed = todolist[:i+1] # don't change these
    packagestopush = [x for x in temp if not x in keepfixed]
-   print "hunter: packagestopush ", packagestopush
-   print "hunter: newsourcemap ", newsourcemap
+   print("hunter: packagestopush ", packagestopush)
+   print("hunter: newsourcemap ", newsourcemap)
    found = False
    temp2 = copy.deepcopy(temp)
    temp2_max = copy.deepcopy(temp2)
@@ -549,7 +552,7 @@ def hunter(searchedpackage, temp, newsourcemap, phase, previouscaller, lastpackc
    while not found:
 	returnnow = True
 	newallconfigs = copy.deepcopy(allconfigs)
-	print "hunter: newsourcemap: ", newsourcemap
+	print("hunter: newsourcemap: ", newsourcemap)
 	for c in allconfigs: 
 	 keepgoing = True
 	 while keepgoing:
@@ -571,9 +574,9 @@ def hunter(searchedpackage, temp, newsourcemap, phase, previouscaller, lastpackc
 		if temp3[p] < max(newsourcemap[p]):
 		   newver = min([v for v in newsourcemap[p] if v > temp3[p]])
 		   temp3[p] = newver
-		   print "hunter: temp3:", temp3
+		   print("hunter: temp3:", temp3)
 		   if not  inconfig(temp3,newallconfigs):
-		     print "hunter: temp3 past inconfig"
+		     print("hunter: temp3 past inconfig")
 		     returnnow = False
 		     keepgoing = True
 		     t = copy.deepcopy(temp3)
@@ -581,14 +584,14 @@ def hunter(searchedpackage, temp, newsourcemap, phase, previouscaller, lastpackc
 		     ret = checkworks(temp3, p)
 		     # print "ret is: ", ret
 		     if ret[0]:
-			print "xxx successful config: ", temp3
+			print("xxx successful config: ", temp3)
 			return temp3
 		     # elif ret[1] in packagestopush:
 			# newstack.append(ret[1])
 	allconfigs = finduniqs(newallconfigs)
 	if returnnow:
 	   return {}
-	print "xxx len(allconfigs): ", len(allconfigs)
+	print("xxx len(allconfigs): ", len(allconfigs))
 	# temp2 = copy.deepcopy(allconfigs[-1])
    return {}
 
@@ -600,14 +603,14 @@ def hunter(searchedpackage, temp, newsourcemap, phase, previouscaller, lastpackc
 # searchedpackage is the package that was pushed
 # Works well when we get caller and callee
 def trytomakework(searchedpackage, temp, newsourcemap, phase, previouscaller, lastpackchanged):
-  print "        "
-  print "+++ Within trytomakework, on configuration ", temp
+  print("        ")
+  print("+++ Within trytomakework, on configuration ", temp)
   x = checkworks(temp, lastpackchanged) 
 	# searchedpackage acts both the role of previous caller and
 	# currently changed package
 	# we simulate this now, but in general
 	# this involves the creation of a frozen virtual machine
-  print "++ Return value of: ", x
+  print("++ Return value of: ", x)
   if x[0] == False:
      badcallee = x[1] # callee
      badcaller = x[2] # caller
@@ -627,8 +630,8 @@ def trytomakework(searchedpackage, temp, newsourcemap, phase, previouscaller, la
 	posscalleeversions = [temp[badcallee]]
      else:
 	posscalleeversions = (sorted(newsourcemap[badcallee]))
-     print "calling package: ", badcaller, " with possible versions: ", posscallerversions
-     print "called package: ", badcallee, " with possible versions: ", posscalleeversions
+     print("calling package: ", badcaller, " with possible versions: ", posscallerversions)
+     print("called package: ", badcallee, " with possible versions: ", posscalleeversions)
      for c_er in posscallerversions:
      	for c_ee in posscalleeversions:
 	   if ((phase == 1) and (not inmemstrong([badcaller,c_er], [badcallee,c_ee], strongmemory))) or ((phase == 2) and (not inmem([badcaller,c_er], [badcallee,c_ee], memory))):
@@ -639,14 +642,14 @@ def trytomakework(searchedpackage, temp, newsourcemap, phase, previouscaller, la
 			lastpackchanged = badcaller
 		elif (not newtemp[badcallee] == temp[badcallee]):
 			lastpackchanged = badcallee
-  	  	print "        "
-  	  	print "+++ Within trytomakework deep, on configuration ", newtemp
-		print "inconfig(newtemp,successful):", inconfig(newtemp,successful)
-		print "inconfigfail(newtemp,failedconfigs):", inconfigfail(newtemp,failedconfigs)
+  	  	print("        ")
+  	  	print("+++ Within trytomakework deep, on configuration ", newtemp)
+		print("inconfig(newtemp,successful):", inconfig(newtemp,successful))
+		print("inconfigfail(newtemp,failedconfigs):", inconfigfail(newtemp,failedconfigs))
 		zz = inconfigfail(newtemp,failedconfigs)
 		if (not inconfig(newtemp,successful)) and (not zz[0]):
 		  x = trytomakework(searchedpackage, newtemp, newsourcemap, phase, previouscaller, lastpackchanged)
-  	  	  print "++ Return value of: ", x
+  	  	  print("++ Return value of: ", x)
 		  if 0 < len(x):
 			return x  
      return {}
@@ -669,12 +672,12 @@ def liquidclimber(constraints, todolist):
   if 0 < len(default):
     successful.append(y) # initially, we have a working configuration
   if knowcaller:
-    print "newsourcemap before monotonicity filtering: ", newsourcemap
+    print("newsourcemap before monotonicity filtering: ", newsourcemap)
     bestmonoconfig = liquidclimberworker(constraints, todolist, newsourcemap, 1)
-    print "best configuration after  monotonicity filtering: ", bestmonoconfig
+    print("best configuration after  monotonicity filtering: ", bestmonoconfig)
     newsourcemap = adjustsource(newsourcemap, bestmonoconfig, todolist)
-    print "newsourcemap after monotonicity filtering: ", newsourcemap
-    print "failed configurations: ", failedconfigs
+    print("newsourcemap after monotonicity filtering: ", newsourcemap)
+    print("failed configurations: ", failedconfigs)
   # if knowcaller is false, come straight to here
   return liquidclimberworker(constraints, todolist, newsourcemap, 2)
 
@@ -693,25 +696,25 @@ def liquidclimberworker(constraints, todolist, newsourcemap, phase):
   for m in todolist: # todolist gives the packages to maximize
 	# in descending order of priority
 	maxmyversions = max(newsourcemap[m])
-	print "liquidclimberworker: current is: ", current, "phase is: ", phase
+	print("liquidclimberworker: current is: ", current, "phase is: ", phase)
 	if (current[m] < maxmyversions):
 		versionstodo = [v for v in newsourcemap[m] if v > current[m]]
 		versionstodo.sort(reverse=True)
-		print "liquidclimberworker: package is: ",m
-		print "liquidclimberworker: versionstodo is: ",versionstodo
+		print("liquidclimberworker: package is: ",m)
+		print("liquidclimberworker: versionstodo is: ",versionstodo)
 		# versions still to try
 		found = False
 		for v in versionstodo:
 		   if not found:
-			print "liquidclimberworker pack-ver: ", m, v
+			print("liquidclimberworker pack-ver: ", m, v)
 			temp = copy.deepcopy(current)
 			temp[m] = v
 			if knowcaller:
 				ret = trytomakework(m, temp, newsourcemap, phase, m, m)
 			else:
-				print "liquidclimberworker calling hunter"
+				print("liquidclimberworker calling hunter")
 				ret = hunter(m, temp, newsourcemap, phase, m, m) # don't know the caller always
-			print "return value: ", ret, " for config: ", temp
+			print("return value: ", ret, " for config: ", temp)
 			if 0 < len(ret):
 				current = copy.deepcopy(ret) 
 				found = True
