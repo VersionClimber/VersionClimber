@@ -1,4 +1,3 @@
-===========================
 Installation with Miniconda
 ===========================
 
@@ -28,16 +27,16 @@ Version Climber install
 
     conda install -c openalea versionclimber
 
-Using **pip**
----------------
+Installation with **pip**
+==========================
 
 ::
 
     pip install git+https://github.com/VersionClimber/VersionClimber
 
 
-From the source code
----------------------
+Installation from source code
+==================================
 
 Source code Requirements (conda env)::
 
