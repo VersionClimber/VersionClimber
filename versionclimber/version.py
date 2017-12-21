@@ -1,7 +1,10 @@
 """ Version utilities
 
 """
+from __future__ import absolute_import
 from collections import OrderedDict
+from six.moves import range
+from six.moves import zip
 
 
 # Select major, minor, patch and commit versions
@@ -73,7 +76,7 @@ def hierarchical_versions(seq, type='major'):
             if ver not in _versions:
                 _versions[ver] = v
 
-    return OrderedDict(zip(reversed(_versions.keys(), _versions.values())))
+    return OrderedDict(list(zip(reversed(list(_versions.keys()), list(_versions.values())))))
 
 def majors(seq):
     return hversions(seq, type='major')
@@ -94,7 +97,7 @@ def take(seq, p):
     n = len(seq)
     step = n / (p - 1)
     values = [seq[0]]
-    indices = range(step, n - step + 1, step)[-p + 2:]
+    indices = list(range(step, n - step + 1, step))[-p + 2:]
     values.extend([seq[i] for i in indices])
     if values[-1] != seq[-1]:
         values.append(seq[-1])
