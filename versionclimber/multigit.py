@@ -3,6 +3,8 @@
 Task 3: Report the version graph for each particular package
 """
 
+from __future__ import absolute_import
+from __future__ import print_function
 import os
 import git
 try:
@@ -31,7 +33,7 @@ def versions(path):
     l.sort(key=lambda x: x[0])
     if l:
         res = zip(*l)[1]
-        print res
+        print(res)
     else:
         res = []
     return res
@@ -46,7 +48,7 @@ def tags(path):
     l.sort(key=lambda x: x[0])
     if l:
         res = zip(*l)[1]
-        print res
+        print(res)
     else:
         res = []
     return res
@@ -72,7 +74,7 @@ def test():
         (pkgs/'..').cd()
 
     _tags = tags('pkgs/scikit-learn')
-    print _tags
+    print(_tags)
 
     _versions = list(versions('pkgs/scikit-learn'))
     return _tags, _versions
