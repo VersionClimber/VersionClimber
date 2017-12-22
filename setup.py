@@ -25,7 +25,7 @@ license = 'Cecill-C'
 
 setup(
     name=name,
-    version='1.1.0',
+    version='1.2.0',
     description=description,
     long_description=long_description,
     author=authors,
