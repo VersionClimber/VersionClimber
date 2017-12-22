@@ -37,6 +37,8 @@ test:
 
   source_files:
     - test/
+    - test/config.yaml
+
   commands:
     - vclimb --help
     - nosetests
