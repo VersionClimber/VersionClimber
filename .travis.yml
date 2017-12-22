@@ -38,11 +38,12 @@ install:
   - conda install -n root conda-build
   # Install dependencies
   - conda build conda/.
-  - conda install versionclimber --use-local
+  - conda install versionclimber --use-local --channel local
 
 before_script:
 
   - conda install -c conda-forge nose
+  - conda install versionclimber --use-local --channel local
 
 script:
   - cd example/tuto11

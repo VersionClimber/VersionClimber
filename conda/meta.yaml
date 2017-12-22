@@ -11,6 +11,7 @@ build:
   number: 0
   entry_points:
     - vclimb = versionclimber.vclimb:main
+
   script: python setup.py install --single-version-externally-managed --record record.txt
 
 requirements:
@@ -26,14 +27,19 @@ requirements:
     - six
 
 test:
+  requires:
+    - nose
   imports:
     - versionclimber
     - versionclimber.utils
     - versionclimber.liquid
     - versionclimber.liquidparser
 
+  source_files:
+    - test/
   commands:
     - vclimb --help
+    - nosetests
 
 about:
   home: https://github.com/VersionClimber/VersionClimber
