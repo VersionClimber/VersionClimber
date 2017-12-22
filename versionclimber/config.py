@@ -3,6 +3,7 @@
 This module implements a Package object that can retrieve the versions and activate it at different versions.
 """
 
+from __future__ import absolute_import
 import yaml
 import logging
 

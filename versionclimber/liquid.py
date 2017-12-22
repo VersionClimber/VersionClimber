@@ -5,6 +5,8 @@ goo: master
 hoo : master
 """
 
+from __future__ import absolute_import
+from __future__ import print_function
 import itertools
 import logging
 
@@ -13,6 +15,10 @@ from .utils import sh, Path, new_stat_file, clock
 from . import multigit
 from .version import take, hversions
 from .config import load_config
+import six
+from six.moves import map
+from six.moves import range
+from six.moves import zip
 
 # Create a singleton defined once by the init method
 # replace all that stuff with Objects.
@@ -30,11 +36,11 @@ class Environment(object):
         self.d = self.commits = multigit.universe_versions(dir, universe, Tags=Tags)
         if endof:
             for pkg in endof:
-                print 'DDD', self.d.keys()
+                print('DDD', list(self.d.keys()))
                 if pkg in self.d:
                     self.d[pkg].insert(0,endof[pkg])
 
-        self.universe = self.d.keys()
+        self.universe = list(self.d.keys())
         self.curdir = Path('.').abspath()
 
         self.pkg_dir = Path(dir)
@@ -59,8 +65,8 @@ class Environment(object):
         """
         universe = self.universe
         n = len(universe) + 1
-        self.pkg2int = dict(zip(universe, range(1, n)))
-        self.int2pkg = dict(zip(range(1, n), universe))
+        self.pkg2int = dict(list(zip(universe, list(range(1, n)))))
+        self.int2pkg = dict(list(zip(list(range(1, n)), universe)))
 
     def _convert_commits(self):
         """ Convert a list of commits to int
@@ -69,11 +75,11 @@ class Environment(object):
         """
         commits = self.commits
         c2i2c = self.bidir_commits = {}
-        for pkg, commit_list in commits.iteritems():
+        for pkg, commit_list in six.iteritems(commits):
             n = len(commit_list) + 1
-            cl = map(str, reversed(commit_list))
-            c2i = dict(zip(cl, range(1, n)))
-            i2c = dict(zip(range(1, n), cl))
+            cl = list(map(str, reversed(commit_list)))
+            c2i = dict(list(zip(cl, list(range(1, n)))))
+            i2c = dict(list(zip(list(range(1, n)), cl)))
             c2i2c[pkg] = c2i, i2c
 
 
@@ -124,7 +130,7 @@ def activate(dir=None):
     """ TODO
     """
     p = env.pkg_dir / 'venv2/bin/activate_this.py'
-    execfile(p, dict(__file__=p))
+    exec(compile(open(p).read(), p, 'exec'), dict(__file__=p))
 
 
 def create_or_activate(dir=None):
@@ -141,11 +147,11 @@ def create_or_activate(dir=None):
     env.venv_dir = dir
 
     p = dir / 'venv/bin/activate_this.py'
-    execfile(p, dict(__file__=p))
+    exec(compile(open(p).read(), p, 'exec'), dict(__file__=p))
 
 
 def config(pkg_config):
-    for pkg, commit in env.pkg_config.iteritems():
+    for pkg, commit in six.iteritems(env.pkg_config):
         checkout(pkg, commit)
 
 
@@ -187,7 +193,7 @@ def parse_error(error_file):
             tgt = pkg
             break
         else:
-            print msg
+            print(msg)
             tgt = ''
     return src, tgt
 
@@ -205,7 +211,7 @@ def experiment(pkgs=('foo', 'goo', 'hoo'), order_list=['hoo', 'goo', 'foo', 'hoo
     compatibilities = []
 
     for commits in gen:
-        dc = dict(zip(pkgs, commits))
+        dc = dict(list(zip(pkgs, commits)))
         for pkg, commit in zip(pkgs, commits):
             checkout(pkg, commit)
             pip_install(pkg)
@@ -248,7 +254,7 @@ def variables_for_parser(pkgs=('foo', 'goo', 'hoo'), default=None, env=env):
 
     sourcemap = {}
     _default = {}
-    for pkg, commit_list in commits.iteritems():
+    for pkg, commit_list in six.iteritems(commits):
         c2i, i2c = bidir_commits[pkg]
         cl = [c2i[str(commit)] for commit in commit_list]
         sourcemap[p2i[pkg]] = cl
@@ -303,7 +309,7 @@ def pkg_versions(universe, init_config, versions, endof=None):
             else:
                 commits = versions[pkg][versions[pkg].index(iversion):]
 
-        if isinstance(commits[0], basestring) and ('r' == commits[0][0]):
+        if isinstance(commits[0], six.string_types) and ('r' == commits[0][0]):
             commits = [ci[1:] for ci in commits]
         pkgs[pkg] = commits
 
@@ -392,8 +398,8 @@ class MyEnv(object):
         """
         universe = self.universe
         n = len(universe) + 1
-        self.pkg2int = dict(zip(universe, range(1, n)))
-        self.int2pkg = dict(zip(range(1, n), universe))
+        self.pkg2int = dict(list(zip(universe, list(range(1, n)))))
+        self.int2pkg = dict(list(zip(list(range(1, n)), universe)))
 
     def _convert_commits(self):
         """ Convert a list of commits to int
@@ -402,18 +408,18 @@ class MyEnv(object):
         """
         commits = self.commits
         c2i2c = self.bidir_commits = {}
-        for pkg, commit_list in commits.iteritems():
+        for pkg, commit_list in six.iteritems(commits):
             n = len(commit_list) + 1
-            cl = map(str, commit_list)
-            c2i = dict(zip(cl, range(1, n)))
-            i2c = dict(zip(range(1, n), cl))
+            cl = list(map(str, commit_list))
+            c2i = dict(list(zip(cl, list(range(1, n)))))
+            i2c = dict(list(zip(list(range(1, n)), cl)))
             c2i2c[pkg] = c2i, i2c
 
     def config2txt(self, config):
         semantic_config = {}
         int2pkg = self.int2pkg
         bidir = self.bidir_commits
-        for pi, ci in config.iteritems():
+        for pi, ci in six.iteritems(config):
             pkg = int2pkg[pi]
             commit = bidir[pkg][1][ci]
             semantic_config[pkg] = commit
@@ -520,7 +526,7 @@ class YAMLEnv(MyEnv):
 
             semantic_config = env.config2txt(config)
 
-            s = ', '.join(['%s: %s'%(pkg, commit) for pkg, commit in semantic_config.iteritems()])
+            s = ', '.join(['%s: %s'%(pkg, commit) for pkg, commit in six.iteritems(semantic_config)])
             logger.info(s)
             if s and STAT_FILE:
                 f.write(s+'\n'+'\n')
@@ -530,7 +536,7 @@ class YAMLEnv(MyEnv):
 
             tx = clock()
 
-            for pkg, commit in semantic_config.iteritems():
+            for pkg, commit in six.iteritems(semantic_config):
                 t0 = clock()
                 status = env.checkout(pkg, commit)
                 t1 = clock()
@@ -627,7 +633,7 @@ class YAMLEnv(MyEnv):
             status = sh(self.post_stage)
 
         res = []
-        for k, v in endconfig.iteritems():
+        for k, v in six.iteritems(endconfig):
             pkg = self.int2pkg[k]
             res.append('(%s,%s)'%(self.int2pkg[k], self.commits[self.int2pkg[k]][v-1]))
 
@@ -639,14 +645,14 @@ class YAMLEnv(MyEnv):
 
         versions = self.commits
 
-        print "-"*80
+        print("-"*80)
         pkg_names = [pkg.name for pkg in self.pkgs]
-        print "Versions of", ' '.join(pkg_names)
+        print("Versions of", ' '.join(pkg_names))
         for name in pkg_names:
-            print '\n'
-            print 'Versions of ', name
-            print '-'*(12+len(name))
-            print '\n'.join(versions[name])
+            print('\n')
+            print('Versions of ', name)
+            print('-'*(12+len(name)))
+            print('\n'.join(versions[name]))
 
 
 

@@ -2,6 +2,7 @@
 
 """
 
+from __future__ import absolute_import
 import os
 try:
     from path import Path
@@ -16,7 +17,7 @@ import urllib2
 import datetime
 import logging
 from distutils.version import LooseVersion
-import multigit
+from . import multigit
 
 logger = logging.getLogger(__name__)
 
@@ -51,7 +52,7 @@ def pypi_versions(package_name):
     """
     url = "https://pypi.python.org/pypi/%s/json" % (package_name,)
     data = json.load(urllib2.urlopen(urllib2.Request(url)))
-    versions = data["releases"].keys()
+    versions = list(data["releases"].keys())
     versions.sort(key=LooseVersion)
 
     return versions

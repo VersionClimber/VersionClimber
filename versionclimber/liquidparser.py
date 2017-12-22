@@ -185,6 +185,8 @@
 
 
 
+from __future__ import absolute_import
+from __future__ import print_function
 import logging
 import sys
 import math
@@ -198,6 +200,7 @@ import collections
 import datetime
 import random
 from operator import itemgetter, attrgetter
+import six
 sys.setrecursionlimit(30000)
 
 now = datetime.datetime.now()
@@ -371,9 +374,9 @@ def findminimalpair(P, currentconf):
 # filter the source based on constraints and output the result
 def filtermap(sourcemap, constraints):
     out = {}
-    for s in sourcemap.viewkeys():
+    for s in six.viewkeys(sourcemap):
         vals = sourcemap[s]
-        if s in constraints.viewkeys():
+        if s in six.viewkeys(constraints):
             vals = [v for v in vals if (v >= constraints[s][0]) and (v <= constraints[s][1])]
         out[s] = copy.deepcopy(vals)
     return out
@@ -425,7 +428,7 @@ def memorydecidepackage(historyofpackversions, newpackver):
         logging.info( "--- memorydecidepackage historyofpackversions is empty")
         return [True, newpackver[0]]
     for h in historyofpackversions:
-        if flatten(h) in memory.viewkeys():
+        if flatten(h) in six.viewkeys(memory):
             if newpackver in memory[flatten(h)]:
                 logging.info( "memorydecidepackage: memory call from  " +str( h) + " to " +str( newpackver)+ " has returned value False.")
                 return [False, h[0]]
@@ -435,7 +438,7 @@ def memorydecidepackage(historyofpackversions, newpackver):
     logging.info( "+++ memorydecidepackage -- position 2")
     h = historyofpackversions[-1]
     x = flatten([h[0], newpackver[0]])
-    if x in axiom.viewkeys():
+    if x in six.viewkeys(axiom):
         if testaxiom(axiom[x], h, newpackver):
             logging.info( "axiom call for  " + str( h) + " with " +str( newpackver)+ " has returned value False because of " +str( axiom[x]))
             return [False, h[0]]
@@ -471,7 +474,7 @@ def inconfigfail(newconfig, listofconfigs_packs):
 # version are in memory
 def inmem(callpackver, calleepackver, memory):
     x = flatten(callpackver)
-    if x not in memory.viewkeys():
+    if x not in six.viewkeys(memory):
         return False
     for e in memory[x]:
         if ((e[0] == calleepackver[0]) and (e[1] == calleepackver[1])):
@@ -567,7 +570,7 @@ def addtomemory(temp, badcallee, badcaller):
     vercaller = temp[badcaller]
     logging.info( "caller: " +str( badcaller) + ' ' + str( vercaller) + " and callee: " + str( badcallee) + ' ' + str( vercallee))
     x = flatten([badcaller, vercaller])
-    if x not in memory.viewkeys():
+    if x not in six.viewkeys(memory):
         memory[x] = []
     memory[x].append([badcallee, vercallee])
     strongmemory.append([badcaller, vercaller, badcallee, vercallee])
@@ -793,7 +796,7 @@ def liquidclimberworker(constraints, todolist, newsourcemap, phase):
             versionstodo = [v for v in newsourcemap[m] if v > current[m]]
             versionstodo.sort(reverse=True)
             logging.info( "liquidclimberworker: package is: "+str(m))
-            print "liquidclimberworker: versionstodo is: ",versionstodo
+            print("liquidclimberworker: versionstodo is: ",versionstodo)
             # versions still to try
             found = False
             for v in versionstodo:
