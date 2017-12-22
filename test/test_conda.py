@@ -24,5 +24,5 @@ def test_nonpy():
     versions_default = utils.conda_versions('gmp')
     versions = utils.conda_versions('gmp', channels=['openalea'])
 
-    assert len(versions_default) < len(versions)
+    assert len(versions_default) < len(versions), str(len(versions_default)) + ', ' + str(len(versions))
     assert set(versions) - set(versions_default)
