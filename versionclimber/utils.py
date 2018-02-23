@@ -10,12 +10,15 @@ import subprocess
 from subprocess import Popen, PIPE
 import re
 import json
-
 import requests
-
 import datetime
 import logging
 from distutils.version import LooseVersion
+try:
+    from itertools import zip_longest
+except ImportError:
+    from itertools import izip_longest as zip_longest
+
 from . import multigit
 
 logger = logging.getLogger(__name__)
@@ -52,7 +55,7 @@ def pypi_versions(package_name):
     url = "https://pypi.python.org/pypi/%s/json" % (package_name,)
     data = json.loads(requests.get(url).content)
     versions = list(data["releases"].keys())
-    versions.sort(key=LooseVersion)
+    versions.sort(key=MyLooseVersion)
 
     return versions
 
@@ -76,7 +79,7 @@ def conda_versions(package_name, channels=[], build='py27'):
 
     versions = [d['version'] for d in pkgs if ('py' not in d['build']) or (build in d['build'])]
     versions = list(set(versions))
-    versions.sort(key=LooseVersion)
+    versions.sort(key=MyLooseVersion)
 
     return versions
 
@@ -122,3 +125,23 @@ def call_and_parse(cmd_list):
         raise Exception('conda %r:\nSTDERR:\n%s\nEND' % (cmd_list,
                                                          stderr.decode()))
     return json.loads(stdout.decode())
+
+
+class MyLooseVersion(LooseVersion):
+    def _cmp (self, other):
+        if isinstance(other, str):
+            other = LooseVersion(other)
+
+        for i, j in zip_longest(self.version, other.version, fillvalue=''):
+            if type(i) != type(j):
+                i = str(i)
+                j = str(j)
+            if i == j:
+                continue
+            elif i < j:
+                return -1
+            else:  # i > j
+                return 1
+        return 0
+
+
