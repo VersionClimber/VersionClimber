@@ -9,7 +9,7 @@ from collections import Counter
 dataset = datasets.fetch_mldata("MNIST Original")
 
 # Extract the features and labels
-features = np.array(dataset.data, 'int16') 
+features = np.array(dataset.data, 'int16')
 labels = np.array(dataset.target, 'int')
 
 # Extract the hog features
@@ -19,7 +19,7 @@ for feature in features:
     list_hog_fd.append(fd)
 hog_features = np.array(list_hog_fd, 'float64')
 
-print "Count of digits in dataset", Counter(labels)
+print("Count of digits in dataset", Counter(labels))
 
 # Create an linear SVM object
 clf = LinearSVC()
