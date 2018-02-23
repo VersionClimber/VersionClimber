@@ -50,7 +50,7 @@ def pypi_versions(package_name):
     url = "https://pypi.python.org/pypi/%s/json" % (package_name,)
     data = json.loads(requests.get(url).content)
     versions = list(data["releases"].keys())
-    versions.sort(cmp=compare_version)
+    versions.sort(key=loose_version)
 
     return versions
 
@@ -74,7 +74,7 @@ def conda_versions(package_name, channels=[], build='py27'):
 
     versions = [d['version'] for d in pkgs if ('py' not in d['build']) or (build in d['build'])]
     versions = list(set(versions))
-    versions.sort(cmp=compare_version)
+    versions.sort(key=loose_version)
 
     return versions
 
@@ -121,6 +121,7 @@ def call_and_parse(cmd_list):
                                                          stderr.decode()))
     return json.loads(stdout.decode())
 
+
 def compare_version(a_str, b_str):
     """
     http://stackoverflow.com/a/11887885
@@ -142,4 +143,25 @@ def compare_version(a_str, b_str):
     if a == b:
         return 0
     return 1
+
+def cmp_to_key(mycmp):
+    'Convert a cmp= function into a key= function'
+    class K:
+        def __init__(self, obj, *args):
+            self.obj = obj
+        def __lt__(self, other):
+            return mycmp(self.obj, other.obj) < 0
+        def __gt__(self, other):
+            return mycmp(self.obj, other.obj) > 0
+        def __eq__(self, other):
+            return mycmp(self.obj, other.obj) == 0
+        def __le__(self, other):
+            return mycmp(self.obj, other.obj) <= 0
+        def __ge__(self, other):
+            return mycmp(self.obj, other.obj) >= 0
+        def __ne__(self, other):
+            return mycmp(self.obj, other.obj) != 0
+    return K
+
+loose_version = cmp_to_key(compare_version)
 
