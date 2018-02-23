@@ -25,6 +25,7 @@ requirements:
     - gitpython
     - pyyaml
     - six
+    - requests
 
 test:
   requires:

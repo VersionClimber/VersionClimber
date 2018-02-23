@@ -4,16 +4,15 @@
 
 from __future__ import absolute_import
 import os
-try:
-    from path import Path
-except ImportError:
-    from path import path as Path
+from path import Path
 
 import subprocess
 from subprocess import Popen, PIPE
 import re
 import json
-import urllib2
+
+import requests
+
 import datetime
 import logging
 from distutils.version import LooseVersion
@@ -51,7 +50,7 @@ def pypi_versions(package_name):
     Returns the versions as a sorted list.
     """
     url = "https://pypi.python.org/pypi/%s/json" % (package_name,)
-    data = json.load(urllib2.urlopen(urllib2.Request(url)))
+    data = json.loads(requests.get(url).content)
     versions = list(data["releases"].keys())
     versions.sort(key=LooseVersion)
 
