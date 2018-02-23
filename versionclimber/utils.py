@@ -10,9 +10,7 @@ import subprocess
 from subprocess import Popen, PIPE
 import re
 import json
-
 import requests
-
 import datetime
 import logging
 from distutils.version import LooseVersion
@@ -52,7 +50,7 @@ def pypi_versions(package_name):
     url = "https://pypi.python.org/pypi/%s/json" % (package_name,)
     data = json.loads(requests.get(url).content)
     versions = list(data["releases"].keys())
-    versions.sort(key=LooseVersion)
+    versions.sort(cmp=compare_version)
 
     return versions
 
@@ -76,7 +74,7 @@ def conda_versions(package_name, channels=[], build='py27'):
 
     versions = [d['version'] for d in pkgs if ('py' not in d['build']) or (build in d['build'])]
     versions = list(set(versions))
-    versions.sort(key=LooseVersion)
+    versions.sort(cmp=compare_version)
 
     return versions
 
@@ -122,3 +120,26 @@ def call_and_parse(cmd_list):
         raise Exception('conda %r:\nSTDERR:\n%s\nEND' % (cmd_list,
                                                          stderr.decode()))
     return json.loads(stdout.decode())
+
+def compare_version(a_str, b_str):
+    """
+    http://stackoverflow.com/a/11887885
+    LooseVersion behaves just like apk's version check, at least
+    for all package versions, that have "-r".
+    :returns:
+        (a <  b): -1
+        (a == b):  0
+        (a >  b):  1
+    """
+    if a_str is None:
+        a_str = "0"
+    if b_str is None:
+        b_str = "0"
+    a = LooseVersion(a_str)
+    b = LooseVersion(b_str)
+    if a < b:
+        return -1
+    if a == b:
+        return 0
+    return 1
+
