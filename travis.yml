@@ -1,51 +1,48 @@
-matrix:
-  include:
-    - language: generic
-      os: osx
-      env: PYTHON_VERSION="2.7"
-      before_install:
-        - brew update
-        - if [[ "$PYTHON_VERSION" == "2.7" ]]; then
-            wget https://repo.continuum.io/miniconda/Miniconda2-latest-MacOSX-x86_64.sh -O miniconda.sh;
-          else
-            wget https://repo.continuum.io/miniconda/Miniconda3-latest-MacOSX-x86_64.sh -O miniconda.sh;
-          fi
+language: generic
 
-    - language: generic
-      os: linux
-      env: PYTHON_VERSION="2.7"
-      before_install:
-        - sudo apt-get update
-        - if [[ "$PYTHON_VERSION" == "2.7" ]]; then
-            wget https://repo.continuum.io/miniconda/Miniconda2-latest-Linux-x86_64.sh -O miniconda.sh;
-          else
-            wget https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh -O miniconda.sh;
-          fi
+os:
+  - linux
+  - osx
 
+sudo: required
+
+services:
+  - docker
+
+env:
+ - CONDA_RECIPE=conda
+   CONDA_VERSION=2
+ - CONDA_RECIPE=conda
+   CONDA_VERSION=3
 
 install:
-  # We do this conditionally because it saves us some downloading if the
-  # version is the same.
-  - bash miniconda.sh -b -p $HOME/miniconda
-  - export PATH="$HOME/miniconda/bin:$PATH"
-  - hash -r
-  - conda config --set always_yes yes --set changeps1 no
-  - conda update -q conda
-  # Useful for debugging any issues with conda
-  - conda info -a
-  - conda create -q -n test-environment python=$PYTHON_VERSION
-  - source activate test-environment
-  - conda install -n root conda-build
-  # Install dependencies
-  - conda build conda/.
-  - conda install versionclimber --use-local --channel local
+  - git clone https://github.com/OpenAlea/travis-ci.git
+  - cd travis-ci
+  - source install.sh
 
 before_script:
-
-  - conda install -c conda-forge nose
-  - conda install versionclimber --use-local --channel local
+  - source before_script.sh
 
 script:
-  - cd example/tuto11
-  - vclimb -h
-  - vclimb
+  - source script.sh
+
+after_success:
+  - source after_success.sh
+
+after_failure:
+  - source after_failure.sh
+
+before_deploy:
+  - source before_deploy.sh
+
+deploy:
+  skip_cleanup: true
+  provider: script
+  script: bash deploy_script.sh
+
+after_deploy:
+  - source after_deploy.sh
+
+after_script:
+- source after_script.sh
+
