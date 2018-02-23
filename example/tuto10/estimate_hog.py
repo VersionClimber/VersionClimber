@@ -19,7 +19,7 @@ for feature in features:
     list_hog_fd.append(fd)
 hog_features = np.array(list_hog_fd, 'float64')
 
-print "Count of digits in dataset", Counter(labels)
+print("Count of digits in dataset", Counter(labels))
 
 # Create an linear SVM object
 clf = LinearSVC()
