@@ -14,6 +14,11 @@ import requests
 import datetime
 import logging
 from distutils.version import LooseVersion
+try:
+    from itertools import zip_longest
+except ImportError:
+    from itertools import izip_longest as zip_longest
+
 from . import multigit
 
 logger = logging.getLogger(__name__)
@@ -50,7 +55,7 @@ def pypi_versions(package_name):
     url = "https://pypi.python.org/pypi/%s/json" % (package_name,)
     data = json.loads(requests.get(url).content)
     versions = list(data["releases"].keys())
-    versions.sort(key=loose_version)
+    versions.sort(key=MyLooseVersion)
 
     return versions
 
@@ -74,7 +79,7 @@ def conda_versions(package_name, channels=[], build='py27'):
 
     versions = [d['version'] for d in pkgs if ('py' not in d['build']) or (build in d['build'])]
     versions = list(set(versions))
-    versions.sort(key=loose_version)
+    versions.sort(key=MyLooseVersion)
 
     return versions
 
@@ -122,46 +127,21 @@ def call_and_parse(cmd_list):
     return json.loads(stdout.decode())
 
 
-def compare_version(a_str, b_str):
-    """
-    http://stackoverflow.com/a/11887885
-    LooseVersion behaves just like apk's version check, at least
-    for all package versions, that have "-r".
-    :returns:
-        (a <  b): -1
-        (a == b):  0
-        (a >  b):  1
-    """
-    if a_str is None:
-        a_str = "0"
-    if b_str is None:
-        b_str = "0"
-    a = LooseVersion(a_str)
-    b = LooseVersion(b_str)
-    if a < b:
-        return -1
-    if a == b:
+class MyLooseVersion(LooseVersion):
+    def _cmp (self, other):
+        if isinstance(other, str):
+            other = LooseVersion(other)
+
+        for i, j in zip_longest(self.version, other.version, fillvalue=''):
+            if type(i) != type(j):
+                i = str(i)
+                j = str(j)
+            if i == j:
+                continue
+            elif i < j:
+                return -1
+            else:  # i > j
+                return 1
         return 0
-    return 1
 
-def cmp_to_key(mycmp):
-    'Convert a cmp= function into a key= function'
-    class K:
-        def __init__(self, obj, *args):
-            self.obj = obj
-        def __lt__(self, other):
-            return mycmp(self.obj, other.obj) < 0
-        def __gt__(self, other):
-            return mycmp(self.obj, other.obj) > 0
-        def __eq__(self, other):
-            return mycmp(self.obj, other.obj) == 0
-        def __le__(self, other):
-            return mycmp(self.obj, other.obj) <= 0
-        def __ge__(self, other):
-            return mycmp(self.obj, other.obj) >= 0
-        def __ne__(self, other):
-            return mycmp(self.obj, other.obj) != 0
-    return K
-
-loose_version = cmp_to_key(compare_version)
 

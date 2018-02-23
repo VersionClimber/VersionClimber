@@ -1,13 +1,13 @@
 # [x for x in temp if not x[0] in keepfixed]
 # May 10, 2015:
-# This version can be called as follows 
+# This version can be called as follows
 # python liquidparser.py 2
 # which means that the caller and callee at the point of error is always known
 # or
 # python liquidparser.py 1
 # which means that the caller may not be known (the default)
 # The interface to works changes in its return value
-# 
+#
 # [True] -- everything is fine
 # [False, 0, callee, caller] -- if you know both; Must be used with option 2
 # [False, 1, callee] -- if compilation
@@ -17,10 +17,10 @@
 # Basic idea is this: False, 0 we handle now.
 # False 1 -- just eliminate that version of that package.
 # False 2 -- Because we are changing just one package at a time,
-# if we have a configuration in which Pj has no error and then 
+# if we have a configuration in which Pj has no error and then
 # we change Pi and Pj has an error, then Pi calls Pj.
-# In general, if we have a configuration C that has an error on 
-# Pj that has just been pushed 
+# In general, if we have a configuration C that has an error on
+# Pj that has just been pushed
 # and we push Pi where i != j to get configuration C'
 # and C' fails on Pk where i != k, then
 # Pi must precede Pj in the call stack and
@@ -34,7 +34,7 @@
 # If there is a configuration C'' that is a minimal pair with C except Pj
 # C1 that works.
 # C2 pushes Pj from C1 and Pk fails, then Pj --> Pk and that is minimal pair
-# C2 pushes Pj from C1 and Pj fails, then test each Pq 
+# C2 pushes Pj from C1 and Pj fails, then test each Pq
 #  by pushing from C2 giving C2_q
 #  and by pushing Pq from C1 as well giving C1_q
 #  If nothing fails in C2_q, then great.
@@ -43,23 +43,23 @@
 
 # Let's say we optimize in the order P3 then P1 and execution
 # order is PA, PB, P1, PC, P3, ...
-# Pushing P3 will result in an error. Pushing PA results in an error on PB. 
+# Pushing P3 will result in an error. Pushing PA results in an error on PB.
 # Pushing PB results in an error on PB.
-#  
-#     
-# 
+#
+#
+#
 # If we now take a case where we keep Pi pushed but unpush Pj and we
-# still get an error on Pk, then 
+# still get an error on Pk, then
 # If we then change Pj and there is still an error, Pi still calls Pj.
 # If we change Pj and there is an error on Pk, then Pj is the caller.
 # So, remember who the lastcaller and packagechanged are.
 # If the error is on packagechanged, then caller is lastcaller.
-# If the error is on a different package, then lastpackagechanged becomes 
+# If the error is on a different package, then lastpackagechanged becomes
 # the lastcaller
 # and the package in error is the callee.
 # The problem arises when we are pushing a priority version.
 # In that case, if the error occurs on that package P1, we have to test other
-# packages that do not precede P1 on the todo list. 
+# packages that do not precede P1 on the todo list.
 # Test package P2 with respect to the original setting of the given
 # package. If you do that and get an error in Px then P2 calls Px
 # (this is the only case we know for sure -- start in a good configuration
@@ -96,12 +96,12 @@
 # So, we advance in descending order of priority. If we fail on some Py,
 # then we apply this rule.
 # Always take the cross-product of downstream in priority.
-# If we start to get ideas about who calls whom, then we can 
+# If we start to get ideas about who calls whom, then we can
 # at least use the following heuristic: if I fail on Pw that I have
 # just pushed, then first
-# look at configurations in which some caller of package Pw changes. 
+# look at configurations in which some caller of package Pw changes.
 # So we need functions that push from successful configurations
-# and others that look at likely callers and evaluate the 
+# and others that look at likely callers and evaluate the
 # cross-product of those.
 # Can we do better than this?
 # A) P1.1., P2.1, P3.1 ... works
@@ -111,21 +111,21 @@
 # P1 calls P3.
 # D) P1.2, P2.1, P3.2, P4... fails on P4
 # P1.2 is compatible with P3.2 and P3 calls P4.
-# So we should remember who calls whom (so if we get a failure we have 
+# So we should remember who calls whom (so if we get a failure we have
 # an idea what to do). And we should remember where there are compatibilities
 # If we know who calls whom and a package can be called from several
 # calling packages, then when the package fails after being pushed,
 # we should play this game.
-# Procedure: if we push Px and get an error on Px, then play with 
+# Procedure: if we push Px and get an error on Px, then play with
 # potential callers of Px and see what you can do.
-# First look at callers of Px denoted Py and push those. See if you get 
+# First look at callers of Px denoted Py and push those. See if you get
 # an error on Px in which case you'll add that to memo.
 # Try pushed Py with pushed Px and see if you go beyond Px say to Pz.
-# 
+#
 # The reason we can't stay with the version of P1 that didn't work is that
 # we may never find out what calls P1.
 # May 5, 2015 version: includes strong monotonicity code
-# What we want: reprozip runs. 
+# What we want: reprozip runs.
 # packages are discovered.
 # user is asked any restrictions -- can click.
 # which to maximize
@@ -137,7 +137,7 @@
 # Eventually, we have to get a configuration file that holds (i) the constraints
 # (ii) the packages that we want to maximize in descending order of priority
 # (iii) the default configuration.
-# For now, please look at constraints = ... and  todolist = 
+# For now, please look at constraints = ... and  todolist =
 # and default =
 
 # To run this file simply run it without any further arguments, i.e.
@@ -148,18 +148,18 @@
 
 
 # The program:
-# 
+#
 # Simulator of acceptable versions.
 # (package1, versionlow1, versionhigh1, package2, versionlow2, versionhigh2)
-# Semantics are that any version 
+# Semantics are that any version
 # between versionlow1 and versionhigh1
-# of package 1 will work with any version 
+# of package 1 will work with any version
 # between versionlow2 and versionhigh2 of package 2.
-# 
+#
 # Some random ordering of package/version pairs in an execution.
-# 
-# If the next package/version is incompatible with the 
-# package/versions already seen then we have a failure with 
+#
+# If the next package/version is incompatible with the
+# package/versions already seen then we have a failure with
 # an announcement of where bad.
 
 
@@ -179,7 +179,7 @@ import datetime
 import random
 from operator import itemgetter, attrgetter
 import six
-sys.setrecursionlimit(30000) 
+sys.setrecursionlimit(30000)
 
 
 now = datetime.datetime.now()
@@ -202,16 +202,16 @@ successful = [] # configurations that have been tried and worked at any time
 
 failedconfigs = [] # configurations that have failed
 
-nocompile = [] 
+nocompile = []
    # package-versions that don't compile, so should not be considered further
 
 knowcaller = False # if you'll always know the caller, then set to True
 # can override with a command line argument
 if 1 < len(sys.argv):
   if (sys.argv[1] == "False") or (sys.argv[1] == "1") or (sys.argv[1] == "false") or (sys.argv[1] == "FALSE"):
-     knowcaller = False
+    knowcaller = False
   else:
-     knowcaller = True
+    knowcaller = True
 
 
 
@@ -233,20 +233,20 @@ def compatible(packver1, packver2):
   ver2 = packver2[1]
   bydefault = True
   if pack1 == pack2:
-	return True
+    return True
   for c in compatibilities:
-    if (c[0] == pack1) and (c[3] == pack2): 
+    if (c[0] == pack1) and (c[3] == pack2):
 	bydefault = False # the two packages are in the list of compatibilities
     	if (ver1 >= c[1]) and (ver1 <= c[2]) and (ver2 >= c[4]) and (ver2 <= c[5]):
 		return True
-    if (c[0] == pack2) and (c[3] == pack1): 
+    if (c[0] == pack2) and (c[3] == pack1):
 	bydefault = False # the two packages are in the list of compatibilities
     	if (ver1 >= c[4]) and (ver1 <= c[5]) and (ver2 >= c[1]) and (ver2 <= c[2]):
 		return True
   return bydefault # if we've never encountered these packages, we'll return
 	# true, but if we have found the packages but no compatible versions,
 	# then we'll return False
-		
+
 
 # is ver1 of pack1 compatible with ver2 of pack2
 # If the packages are the same then return true
@@ -263,14 +263,14 @@ def cudftest(packver1, packver2):
   if pack1 == pack2:
 	return True
   for c in cudf:
-    if (c[0] == pack1) and (c[3] == pack2): 
+    if (c[0] == pack1) and (c[3] == pack2):
 	bydefault = False # the two packages are in the list of cudfs
     	if (ver1 >= c[1]) and (ver1 <= c[2]) and (ver2 >= c[4]):
 		return True
   return bydefault # if we've never encountered these packages, we'll return
 	# true, but if we have found the packages but no compatible versions,
 	# then we'll return False
-		
+
 # Given a new package-version pair newpackver,
 # is it compatible with the ones that are already there?
 def decidepackage(historyofpackversions, newpackver):
@@ -286,7 +286,7 @@ def decidepackage(historyofpackversions, newpackver):
 	# print "decidepackage: call on compatible from ", h, " to ", newpackver, " has return value True."
    	return [True, newpackver[0]]
 
-# Does an execution work? If so return an empty list. 
+# Does an execution work? If so return an empty list.
 # If not, return the package that failed.
 def works(listofpackversions):
    history = []
@@ -298,9 +298,9 @@ def works(listofpackversions):
 		print("  Success up to: ", history)
 		print("  Failure on: ", p, listofpackversions[p])
 		if knowcaller:
-			return [False, 0, p, x[1]] 
+			return [False, 0, p, x[1]]
 		else: # if you know callee then state it, but if not, can replace p by -1
-			return [False, 2, p] 
+			return [False, 2, p]
 			# ??? changed the 0 to 2 to test out callee only
    return [True, 0, -1, -1] # -1 indicates all ok only use the True part
 
@@ -309,7 +309,7 @@ def works(listofpackversions):
 
 # given that we have just pushed package P,
 # find a minimal pair of current configuration with
-# a successful configuration, meaning a configuration in 
+# a successful configuration, meaning a configuration in
 # successful that is identical to current in pack-ver except in P.
 def findminimalpair(P, currentconf):
    i = 0
@@ -351,7 +351,7 @@ def flatten(list):
 # whether a given call on newpackver from the last element of history
 # has already been determined to be incompatible
 # returns True if incompatibility else False if no trouble found
-# element of axiomlist has format 
+# element of axiomlist has format
 # (pack1, version1, lesseq/eq/greatereq, pack2, version2, lesseq/eq/greatereq)
 def testaxiom(axiomlist, h, new):
     for a in axiomlist:
@@ -446,7 +446,7 @@ def inmemstrong(callpackver, calleepackver, strongmemory):
    return False
 
 # First see whether we can determine that this won't work because
-# of what we remember. If we can, then return False, 
+# of what we remember. If we can, then return False,
 # identify the offending package
 # combinations and return a False indicating we did not need to to a real
 # execution.
@@ -498,7 +498,7 @@ def checkworks(listofpackversions, latestpackchanged):
 	failedconfigs.append([y, x[2], x[3]])
 	return [x[0], x[2], x[2], True]
      if (x[1] == 2):
-	if (not latestpackchanged == x[2]) and findminimalpair(latestpackchanged, y): 
+	if (not latestpackchanged == x[2]) and findminimalpair(latestpackchanged, y):
 	   # found minimal pair with respect to a successful configuration
 	   # that differs only in latestpackchanged
 	   # and callee is not the same as latestpackchanged
@@ -509,7 +509,7 @@ def checkworks(listofpackversions, latestpackchanged):
 	   return [x[0], x[2], -1, True]
 	else:
 	   return [x[0], x[2], -1, True]
-        
+
 
 
 # whichever version of badcallee is in temp is incompatible with
@@ -530,10 +530,10 @@ def mymed(mylist):
    return mylist[len(mylist) / 2]
 
 # hunter method of finding best configuration.
-# This method can degenerate into a cross-product method if we 
+# This method can degenerate into a cross-product method if we
 # are not careful. However we can try.
 def hunter(searchedpackage, temp, newsourcemap, phase, previouscaller, lastpackchanged):
-   # First we try just pushing all packages except those in todo list 
+   # First we try just pushing all packages except those in todo list
    # that either precede or equal searchedpackage
    # until we get something that works.
    i = todolist.index(searchedpackage)
@@ -553,7 +553,7 @@ def hunter(searchedpackage, temp, newsourcemap, phase, previouscaller, lastpackc
 	returnnow = True
 	newallconfigs = copy.deepcopy(allconfigs)
 	print("hunter: newsourcemap: ", newsourcemap)
-	for c in allconfigs: 
+	for c in allconfigs:
 	 keepgoing = True
 	 while keepgoing:
 	   keepgoing = False
@@ -605,7 +605,7 @@ def hunter(searchedpackage, temp, newsourcemap, phase, previouscaller, lastpackc
 def trytomakework(searchedpackage, temp, newsourcemap, phase, previouscaller, lastpackchanged):
   print("        ")
   print("+++ Within trytomakework, on configuration ", temp)
-  x = checkworks(temp, lastpackchanged) 
+  x = checkworks(temp, lastpackchanged)
 	# searchedpackage acts both the role of previous caller and
 	# currently changed package
 	# we simulate this now, but in general
@@ -617,7 +617,7 @@ def trytomakework(searchedpackage, temp, newsourcemap, phase, previouscaller, la
      previouscaller = badcaller
      i = todolist.index(searchedpackage)
      keepfixed = todolist[:i+1] # don't change these
-     # if (x[3]) and (not badcallee == badcaller): 
+     # if (x[3]) and (not badcallee == badcaller):
 	# x[3] is true if we really did execute
 	# baddcallee == baddcaller if compile error
 	# Those have been added to nocompile already
@@ -651,15 +651,15 @@ def trytomakework(searchedpackage, temp, newsourcemap, phase, previouscaller, la
 		  x = trytomakework(searchedpackage, newtemp, newsourcemap, phase, previouscaller, lastpackchanged)
   	  	  print("++ Return value of: ", x)
 		  if 0 < len(x):
-			return x  
+			return x
      return {}
   else:
      return temp
-  
-	
 
 
-	
+
+
+
 
 # This implements the algorithm against our simulator, but eventually
 # against a real system
@@ -716,9 +716,9 @@ def liquidclimberworker(constraints, todolist, newsourcemap, phase):
 				ret = hunter(m, temp, newsourcemap, phase, m, m) # don't know the caller always
 			print("return value: ", ret, " for config: ", temp)
 			if 0 < len(ret):
-				current = copy.deepcopy(ret) 
+				current = copy.deepcopy(ret)
 				found = True
-  return current 
+  return current
 
 
 
@@ -735,20 +735,20 @@ def adjustsource(newsourcemap, bestmonoconfig, todolist):
 	p = todolist[i]
 	if max(newsourcemap[p]) == bestmonoconfig[p]:
 		newsourcemap[p] = [bestmonoconfig[p]]
-	else: 
+	else:
 		flag = False
 	i+= 1
  return newsourcemap
 
-	
-	
+
+
 
 '''  # When transferring to Christophe
 # DATA
 
 # For simulator
-	
-	
+
+
 
 # compatibilities= []
 # compatibilities.append([1, 11, 13, 2, 21, 23])
@@ -894,7 +894,7 @@ memory = {} # we will remember here the versions of package
 	# combinations that don't work, so we don't redo them
 	# we just keep exploring higher versions
 
-strongmemory = [] # these will be in the form 
+strongmemory = [] # these will be in the form
 		# [callpack, callver, calleepack, calleever]
 
 axiom = {} # we use the historicity and failure monotonicity axioms
