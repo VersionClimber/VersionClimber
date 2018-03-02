@@ -1,5 +1,8 @@
 .. Use Cases
 
+Tutorials
+------------
+
 
 :Release: |release|
 :Date: |today|
