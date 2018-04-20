@@ -32,6 +32,7 @@ script:
   - cd VersionClimber/example/tuto11
   - vclimb -h
   - vclimb
+  - cd -
 
 after_success:
   - source after_success.sh
