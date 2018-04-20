@@ -26,6 +26,8 @@ before_script:
 
 script:
   - source script.sh
+  - source activate
+  - conda install --use-local versionclimber
   - cd example/tuto11
   - vclimb -h
   - vclimb
