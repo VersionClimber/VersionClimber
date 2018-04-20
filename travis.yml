@@ -26,9 +26,9 @@ before_script:
 
 script:
   - source script.sh
-  #- cd example/tuto11
-  #- vclimb -h
-  #- vclimb
+  - cd example/tuto11
+  - vclimb -h
+  - vclimb
 
 after_success:
   - source after_success.sh
