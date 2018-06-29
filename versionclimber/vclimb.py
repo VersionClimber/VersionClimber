@@ -6,7 +6,8 @@ import sys
 import os
 from optparse import OptionParser
 
-from versionclimber import liquid, liquidparser
+from versionclimber import liquid
+from versionclimber.algo import liquidparser, demandsupply
 
 def main():
     """This function is called by vclimb
