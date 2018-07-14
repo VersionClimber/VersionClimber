@@ -76,7 +76,34 @@ def hierarchical_versions(seq, type='major'):
             if ver not in _versions:
                 _versions[ver] = v
 
-    return OrderedDict(list(zip(reversed(list(_versions.keys()), list(_versions.values())))))
+    return OrderedDict(list(reversed(list(zip(list(_versions.keys()),
+                                              list(_versions.values()))))))
+
+def segment_versions(seq, type='major'):
+    """ Create mini-series of versions between major, minor and patch.
+    return a list of list.
+
+    :Parameter: type = major, minor, patch
+    """
+    _versions = OrderedDict()
+
+    if '.' in seq[0]:
+        f = _major if type == 'major' else _minor if type == 'minor' else _patch
+        for v in seq:
+            ver = f(v)
+            _versions.setdefault(ver, []).append(v)
+
+    else:
+        digit = -3 if type == 'major' else -2 if type == 'minor' else -1
+        f = _version
+        for v in seq:
+            ver = f(v, digit)
+            _versions.setdefault(ver, []).append(v)
+
+    return OrderedDict(zip(_versions.keys(),
+                           _versions.values()))
+
+
 
 def majors(seq):
     return hversions(seq, type='major')

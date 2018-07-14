@@ -293,10 +293,11 @@ def read_packageversions(fn):
   return packageversions, miniseries
 
 # Christophe : main program
-def liquidclimber(miniseries, packageversions, anchorFlag):
+def liquidclimber(miniseries, packageversions, anchorFlag=True):
   configs = genconfigs(miniseries, packageversions, anchorFlag)
   if anchorFlag == True:
-    print('Here are the anchors to try: ', configs)
+    #print('Here are the anchors to try: ', configs)
+    print('Number of anchors to try: ', len(configs))
   if anchorFlag == False:
     print('Here is the number of configurations potentially to explore: ', len(configs))
   notDone = True
@@ -320,7 +321,7 @@ def liquidclimber(miniseries, packageversions, anchorFlag):
           j+= 1
         print("Here is the best final configuration: ", bestanchor)
 
-  print("Total configurations tested is: ", totaltests)
+  # print("Total configurations tested is: ", totaltests)
   return bestanchor
 
 
@@ -340,6 +341,9 @@ if __name__ == '__main__':
   totaltests = 0
 
   packageversions, miniseries = read_packageversions("packageversions")
+
+  print("PackageVersions", packageversions)
+  print("miniseries", miniseries)
 
   #configs = genconfigs(miniseries, packageversions, anchorFlag)
 

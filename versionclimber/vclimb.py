@@ -9,6 +9,14 @@ from optparse import OptionParser
 from versionclimber import liquid
 from versionclimber.algo import liquidparser, demandsupply
 
+# Do we need a specific option to decide if we run the new algorithm?
+DEMANDSUPPLY = True
+
+if DEMANDSUPPLY:
+    algo_module = demandsupply
+else:
+    algo_module = liquidparser
+
 def main():
     """This function is called by vclimb
 
@@ -46,13 +54,15 @@ vclimb can also print all the versions of the packages
         raise ValueError("""--conf must be provided. See help (--help)""")
 
     if not opts.version:
-        liquidparser.start_logging(opts.log_file)
+        algo_module.start_logging(opts.log_file)
 
     env = liquid.YAMLEnv(opts.config)
 
     print('version ', opts.version)
+
+
     if not opts.version:
-        solutions = env.run(liquidparser)
+        solutions = env.run(algo_module)
 
         print(('\n' * 3))
         print('Solution is:')
