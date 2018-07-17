@@ -9,13 +9,6 @@ from optparse import OptionParser
 from versionclimber import liquid
 from versionclimber.algo import liquidparser, demandsupply
 
-# Do we need a specific option to decide if we run the new algorithm?
-DEMANDSUPPLY = True
-
-if DEMANDSUPPLY:
-    algo_module = demandsupply
-else:
-    algo_module = liquidparser
 
 def main():
     """This function is called by vclimb
@@ -46,6 +39,8 @@ vclimb can also print all the versions of the packages
         help="Store logging information in this file")
     parser.add_option("-v", "--version", action="store_true", dest="version", default=False,
         help="Print versions of all packages")
+    parser.add_option("-d", "--demandsupply", action="store_true", dest="demandsupply", default=False,
+        help="Use the demand supply algorithm")
 
     (opts, args)= parser.parse_args()
 
@@ -53,10 +48,15 @@ vclimb can also print all the versions of the packages
     if opts.config == None:
         raise ValueError("""--conf must be provided. See help (--help)""")
 
+    if opts.demandsupply:
+        algo_module = demandsupply
+    else:
+        algo_module = liquidparser
+
     if not opts.version:
         algo_module.start_logging(opts.log_file)
 
-    env = liquid.YAMLEnv(opts.config)
+    env = liquid.YAMLEnv(opts.config, opts.demandsupply)
 
     print('version ', opts.version)
 

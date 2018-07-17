@@ -302,7 +302,8 @@ def liquidclimber(miniseries, packageversions, anchorFlag=True):
     print('Here is the number of configurations potentially to explore: ', len(configs))
   notDone = True
   i = 0
-  while (i <= len(configs)) and notDone:
+  bestanchor = []
+  while (i < len(configs)) and notDone:
     c = configs[i]
     i = i+1
     if tryconfig(c) == 1:
@@ -322,6 +323,8 @@ def liquidclimber(miniseries, packageversions, anchorFlag=True):
         print("Here is the best final configuration: ", bestanchor)
 
   # print("Total configurations tested is: ", totaltests)
+  if not bestanchor:
+    print("No configuration found that works")
   return bestanchor
 
 

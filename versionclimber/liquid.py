@@ -434,14 +434,14 @@ class YAMLEnv(MyEnv):
         - get the set of versions
 
     """
-    def __init__(self, config_file):
+    def __init__(self, config_file, demandsupply=False):
         config = load_config(config_file)
         self.pkgs = config['packages']
         self.cmd = config['run']
         self.pre_stage = config['pre']
         self.post_stage = config['post']
 
-        self.algo_demandsupply = (config['algo'] == 'demandsupply')
+        self.algo_demandsupply = demandsupply
 
         if isinstance(self.cmd, list):
             self.cmd = self.cmd[0]
@@ -511,6 +511,8 @@ class YAMLEnv(MyEnv):
 
         stat_file = new_stat_file(exp=log_dir)
         pkg_first= self.universe[0]
+
+        install_errors = []
 
         def works_yaml(listofpackversions, stat_file=stat_file, env=self):
             env.count += 1
@@ -616,6 +618,8 @@ class YAMLEnv(MyEnv):
             tx = clock()
 
             for pkg, commit in semantic_config:
+                if (pkg, commit) in install_errors:
+                    return False
                 t0 = clock()
                 status = env.checkout(pkg, commit)
                 t1 = clock()
@@ -626,6 +630,7 @@ class YAMLEnv(MyEnv):
                 if STAT_FILE:
                     f.write(s)
                 if status != 0:
+                    install_errors.append((pkg, commit))
                     res = False
                     s = 'FAIL build %s\n'%pkg
                     logger.info(s)
@@ -691,7 +696,7 @@ class YAMLEnv(MyEnv):
             for pkg in self.universe:
                 versions = self.commits[pkg]
                 # parametrise the extraction type for each package (major, minor, patch, commit)
-                v_dict = segment_versions(versions, type='minor')
+                v_dict = segment_versions(versions, type='major')
                 for _version in v_dict:
                     miniseries.append([pkg, 'supply-constant', v_dict[_version]])
 
