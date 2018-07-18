@@ -24,7 +24,7 @@ def test_versions():
     assert(d['2.6'] == ['2.6.1', '2.6.3', '2.6.8'])
 
 
-def test_segment_versions(config):
+def my_segment_versions(config='config.yaml'):
     config = load_config(config)
     pkgs = config['packages']
     universe = [pkg.name for pkg in pkgs]

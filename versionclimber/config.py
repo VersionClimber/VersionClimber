@@ -29,6 +29,7 @@ class Package(object):
                  recipe=None,
                  channels=None,
                  hierarchy='commit',
+                 supply='minor',
                  directory='.vclimb'):
         self.name = name
         self.vcs = vcs
@@ -37,6 +38,7 @@ class Package(object):
         self.build_cmd = build_cmd
         self.version = version
         self.hierarchy = hierarchy
+        self.supply = supply
         self.conda = bool(conda)
         self.dir = Path(directory).abspath()
         self.conda_channels = [] if not channels else channels

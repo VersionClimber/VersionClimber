@@ -5,7 +5,7 @@ from setuptools import setup
 
 # Packages list, namespace and root directory of packages
 
-packages = ['versionclimber']
+packages = ['versionclimber', 'versionclimber.algo']
 
 # dependencies to other eggs
 setup_requires = []

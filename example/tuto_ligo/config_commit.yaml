@@ -4,41 +4,49 @@ packages:
       vcs       : conda
       cmd       : conda install -y
       hierarchy : commit
+      supply    : major
 
     - name      : seaborn
       vcs       : conda
       cmd       : conda install -y
       hierarchy : commit
+      supply    : major
 
     - name      : h5py
       vcs       : conda
       cmd       : conda install -y
       hierarchy : commit
+      supply    : major
 
     - name      : matplotlib
       vcs       : conda
       cmd       : conda install -y
       hierarchy : commit
+      supply    : major
 
     - name      : scipy
       vcs       : conda
       cmd       : conda install -y
       hierarchy : commit
+      supply    : minor
 
     - name      : numpy
       vcs       : conda
       cmd       : conda install -y
       hierarchy : commit
+      supply    : minor
 
     - name      : notebook
       vcs       : conda
       cmd       : conda install -y
       hierarchy : commit
+      supply    : major
 
     - name      : nbconvert
       vcs       : conda
       cmd       : conda install -y
       hierarchy : commit
+      supply    : major
 
 run:
     - jupyter nbconvert --ExecutePreprocessor.timeout=60 --to notebook --execute ligo/index.ipynb

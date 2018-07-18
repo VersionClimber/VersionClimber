@@ -687,20 +687,8 @@ class YAMLEnv(MyEnv):
         liquidparser.works = works
 
         if self.algo_demandsupply:
-            # packageversions = [ [[p1, v1], [p1, v2]], [[p2, v1], [p2, v2]], ... ]
-            # miniseries = [[p1, 'supply-constant', [v1, v2, ...] ], [p2, 'demand-constant', [] ] ]
-            packageversions = [[[pkg, c] for c in self.commits[pkg]] for pkg in self.universe]
+            return self._supply_constant_packages()
 
-            # TODO : to improve in a more generic way
-            miniseries = []
-            for pkg in self.universe:
-                versions = self.commits[pkg]
-                # parametrise the extraction type for each package (major, minor, patch, commit)
-                v_dict = segment_versions(versions, type='major')
-                for _version in v_dict:
-                    miniseries.append([pkg, 'supply-constant', v_dict[_version]])
-
-            return packageversions, miniseries
         else:
             universe = self.universe
             ordered_packages = universe
@@ -757,19 +745,59 @@ class YAMLEnv(MyEnv):
 
         return res
 
+    def _supply_constant_packages(self):
+        """ Return a list of supply constant versions of the different packages. """
+
+        if self.algo_demandsupply:
+            # packageversions = [ [[p1, v1], [p1, v2]], [[p2, v1], [p2, v2]], ... ]
+            # miniseries = [[p1, 'supply-constant', [v1, v2, ...] ], [p2, 'demand-constant', [] ] ]
+            packageversions = [[[pkg.name, c] for c in self.commits[pkg.name]] for pkg in self.pkgs]
+
+            # TODO : to improve in a more generic way
+            miniseries = []
+            for pkg in self.pkgs:
+                versions = self.commits[pkg.name]
+                # parametrise the extraction type for each package (major, minor, patch, commit)
+                v_dict = segment_versions(versions, type=pkg.supply)
+                for _version in v_dict:
+                    #miniseries.append([pkg.name, 'supply-constant', v_dict[_version]])
+                    miniseries.append([pkg.name, 'demand-constant', v_dict[_version]])
+
+            return packageversions, miniseries
+
+
     def print_versions(self):
         """ Print all the versions of the different packages."""
 
-        versions = self.commits
-
         print("-"*80)
-        pkg_names = [pkg.name for pkg in self.pkgs]
-        print("Versions of", ' '.join(pkg_names))
-        for name in pkg_names:
-            print('\n')
-            print('Versions of ', name)
-            print('-'*(12+len(name)))
-            print('\n'.join(versions[name]))
+
+        versions = self.commits
+        if not self.algo_demandsupply:
+
+            pkg_names = [pkg.name for pkg in self.pkgs]
+            print("Versions of", ' '.join(pkg_names))
+            for name in pkg_names:
+                print('\n')
+                print('Versions of ', name)
+                print('-'*(12+len(name)))
+                print('\n'.join(versions[name]))
+        else:
+            pkg_names = [pkg.name for pkg in self.pkgs]
+            print("Versions of", ' '.join(pkg_names))
+            for pkg in self.pkgs:
+                name = pkg.name
+                print('\n')
+                print('Versions of ', name)
+                print('-'*(12+len(name)))
+                print('\n'.join(versions[name]))
+
+                # parametrise the extraction type for each package (major, minor, patch, commit)
+                v_dict = segment_versions(versions[name], type=pkg.supply)
+                print('\n')
+                print('Supply-constant Versions of ', name)
+                print('-'*(12+len(name)))
+                for _version in v_dict:
+                    print('Supply-constant ', ' '.join(v_dict[_version]))
 
 
 
