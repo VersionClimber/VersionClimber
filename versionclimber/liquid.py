@@ -760,8 +760,8 @@ class YAMLEnv(MyEnv):
                 # parametrise the extraction type for each package (major, minor, patch, commit)
                 v_dict = segment_versions(versions, type=pkg.supply)
                 for _version in v_dict:
-                    #miniseries.append([pkg.name, 'supply-constant', v_dict[_version]])
-                    miniseries.append([pkg.name, 'demand-constant', v_dict[_version]])
+                    miniseries.append([pkg.name, 'supply-constant', v_dict[_version]])
+                    #miniseries.append([pkg.name, 'demand-constant', v_dict[_version]])
 
             return packageversions, miniseries
 
