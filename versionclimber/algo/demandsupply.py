@@ -216,26 +216,26 @@ def findbetterpackval(bestanchor, j, miniseries):
       mymini = m[2]
       badindex = len(mymini) # impossibly high
       # first try the highest
-      j = badindex - 1
-      cand = [pv[0], mymini[j]]
+      k = badindex - 1
+      cand = [pv[0], mymini[k]]
       c = assembleconfig(cand, j, bestanchor)
       if works(c):
-        goodindex = j
+        goodindex = k
         return ([pv[0], mymini[goodindex]])
       else:
-        badindex = j
+        badindex = k
 
       # Now do binary search normally
       goodindex = 0 # this is the anchor
-      j = int(goodindex + math.ceil((badindex - goodindex)/2))
-      while (j > goodindex) and (j < badindex):
-        cand = [pv[0], mymini[j]]
+      k = int(goodindex + math.ceil((badindex - goodindex)/2))
+      while (k > goodindex) and (k < badindex):
+        cand = [pv[0], mymini[k]]
         c = assembleconfig(cand, j, bestanchor)
         if works(c):
-          goodindex = j
+          goodindex = k
         else:
-          badindex = j
-        j = int(goodindex + math.ceil((badindex - goodindex)/2))
+          badindex = k
+        k = int(goodindex + math.ceil((badindex - goodindex)/2))
       return ([pv[0], mymini[goodindex]])
   return bestanchor[j]
 

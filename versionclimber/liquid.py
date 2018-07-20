@@ -687,6 +687,7 @@ class YAMLEnv(MyEnv):
         liquidparser.works = works
 
         if self.algo_demandsupply:
+            liquidparser.tryconfig = lambda c: 1
             return self._supply_constant_packages()
 
         else:
