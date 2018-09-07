@@ -29,6 +29,7 @@ class Package(object):
                  recipe=None,
                  channels=None,
                  hierarchy='commit',
+                 supply='minor',
                  directory='.vclimb'):
         self.name = name
         self.vcs = vcs
@@ -37,6 +38,7 @@ class Package(object):
         self.build_cmd = build_cmd
         self.version = version
         self.hierarchy = hierarchy
+        self.supply = supply
         self.conda = bool(conda)
         self.dir = Path(directory).abspath()
         self.conda_channels = [] if not channels else channels
@@ -50,6 +52,9 @@ class Package(object):
 
     def __str__(self):
         return self.name
+
+    def __repr__(self):
+        return str(self)
 
     def clone(self):
         cwd = Path('.').abspath()
@@ -111,10 +116,6 @@ class Package(object):
                 versions = ['1.0']
             else:
                 raise Exception('%s is not implemented yet'%self.vcs)
-
-        # print '+++++++++++++++++++++++++++++++++++++++++++++++++++++++++'
-        # print 'VERSIONS (%s): '%(self.name), versions
-        # print '+++++++++++++++++++++++++++++++++++++++++++++++++++++++++'
 
         return versions
 
@@ -225,6 +226,10 @@ class Package(object):
             return commit
 
 
+    def __str__(self):
+        return self.name
+
+
 def load_config(yaml_filename):
     """ Create an environment from a yaml file.
 
@@ -246,6 +251,7 @@ def load_config(yaml_filename):
     config['run'] = run_cmd
     config['pre'] = data.get('pre')
     config['post'] = data.get('post')
+    config['algo'] = data.get('algo', 'demandsupply')
 
     return config
 

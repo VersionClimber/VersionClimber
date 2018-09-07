@@ -13,7 +13,7 @@ import logging
 # import git
 from .utils import sh, Path, new_stat_file, clock
 from . import multigit
-from .version import take, hversions
+from .version import take, hversions, segment_versions
 from .config import load_config
 import six
 from six.moves import map
@@ -346,22 +346,6 @@ def replace_by_wrong_commits(pkg, commits, endof):
 
     return commits
 
-'''
-def _convert_commits(pkgs):
-    """ Convert a list of commits to int
-
-    The commits are a list from newer to later
-    """
-    commits = pkgs
-    c2i2c = bidir_commits = {}
-    for pkg, commit_list in commits.iteritems():
-        n = len(commit_list) + 1
-        cl = map(str, commit_list)
-        c2i = dict(zip(cl, range(1, n)))
-        i2c = dict(zip(range(1, n), cl))
-        c2i2c[pkg] = c2i, i2c
-    return bidir_commits
-'''
 
 
 class MyEnv(object):
@@ -398,8 +382,12 @@ class MyEnv(object):
         """
         universe = self.universe
         n = len(universe) + 1
-        self.pkg2int = dict(list(zip(universe, list(range(1, n)))))
-        self.int2pkg = dict(list(zip(list(range(1, n)), universe)))
+
+        if self.algo_demandsupply:
+            self.int2pkg = self.pkg2int = dict(list(zip(universe, universe)))
+        else:
+            self.pkg2int = dict(list(zip(universe, list(range(1, n)))))
+            self.int2pkg = dict(list(zip(list(range(1, n)), universe)))
 
     def _convert_commits(self):
         """ Convert a list of commits to int
@@ -408,15 +396,25 @@ class MyEnv(object):
         """
         commits = self.commits
         c2i2c = self.bidir_commits = {}
-        for pkg, commit_list in six.iteritems(commits):
-            n = len(commit_list) + 1
-            cl = list(map(str, commit_list))
-            c2i = dict(list(zip(cl, list(range(1, n)))))
-            i2c = dict(list(zip(list(range(1, n)), cl)))
-            c2i2c[pkg] = c2i, i2c
+
+        if self.algo_demandsupply:
+            for pkg, commit_list in six.iteritems(commits):
+                n = len(commit_list) + 1
+                cl = list(map(str, commit_list))
+                i2c = c2i = dict(list(zip(cl, cl)))
+                c2i2c[pkg] = c2i, i2c
+
+        else:
+            for pkg, commit_list in six.iteritems(commits):
+                n = len(commit_list) + 1
+                cl = list(map(str, commit_list))
+                c2i = dict(list(zip(cl, list(range(1, n)))))
+                i2c = dict(list(zip(list(range(1, n)), cl)))
+                c2i2c[pkg] = c2i, i2c
 
     def config2txt(self, config):
         semantic_config = {}
+
         int2pkg = self.int2pkg
         bidir = self.bidir_commits
         for pi, ci in six.iteritems(config):
@@ -436,12 +434,14 @@ class YAMLEnv(MyEnv):
         - get the set of versions
 
     """
-    def __init__(self, config_file):
+    def __init__(self, config_file, demandsupply=False):
         config = load_config(config_file)
         self.pkgs = config['packages']
         self.cmd = config['run']
         self.pre_stage = config['pre']
         self.post_stage = config['post']
+
+        self.algo_demandsupply = demandsupply
 
         if isinstance(self.cmd, list):
             self.cmd = self.cmd[0]
@@ -511,6 +511,8 @@ class YAMLEnv(MyEnv):
 
         stat_file = new_stat_file(exp=log_dir)
         pkg_first= self.universe[0]
+
+        install_errors = []
 
         def works_yaml(listofpackversions, stat_file=stat_file, env=self):
             env.count += 1
@@ -587,43 +589,144 @@ class YAMLEnv(MyEnv):
                     res = [False, 2, -1, -1]
             return res
 
-        return works_yaml
+        ###################################
+        # Work function for the New algorithm demand supply
+
+        def works_demandsupply(listofpackversions, stat_file=stat_file, env=self):
+            env.count += 1
+            count = env.count
+
+            config = listofpackversions
+
+            s = "\nConfiguration %d"%count
+            logger.info(s)
+            if STAT_FILE:
+                f = open(stat_file, 'a')
+                f.write(s+'\n')
+
+            #semantic_config = env.config2txt(config)
+            semantic_config = config
+
+            s = ', '.join(['%s: %s'%(pkg, commit) for pkg, commit in semantic_config])
+            logger.info(s)
+            if s and STAT_FILE:
+                f.write(s+'\n'+'\n')
+                f.write('# Installation of packages'+'\n')
+
+            logger.info('# Installation of packages')
+
+            tx = clock()
+
+            for pkg, commit in semantic_config:
+                if (pkg, commit) in install_errors:
+                    return False
+                t0 = clock()
+                status = env.checkout(pkg, commit)
+                t1 = clock()
+                s = 'Install (%s,%s) in %f s\n'%(pkg, commit,(t1-t0).total_seconds())
+                logger.info(s)
+
+
+                if STAT_FILE:
+                    f.write(s)
+                if status != 0:
+                    install_errors.append((pkg, commit))
+                    res = False
+                    s = 'FAIL build %s\n'%pkg
+                    logger.info(s)
+                    if STAT_FILE:
+                        f.write(s)
+                        f.close()
+                    return res
+
+            t2 = clock()
+            status = env.one_run()
+            #status = 0
+
+            t3 = clock()
+
+            s = 'Configuration execution in %f s \n'%(t3-t2).total_seconds()
+            logger.info(s)
+            if STAT_FILE: f.write(s)
+
+            if status:
+                s = 'Execution FAILED\n'
+                if STAT_FILE: f.write('Execution FAILED\n')
+                logger.info('Status '+str(status))
+
+
+            s = 'Total time: %f s\n'%(t3-tx).total_seconds()
+            if STAT_FILE: f.write(s)
+            logger.info(s)
+
+            if STAT_FILE: f.close()
+
+
+            if status == 0:
+                # res = [True, 0, -1, -1]
+                res = True
+            else:
+                res = False
+                # try:
+                #     if liquidparser.knowcaller:
+                #         res = [False, 0, pkg2int[status[1]], pkg2int[status[0]]]
+                #     else:
+                #         res = [False, 2, -1, -1]
+                # except:
+                #     res = [False, 2, -1, -1]
+            return res
+
+
+        works_function = works_demandsupply if self.algo_demandsupply else works_yaml
+        return works_function
 
 
     def monkey_patch(self, liquidparser, knowcaller=False):
 
         works = self.works()
-        universe = self.universe
-
         liquidparser.works = works
-        ordered_packages = universe
 
-        sourcemap, default, todolist = variables_for_parser(ordered_packages, env=self)
-        orderofpackages = [self.pkg2int[p] for p in ordered_packages]
+        if self.algo_demandsupply:
+            liquidparser.tryconfig = lambda c: 1
+            return self._supply_constant_packages()
 
-        liquidparser.compatibilities = []
-        liquidparser.orderofpackages = orderofpackages
-        liquidparser.default = default
-        liquidparser.sourcemap = sourcemap
-        liquidparser.strongmemory = []
-        constraints = {}
-        liquidparser.todolist = todolist
-        liquidparser.knowcaller = knowcaller
+        else:
+            universe = self.universe
+            ordered_packages = universe
 
-        return constraints, todolist
+            sourcemap, default, todolist = variables_for_parser(ordered_packages, env=self)
+            orderofpackages = [self.pkg2int[p] for p in ordered_packages]
+
+            liquidparser.compatibilities = []
+            liquidparser.orderofpackages = orderofpackages
+            liquidparser.default = default
+            liquidparser.sourcemap = sourcemap
+            liquidparser.strongmemory = []
+            constraints = {}
+            liquidparser.todolist = todolist
+            liquidparser.knowcaller = knowcaller
+
+            return constraints, todolist
 
     def restore(self):
         for pkg in self.pkgs:
             pkg.restore()
 
     def run(self, liquidparser):
-        constraints, todolist = self.monkey_patch(liquidparser)
+
+        if self.algo_demandsupply:
+            packageversions, miniseries = self.monkey_patch(liquidparser)
+        else:
+            constraints, todolist = self.monkey_patch(liquidparser)
 
         if self.pre_stage:
             status = sh(self.pre_stage)
 
         try:
-            endconfig = liquidparser.liquidclimber(constraints, todolist)
+            if self.algo_demandsupply:
+                endconfig = liquidparser.liquidclimber(miniseries, packageversions, True)
+            else:
+                endconfig = liquidparser.liquidclimber(constraints, todolist)
             # print liquidparser.memory
         finally:
             self.restore()
@@ -633,26 +736,69 @@ class YAMLEnv(MyEnv):
             status = sh(self.post_stage)
 
         res = []
-        for k, v in six.iteritems(endconfig):
-            pkg = self.int2pkg[k]
-            res.append('(%s,%s)'%(self.int2pkg[k], self.commits[self.int2pkg[k]][v-1]))
 
+        if not self.algo_demandsupply:
+            for k, v in six.iteritems(endconfig):
+                pkg = self.int2pkg[k]
+                res.append('(%s,%s)'%(self.int2pkg[k], self.commits[self.int2pkg[k]][v-1]))
+        else:
+            res = endconfig
 
         return res
+
+    def _supply_constant_packages(self):
+        """ Return a list of supply constant versions of the different packages. """
+
+        if self.algo_demandsupply:
+            # packageversions = [ [[p1, v1], [p1, v2]], [[p2, v1], [p2, v2]], ... ]
+            # miniseries = [[p1, 'supply-constant', [v1, v2, ...] ], [p2, 'demand-constant', [] ] ]
+            packageversions = [[[pkg.name, c] for c in self.commits[pkg.name]] for pkg in self.pkgs]
+
+            # TODO : to improve in a more generic way
+            miniseries = []
+            for pkg in self.pkgs:
+                versions = self.commits[pkg.name]
+                # parametrise the extraction type for each package (major, minor, patch, commit)
+                v_dict = segment_versions(versions, type=pkg.supply)
+                for _version in v_dict:
+                    miniseries.append([pkg.name, 'supply-constant', v_dict[_version]])
+                    #miniseries.append([pkg.name, 'demand-constant', v_dict[_version]])
+
+            return packageversions, miniseries
+
 
     def print_versions(self):
         """ Print all the versions of the different packages."""
 
-        versions = self.commits
-
         print("-"*80)
-        pkg_names = [pkg.name for pkg in self.pkgs]
-        print("Versions of", ' '.join(pkg_names))
-        for name in pkg_names:
-            print('\n')
-            print('Versions of ', name)
-            print('-'*(12+len(name)))
-            print('\n'.join(versions[name]))
+
+        versions = self.commits
+        if not self.algo_demandsupply:
+
+            pkg_names = [pkg.name for pkg in self.pkgs]
+            print("Versions of", ' '.join(pkg_names))
+            for name in pkg_names:
+                print('\n')
+                print('Versions of ', name)
+                print('-'*(12+len(name)))
+                print('\n'.join(versions[name]))
+        else:
+            pkg_names = [pkg.name for pkg in self.pkgs]
+            print("Versions of", ' '.join(pkg_names))
+            for pkg in self.pkgs:
+                name = pkg.name
+                print('\n')
+                print('Versions of ', name)
+                print('-'*(12+len(name)))
+                print('\n'.join(versions[name]))
+
+                # parametrise the extraction type for each package (major, minor, patch, commit)
+                v_dict = segment_versions(versions[name], type=pkg.supply)
+                print('\n')
+                print('Supply-constant Versions of ', name)
+                print('-'*(12+len(name)))
+                for _version in v_dict:
+                    print('Supply-constant ', ' '.join(v_dict[_version]))
 
 
 

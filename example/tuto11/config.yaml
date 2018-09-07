@@ -2,6 +2,7 @@ packages:
     - name      : scikit-image
       vcs       : conda
       cmd       : conda install -y
+      supply    : minor
       channels  :
         - conda-forge
       hierarchy : patch
@@ -10,6 +11,7 @@ packages:
     - name      : scikit-learn
       vcs       : conda
       cmd       : conda install -y
+      supply    : minor
       channels  :
         - conda-forge
       hierarchy : patch
@@ -19,14 +21,16 @@ packages:
       cmd       : conda install -y
       channels  :
         - conda-forge
-      hierarchy : minor
+      hierarchy : patch
+      supply    : minor
 
     - name      : numpy
       vcs       : conda
       cmd       : conda install -y
       channels  :
         - conda-forge
-      hierarchy : minor
+      hierarchy : patch
+      supply    : minor
 
 run:
     - python estimate_hog.py

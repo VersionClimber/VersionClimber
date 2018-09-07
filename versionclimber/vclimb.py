@@ -6,7 +6,9 @@ import sys
 import os
 from optparse import OptionParser
 
-from versionclimber import liquid, liquidparser
+from versionclimber import liquid
+from versionclimber.algo import liquidparser, demandsupply
+
 
 def main():
     """This function is called by vclimb
@@ -37,6 +39,8 @@ vclimb can also print all the versions of the packages
         help="Store logging information in this file")
     parser.add_option("-v", "--version", action="store_true", dest="version", default=False,
         help="Print versions of all packages")
+    parser.add_option("-d", "--demandsupply", action="store_true", dest="demandsupply", default=False,
+        help="Use the demand supply algorithm")
 
     (opts, args)= parser.parse_args()
 
@@ -44,14 +48,21 @@ vclimb can also print all the versions of the packages
     if opts.config == None:
         raise ValueError("""--conf must be provided. See help (--help)""")
 
-    if not opts.version:
-        liquidparser.start_logging(opts.log_file)
+    if opts.demandsupply:
+        algo_module = demandsupply
+    else:
+        algo_module = liquidparser
 
-    env = liquid.YAMLEnv(opts.config)
+    if not opts.version:
+        algo_module.start_logging(opts.log_file)
+
+    env = liquid.YAMLEnv(opts.config, opts.demandsupply)
 
     print('version ', opts.version)
+
+
     if not opts.version:
-        solutions = env.run(liquidparser)
+        solutions = env.run(algo_module)
 
         print(('\n' * 3))
         print('Solution is:')

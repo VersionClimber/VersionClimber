@@ -5,7 +5,7 @@ from setuptools import setup
 
 # Packages list, namespace and root directory of packages
 
-packages = ['versionclimber']
+packages = ['versionclimber', 'versionclimber.algo']
 
 # dependencies to other eggs
 setup_requires = []
@@ -25,7 +25,7 @@ license = 'Cecill-C'
 
 setup(
     name=name,
-    version='1.2.0',
+    version='1.3.0',
     description=description,
     long_description=long_description,
     author=authors,
