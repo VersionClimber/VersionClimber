@@ -20,8 +20,8 @@ def test_config():
 def test_versions():
     versions = ("1.0.1 2.6.1 2.6.3 2.6.8 2.7.15 3.3.5").split()
     d = version.segment_versions(versions,'minor')
-    assert(d.keys() == ['1.0', '2.6', '2.7', '3.3'])
-    assert(d['2.6'] == ['2.6.1', '2.6.3', '2.6.8'])
+    assert(set(d.keys()) >= set(['1.0', '2.6', '2.7', '3.3']))
+    assert(set(d['2.6']) >= set(['2.6.1', '2.6.3', '2.6.8']))
 
 
 def my_segment_versions(config='config.yaml'):
