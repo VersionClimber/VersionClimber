@@ -473,7 +473,7 @@ class YAMLEnv(MyEnv):
 
 
     def checkout(self, pkg_name, commit):
-        """
+        """ Install the package `pkg_name` at a given version.
 
         """
         pkg = self.pkg_names[pkg_name]
@@ -481,6 +481,74 @@ class YAMLEnv(MyEnv):
         status = pkg.local_install(commit,version=version)
         return status
 
+    def install_config(self, semantic_config):
+        """ Install a set of packages in the most atomic way.
+
+        We will first install all the conda packages. Then use other commands separetly.
+        """
+        # TODO : Move the main code in a new object PackageSet
+
+        pkg_names, commits = zip(*semantic_config)
+        pkgs =  [self.pkg_names[pn] for pn in pkg_names]
+        versions = [self.bidir_commits[pkg_name][0][commit] for commit in commits]
+
+        conda_pkgs = [(i, pkg) for i, pkg in enumerate(pkgs) if pkg.vcs == 'conda']
+        other_pkgs = [(i, pkg) for i, pkg in enumerate(pkgs) if pkg.vcs != 'conda']
+
+        status = 0
+        if conda_pkgs:
+            # channel
+            channels = []
+            for i, pkg in conda_pkgs:
+                for c in pkg.conda_channels:
+                    if c not in channels:
+                        channels.append(c)
+
+            channel_str = ' '.join(['-c '+ channel for channel in channels])
+
+            cmd = 'conda install -y'
+            for i, pkg in conda_pkgs:
+                if len(pkg.cmd > cmd):
+                    # more options have been given in the command
+                    cmd = pkg.cmd
+
+            cmd_list = [cmd]
+            cmd_list.append(channels)
+
+            cmd_lists.extend(['%s=%s' % (pkg.name, versions[i])
+                             for i, pkg in conda_pkgs])
+            cmd = ' '.join(cmd_lists)
+
+            t0 = clock()
+            status = sh(cmd)
+            t1 = clock()
+
+            s = 'Run %s in %f s\n'%(cmd,(t1-t0).total_seconds())
+            logger.info(s)
+            if STAT_FILE:
+                f.write(s)
+
+            if status != 0:
+                res = [False, 0, self.pkg2int[conda_pkgs[0]], self.pkg2int[self.universe[0]]]
+                s = 'FAIL build %s\n'%pkg
+                logger.info(s)
+                if STAT_FILE:
+                    f.write(s)
+                    f.close()
+                    return status, res
+
+        for i, pkg in other_pkgs:
+            t0 = clock()
+            status = env.checkout(pkg, versions[i])
+            t1 = clock()
+            s = 'Install (%s,%s) in %f s\n'%(pkg, commit,(t1-t0).total_seconds())
+            logger.info(s)
+
+            if status:
+                return status
+
+
+        return status, None
 
     def one_run(self):
         """ Run just the command in a fixed environment.
@@ -538,22 +606,9 @@ class YAMLEnv(MyEnv):
 
             tx = clock()
 
-            for pkg, commit in six.iteritems(semantic_config):
-                t0 = clock()
-                status = env.checkout(pkg, commit)
-                t1 = clock()
-                s = 'Install (%s,%s) in %f s\n'%(pkg, commit,(t1-t0).total_seconds())
-                logger.info(s)
-                if STAT_FILE:
-                    f.write(s)
-                if status != 0:
-                    res = [False, 0, env.pkg2int[pkg], env.pkg2int[pkg_first]]
-                    s = 'FAIL build %s\n'%pkg
-                    logger.info(s)
-                    if STAT_FILE:
-                        f.write(s)
-                        f.close()
-                    return res
+            status, ret = env.install_config(semantic_config)
+            if status:
+                return ret
 
             t2 = clock()
             status = env.one_run()
@@ -617,27 +672,9 @@ class YAMLEnv(MyEnv):
 
             tx = clock()
 
-            for pkg, commit in semantic_config:
-                if (pkg, commit) in install_errors:
-                    return False
-                t0 = clock()
-                status = env.checkout(pkg, commit)
-                t1 = clock()
-                s = 'Install (%s,%s) in %f s\n'%(pkg, commit,(t1-t0).total_seconds())
-                logger.info(s)
-
-
-                if STAT_FILE:
-                    f.write(s)
-                if status != 0:
-                    install_errors.append((pkg, commit))
-                    res = False
-                    s = 'FAIL build %s\n'%pkg
-                    logger.info(s)
-                    if STAT_FILE:
-                        f.write(s)
-                        f.close()
-                    return res
+            status, ret = env.install_config(semantic_config)
+            if status:
+                return False
 
             t2 = clock()
             status = env.one_run()
@@ -667,13 +704,7 @@ class YAMLEnv(MyEnv):
                 res = True
             else:
                 res = False
-                # try:
-                #     if liquidparser.knowcaller:
-                #         res = [False, 0, pkg2int[status[1]], pkg2int[status[0]]]
-                #     else:
-                #         res = [False, 2, -1, -1]
-                # except:
-                #     res = [False, 2, -1, -1]
+
             return res
 
 
@@ -754,7 +785,7 @@ class YAMLEnv(MyEnv):
             # miniseries = [[p1, 'supply-constant', [v1, v2, ...] ], [p2, 'demand-constant', [] ] ]
             packageversions = [[[pkg.name, c] for c in self.commits[pkg.name]] for pkg in self.pkgs]
 
-            # TODO : to improve in a more generic way
+            # CPL TODO : to improve in a more generic way
             miniseries = []
             for pkg in self.pkgs:
                 versions = self.commits[pkg.name]
