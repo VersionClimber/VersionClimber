@@ -745,6 +745,8 @@ class YAMLEnv(MyEnv):
 
     def run(self, liquidparser):
 
+        tx = clock()
+
         if self.algo_demandsupply:
             packageversions, miniseries = self.monkey_patch(liquidparser)
         else:
@@ -774,6 +776,14 @@ class YAMLEnv(MyEnv):
                 res.append('(%s,%s)'%(self.int2pkg[k], self.commits[self.int2pkg[k]][v-1]))
         else:
             res = endconfig
+
+        t1 = clock()
+        s = 'Total time in %f s\n'%((t1-tx).total_seconds())
+        if STAT_FILE:
+            f = open(stat_file, 'a')
+            f.write(s+'\n')
+            f.close()
+        logger.info(s)
 
         return res
 
