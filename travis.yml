@@ -31,7 +31,7 @@ script:
   - conda install --use-local versionclimber
   - cd VersionClimber/example/tuto11
   - vclimb -h
-  - vclimb
+  - vclimb -d
   - cd -
 
 after_success:
