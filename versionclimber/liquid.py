@@ -508,7 +508,7 @@ class YAMLEnv(MyEnv):
 
             cmd = 'conda install -y'
             for i, pkg in conda_pkgs:
-                if len(pkg.cmd > cmd):
+                if len(pkg.cmd) > len(cmd):
                     # more options have been given in the command
                     cmd = pkg.cmd
 
