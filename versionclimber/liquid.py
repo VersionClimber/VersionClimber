@@ -513,7 +513,7 @@ class YAMLEnv(MyEnv):
                     cmd = pkg.cmd
 
             cmd_list = [cmd]
-            cmd_list.append(channels)
+            cmd_list.append(channel_str)
 
             cmd_list.extend(['%s=%s' % (pkg.name, versions[i])
                              for i, pkg in conda_pkgs])
