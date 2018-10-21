@@ -515,9 +515,9 @@ class YAMLEnv(MyEnv):
             cmd_list = [cmd]
             cmd_list.append(channels)
 
-            cmd_lists.extend(['%s=%s' % (pkg.name, versions[i])
+            cmd_list.extend(['%s=%s' % (pkg.name, versions[i])
                              for i, pkg in conda_pkgs])
-            cmd = ' '.join(cmd_lists)
+            cmd = ' '.join(cmd_list)
 
             t0 = clock()
             status = sh(cmd)
