@@ -490,7 +490,7 @@ class YAMLEnv(MyEnv):
 
         pkg_names, commits = zip(*semantic_config)
         pkgs =  [self.pkg_names[pn] for pn in pkg_names]
-        versions = [self.bidir_commits[pkg_name][0][commit] for commit in commits]
+        versions = [self.bidir_commits[pkg_names[i][0][commit] for i, commit in enumerate(commits)]
 
         conda_pkgs = [(i, pkg) for i, pkg in enumerate(pkgs) if pkg.vcs == 'conda']
         other_pkgs = [(i, pkg) for i, pkg in enumerate(pkgs) if pkg.vcs != 'conda']
