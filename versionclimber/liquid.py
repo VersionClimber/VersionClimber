@@ -20,12 +20,16 @@ from six.moves import map
 from six.moves import range
 from six.moves import zip
 
+from collections import OrderedDict
+
 # Create a singleton defined once by the init method
 # replace all that stuff with Objects.
 
 logger = logging.getLogger(__name__)
 
 STAT_FILE = False
+ANCHOR = True
+
 
 class Environment(object):
     empty = True
@@ -488,9 +492,13 @@ class YAMLEnv(MyEnv):
         """
         # TODO : Move the main code in a new object PackageSet
 
-        pkg_names, commits = zip(*semantic_config)
+        print(semantic_config)
+        pkg_names= list(semantic_config.keys())
+        commits = list(semantic_config.values())
         pkgs =  [self.pkg_names[pn] for pn in pkg_names]
-        versions = [self.bidir_commits[pkg_names[i]][0][commit] for i, commit in enumerate(commits)]
+        versions = [commit for i, commit in enumerate(commits)]
+
+        print('versions', versions)
 
         conda_pkgs = [(i, pkg) for i, pkg in enumerate(pkgs) if pkg.vcs == 'conda']
         other_pkgs = [(i, pkg) for i, pkg in enumerate(pkgs) if pkg.vcs != 'conda']
@@ -529,7 +537,9 @@ class YAMLEnv(MyEnv):
                 f.write(s)
 
             if status != 0:
-                res = [False, 0, self.pkg2int[conda_pkgs[0]], self.pkg2int[self.universe[0]]]
+                print('pkg2int', self.pkg2int)
+                res = [False, 2, self.pkg2int[(conda_pkgs[0][1].name)],
+                       self.pkg2int[self.universe[0]]]
                 s = 'FAIL build %s\n'%pkg
                 logger.info(s)
                 if STAT_FILE:
@@ -545,7 +555,9 @@ class YAMLEnv(MyEnv):
             logger.info(s)
 
             if status:
-                return status
+                res, [False, 2, self.pkg2int[pkg.name],
+                       self.pkg2int[self.universe[0]]]
+                return status, res
 
 
         return status, None
@@ -607,8 +619,12 @@ class YAMLEnv(MyEnv):
             tx = clock()
 
             status, ret = env.install_config(semantic_config)
-            if status:
+            if status and ret:
                 return ret
+            elif status:
+                if STAT_FILE: f.close()
+                res = [False, 2, -1, -1]
+                return res
 
             t2 = clock()
             status = env.one_run()
@@ -660,9 +676,9 @@ class YAMLEnv(MyEnv):
                 f.write(s+'\n')
 
             #semantic_config = env.config2txt(config)
-            semantic_config = config
+            semantic_config = OrderedDict(config)
 
-            s = ', '.join(['%s: %s'%(pkg, commit) for pkg, commit in semantic_config])
+            s = ', '.join(['%s: %s'%(pkg, commit) for pkg, commit in config])
             logger.info(s)
             if s and STAT_FILE:
                 f.write(s+'\n'+'\n')
@@ -700,6 +716,7 @@ class YAMLEnv(MyEnv):
 
 
             if status == 0:
+                print("SUCCEED!!!!!!!!")
                 # res = [True, 0, -1, -1]
                 res = True
             else:
@@ -718,7 +735,7 @@ class YAMLEnv(MyEnv):
         liquidparser.works = works
 
         if self.algo_demandsupply:
-            liquidparser.tryconfig = lambda c: 1
+            #liquidparser.tryconfig = lambda c: 1
             return self._supply_constant_packages()
 
         else:
@@ -757,7 +774,10 @@ class YAMLEnv(MyEnv):
 
         try:
             if self.algo_demandsupply:
-                endconfig = liquidparser.liquidclimber(miniseries, packageversions, True)
+                print("PackageVersions", packageversions)
+                print("miniseries", miniseries)
+                endconfig = liquidparser.liquidclimber(miniseries, packageversions, ANCHOR)
+
             else:
                 endconfig = liquidparser.liquidclimber(constraints, todolist)
             # print liquidparser.memory
@@ -802,8 +822,10 @@ class YAMLEnv(MyEnv):
                 # parametrise the extraction type for each package (major, minor, patch, commit)
                 v_dict = segment_versions(versions, type=pkg.supply)
                 for _version in v_dict:
-                    miniseries.append([pkg.name, 'supply-constant', v_dict[_version]])
-                    #miniseries.append([pkg.name, 'demand-constant', v_dict[_version]])
+                    if pkg.name == 'python':
+                        miniseries.append([pkg.name, 'demand-constant', v_dict[_version]])
+                    else:
+                        miniseries.append([pkg.name, 'supply-constant', v_dict[_version]])
 
             return packageversions, miniseries
 
@@ -840,6 +862,5 @@ class YAMLEnv(MyEnv):
                 print('-'*(12+len(name)))
                 for _version in v_dict:
                     print('Supply-constant ', ' '.join(v_dict[_version]))
-
 
 

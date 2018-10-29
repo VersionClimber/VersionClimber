@@ -45,6 +45,7 @@ import copy
 import logging
 
 #CPL
+import itertools
 #context = zmq.Context()
 #socket = context.socket(zmq.REP)
 #socket.bind("tcp://*:50008")
@@ -67,10 +68,10 @@ def start_logging(log_file=log_file):
 def genconfigs(miniseries, packageversions, anchorFlag):
   if anchorFlag == True:
     myanchors = findanchors(miniseries)
-    return mycrossproduct(myanchors)
+    return mycrossproduct_iter(myanchors)
   else:
     # just go through all configurations
-    return mycrossproduct(packageversions)
+    return mycrossproduct_iter(packageversions)
 
 
 
@@ -89,6 +90,17 @@ def mycrossproduct(packageversions):
     i+= 1
   return currentcross
 
+def mycrossproduct_iter(packageversions):
+  # return the different versions of each package using a reverse iterators
+  iterators= map(reversed, packageversions)
+
+  # return an iterator of the cross product of each packageversion iterator
+  # by varying the latest one
+  gen = itertools.product(*iterators)
+
+  nb_versions = reduce(lambda x, y: x*y, map(len, packageversions))
+
+  return nb_versions, gen
 
 # findanchors for each supply-constant mini-series, this will take the
 # minimum minor version.
@@ -305,17 +317,17 @@ def read_packageversions(fn):
 
 # Christophe : main program
 def liquidclimber(miniseries, packageversions, anchorFlag=True):
-  configs = genconfigs(miniseries, packageversions, anchorFlag)
+  nb_configs, configs = genconfigs(miniseries, packageversions, anchorFlag)
   if anchorFlag == True:
     #print('Here are the anchors to try: ', configs)
-    print('Number of anchors to try: ', len(configs))
+    print('Number of anchors to try: ', nb_configs)
   if anchorFlag == False:
-    print('Here is the number of configurations potentially to explore: ', len(configs))
+    print('Here is the number of configurations potentially to explore: ', nb_configs)
   notDone = True
   i = 0
   bestanchor = []
-  while (i < len(configs)) and notDone:
-    c = configs[i]
+  while (i < nb_configs) and notDone:
+    c = list(configs.next())
     i = i+1
     if tryconfig(c) == 1:
       notDone = False
@@ -323,6 +335,7 @@ def liquidclimber(miniseries, packageversions, anchorFlag=True):
         # We're done because anchorFlag == False means we do
         # a lexicographic sort of all possible configurations
         print("Here is the best final configuration using a complete lexicographic sort: ", c)
+        return c
       elif anchorFlag == True:
         print("Here is the best anchor configuration: ", c)
         bestanchor = copy.deepcopy(c)
