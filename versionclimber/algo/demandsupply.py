@@ -329,7 +329,7 @@ def liquidclimber(miniseries, packageversions, anchorFlag=True):
   i = 0
   bestanchor = []
   while (i < nb_configs) and notDone:
-    c = list(configs.next())
+    c = list(next(configs))
     i = i+1
     if tryconfig(c) == 1:
       notDone = False
