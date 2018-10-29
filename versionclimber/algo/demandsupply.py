@@ -98,7 +98,9 @@ def mycrossproduct_iter(packageversions):
   # by varying the latest one
   gen = itertools.product(*iterators)
 
-  nb_versions = reduce(lambda x, y: x*y, map(len, packageversions))
+  nb_versions = 1
+  for pkgvers in packageversions:
+    nb_versions *= len(pkgvers)
 
   return nb_versions, gen
 
