@@ -551,7 +551,7 @@ class YAMLEnv(MyEnv):
 
         for i, pkg in other_pkgs:
             t0 = clock()
-            status = env.checkout(pkg, versions[i])
+            status = self.checkout(pkg, versions[i])
             t1 = clock()
             s = 'Install (%s,%s) in %f s\n'%(pkg, commit,(t1-t0).total_seconds())
             logger.info(s)
