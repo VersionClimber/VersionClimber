@@ -28,6 +28,8 @@ from collections import OrderedDict
 logger = logging.getLogger(__name__)
 
 STAT_FILE = False
+
+# TODO: Define ANCHOR as an optional parameter of vclimb
 ANCHOR = True
 
 
@@ -492,13 +494,13 @@ class YAMLEnv(MyEnv):
         """
         # TODO : Move the main code in a new object PackageSet
 
-        print(semantic_config)
+        #print(semantic_config) # log this
         pkg_names= list(semantic_config.keys())
         commits = list(semantic_config.values())
         pkgs =  [self.pkg_names[pn] for pn in pkg_names]
         versions = [commit for i, commit in enumerate(commits)]
 
-        print('versions', versions)
+        #print('versions', versions) # log this
 
         conda_pkgs = [(i, pkg) for i, pkg in enumerate(pkgs) if pkg.vcs == 'conda']
         other_pkgs = [(i, pkg) for i, pkg in enumerate(pkgs) if pkg.vcs != 'conda']
@@ -774,8 +776,8 @@ class YAMLEnv(MyEnv):
 
         try:
             if self.algo_demandsupply:
-                print("PackageVersions", packageversions)
-                print("miniseries", miniseries)
+                # print("PackageVersions", packageversions) # log this
+                # print("miniseries", miniseries) # log this
                 endconfig = liquidparser.liquidclimber(miniseries, packageversions, ANCHOR)
 
             else:
@@ -861,6 +863,7 @@ class YAMLEnv(MyEnv):
                 print('Supply-constant Versions of ', name)
                 print('-'*(12+len(name)))
                 for _version in v_dict:
-                    print('Supply-constant ', ' '.join(v_dict[_version]))
+                    constant = 'Supply-constant ' if name != 'python' else 'Demand-constant '
+                    print(constant, ' '.join(v_dict[_version]))
 
 
