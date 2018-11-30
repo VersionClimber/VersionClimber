@@ -69,3 +69,5 @@ nosetests.xml
 # temporary files
 *._icon.png
 
+# OS dependent
+.DS_Store

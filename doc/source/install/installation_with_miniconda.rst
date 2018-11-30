@@ -25,7 +25,7 @@ Version Climber install
 
 .. code:: shell
 
-    conda install -c openalea versionclimber
+    conda install -c versionclimber versionclimber
 
 Installation with **pip**
 ==========================
@@ -40,7 +40,7 @@ Installation from source code
 
 Source code Requirements (conda env)::
 
-    conda install path.py gitpython pyyaml
+    conda install path.py gitpython pyyaml python six requests pyzmq
 
 or (in a virtualenv)::
 
