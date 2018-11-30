@@ -53,7 +53,7 @@ Using conda on Linux, Mac or Windows
 
 ::
 
-    conda install versionclimber -c openalea
+    conda install versionclimber -c versionclimber
 
 
 Using pip
@@ -68,7 +68,7 @@ From the source code
 *********************
 Source code Requirements (conda env)::
 
-    conda install path.py gitpython pyyaml
+    conda install path.py gitpython pyyaml six requests pyzmq
 
 or (in a virtualenv)::
 

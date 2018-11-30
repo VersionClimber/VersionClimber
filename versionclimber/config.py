@@ -195,7 +195,8 @@ class Package(object):
                 cmd_list.append(self.recipe_dir)
                 build_cmd = ' '.join(cmd_list)
 
-                status = sh(cmd)
+                logger.info('Build conda package: %s '%(build_cmd))
+                status = sh(build_cmd)
                 if status:
                     return status
 

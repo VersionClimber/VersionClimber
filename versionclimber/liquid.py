@@ -14,7 +14,7 @@ import logging
 from .utils import sh, Path, new_stat_file, clock
 from . import multigit
 from .version import take, hversions, segment_versions
-from .config import load_config
+from .config import load_config, Package
 import six
 from six.moves import map
 from six.moves import range
@@ -482,7 +482,11 @@ class YAMLEnv(MyEnv):
         """ Install the package `pkg_name` at a given version.
 
         """
-        pkg = self.pkg_names[pkg_name]
+        if isinstance(pkg_name, Package):
+            pkg = pkg_name
+            pkg_name = pkg.name
+        else:
+            pkg = self.pkg_names[pkg_name]
         version = self.bidir_commits[pkg_name][0][commit]
         status = pkg.local_install(commit,version=version)
         return status
@@ -551,7 +555,7 @@ class YAMLEnv(MyEnv):
 
         for i, pkg in other_pkgs:
             t0 = clock()
-            status = env.checkout(pkg, versions[i])
+            status = self.checkout(pkg, versions[i])
             t1 = clock()
             s = 'Install (%s,%s) in %f s\n'%(pkg, commit,(t1-t0).total_seconds())
             logger.info(s)

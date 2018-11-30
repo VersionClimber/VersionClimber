@@ -17,7 +17,7 @@ def test_skimage():
 
 def test_mtg_channels():
     versions = utils.conda_versions('openalea.mtg', channels=['openalea'])
-    assert versions[0] == '2.0.0'
+    assert '2.0.1' in versions
     assert len(versions) >= 1
 
 def test_nonpy():
