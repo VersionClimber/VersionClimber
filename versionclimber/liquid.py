@@ -548,7 +548,7 @@ class YAMLEnv(MyEnv):
                 if STAT_FILE:
                     f.write(s)
                     f.close()
-                    return status, res
+                return status, res
 
         for i, pkg in other_pkgs:
             t0 = clock()
