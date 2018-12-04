@@ -766,7 +766,7 @@ class YAMLEnv(MyEnv):
         for pkg in self.pkgs:
             pkg.restore()
 
-    def run(self, liquidparser):
+    def run(self, liquidparser, anchor=False):
 
         tx = clock()
 
@@ -782,7 +782,7 @@ class YAMLEnv(MyEnv):
             if self.algo_demandsupply:
                 # print("PackageVersions", packageversions) # log this
                 # print("miniseries", miniseries) # log this
-                endconfig = liquidparser.liquidclimber(miniseries, packageversions, ANCHOR)
+                endconfig = liquidparser.liquidclimber(miniseries, packageversions, anchor)
 
             else:
                 endconfig = liquidparser.liquidclimber(constraints, todolist)

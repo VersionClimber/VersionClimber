@@ -39,8 +39,10 @@ vclimb can also print all the versions of the packages
         help="Store logging information in this file")
     parser.add_option("-v", "--version", action="store_true", dest="version", default=False,
         help="Print versions of all packages")
-    parser.add_option("-d", "--demandsupply", action="store_true", dest="demandsupply", default=False,
+    parser.add_option("-d", "--demandsupply", action="store_true", dest="demandsupply", default=True,
         help="Use the demand supply algorithm")
+    parser.add_option("-a", "--anchor", action="store_true", dest="anchor", default=False,
+        help="Generate the cross-product of the anchor before testing all the configs.")
 
     (opts, args)= parser.parse_args()
 
@@ -62,7 +64,7 @@ vclimb can also print all the versions of the packages
 
 
     if not opts.version:
-        solutions = env.run(algo_module)
+        solutions = env.run(algo_module, opts.anchor)
 
         print(('\n' * 3))
         print('Solution is:')
