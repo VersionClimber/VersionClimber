@@ -6,7 +6,7 @@ To run this case study, first create a new conda environment, and install Versio
 
     conda create -n tutorial_usecase1 python=2 -y
     source activate tutorial_usecase1
-    conda install versionclimber -c openalea -y
+    conda install versionclimber -c versionclimber -y
 
 We install also some dependencies we want to fix, such as NumPy, SciPy, Cython and six::
 
