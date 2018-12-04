@@ -29,9 +29,6 @@ logger = logging.getLogger(__name__)
 
 STAT_FILE = False
 
-# TODO: Define ANCHOR as an optional parameter of vclimb
-ANCHOR = True
-
 
 class Environment(object):
     empty = True
