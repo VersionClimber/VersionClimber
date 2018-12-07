@@ -12,12 +12,11 @@ build:
 
 requirements:
   build:
-    - python
+    - python {{PY_VER}}*
     - setuptools
     - pywin32 # [win]
     - six
   run:
-    - python
     - setuptools
     - pywin32 # [win]
     - six
