@@ -29,7 +29,7 @@ packages:
       vcs       : conda
       cmd       : conda install -y
       hierarchy : patch
-      supply    : minor
+      supply    : major
 
     - name      : pandas
       vcs       : conda
@@ -53,7 +53,7 @@ packages:
       vcs       : conda
       cmd       : conda install -y
       hierarchy : patch
-      supply    : minor
+      supply    : major
 
     - name      : scikit-image
       vcs       : conda
@@ -89,7 +89,7 @@ packages:
       vcs       : conda
       cmd       : conda install -y
       hierarchy : patch
-      supply    : major
+      supply    : minor
 
     - name      : numpy
       vcs       : conda
