@@ -29,9 +29,6 @@ logger = logging.getLogger(__name__)
 
 STAT_FILE = False
 
-# TODO: Define ANCHOR as an optional parameter of vclimb
-ANCHOR = True
-
 
 class Environment(object):
     empty = True
@@ -551,7 +548,7 @@ class YAMLEnv(MyEnv):
                 if STAT_FILE:
                     f.write(s)
                     f.close()
-                    return status, res
+                return status, res
 
         for i, pkg in other_pkgs:
             t0 = clock()
@@ -766,7 +763,7 @@ class YAMLEnv(MyEnv):
         for pkg in self.pkgs:
             pkg.restore()
 
-    def run(self, liquidparser):
+    def run(self, liquidparser, anchor=False):
 
         tx = clock()
 
@@ -782,7 +779,7 @@ class YAMLEnv(MyEnv):
             if self.algo_demandsupply:
                 # print("PackageVersions", packageversions) # log this
                 # print("miniseries", miniseries) # log this
-                endconfig = liquidparser.liquidclimber(miniseries, packageversions, ANCHOR)
+                endconfig = liquidparser.liquidclimber(miniseries, packageversions, anchor)
 
             else:
                 endconfig = liquidparser.liquidclimber(constraints, todolist)
