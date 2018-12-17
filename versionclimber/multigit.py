@@ -47,7 +47,7 @@ def tags(path):
     l = [(t.commit.authored_date, t.name) for t in repo.tags]
     l.sort(key=lambda x: x[0])
     if l:
-        res = zip(*l)[1]
+        res = list(zip(*l))[1]
         print(res)
     else:
         res = []

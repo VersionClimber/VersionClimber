@@ -540,10 +540,9 @@ class YAMLEnv(MyEnv):
                 f.write(s)
 
             if status != 0:
-                print('pkg2int', self.pkg2int)
                 res = [False, 2, self.pkg2int[(conda_pkgs[0][1].name)],
                        self.pkg2int[self.universe[0]]]
-                s = 'FAIL build %s\n'%pkg
+                s = 'FAIL build %s\n'%cmd
                 logger.info(s)
                 if STAT_FILE:
                     f.write(s)
@@ -552,7 +551,8 @@ class YAMLEnv(MyEnv):
 
         for i, pkg in other_pkgs:
             t0 = clock()
-            status = self.checkout(pkg, versions[i])
+            commit = versions[i]
+            status = self.checkout(pkg, commit)
             t1 = clock()
             s = 'Install (%s,%s) in %f s\n'%(pkg, commit,(t1-t0).total_seconds())
             logger.info(s)
