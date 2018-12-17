@@ -7,7 +7,7 @@ import os
 from optparse import OptionParser
 
 from versionclimber import liquid
-from versionclimber.algo import liquidparser, demandsupply
+from versionclimber.algo import liquidparser, demandsupply, demandsupply_optimistic
 
 
 def main():
@@ -51,7 +51,7 @@ vclimb can also print all the versions of the packages
         raise ValueError("""--conf must be provided. See help (--help)""")
 
     if opts.demandsupply:
-        algo_module = demandsupply
+        algo_module = demandsupply_optimistic
     else:
         algo_module = liquidparser
 
