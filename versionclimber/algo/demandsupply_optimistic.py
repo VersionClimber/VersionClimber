@@ -222,7 +222,7 @@ def assembleconfig(cand, j, bestanchor):
 # BOOL is True if this worked and False otherwise.
 # config is the configuration that worked if there is one and empty
 # otherwise.
-def tryoptimistic(currentconfig):
+def tryoptimistic(currentconfig, miniseries):
   outconfig = []
   for j in range(len(currentconfig)):
     pv = currentconfig[j]
@@ -367,7 +367,7 @@ def liquidclimber(miniseries, packageversions, anchorFlag=True):
         print("Here is the best anchor configuration: ", c)
         bestanchor = copy.deepcopy(c)
         j = 0
-        pair = tryoptimistic(bestanchor)
+        pair = tryoptimistic(bestanchor, miniseries)
         if pair[0] is True:
           bestanchor = copy.deepcopy(pair[1])
           j = len(c) # no longer need to do the loop below

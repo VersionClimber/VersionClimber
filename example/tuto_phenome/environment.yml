@@ -13,8 +13,8 @@ dependencies:
   - blas=1.0=mkl
   - bzip2=1.0.6=h1de35cc_5
   - ca-certificates=2018.03.07=0
-  - cairo=1.14.12=he60d9cb_2
-  - certifi=2018.10.15=py27_0
+  - cairo=1.14.12=hc4e6be7_4
+  - certifi=2018.11.29=py27_0
   - cffi=1.11.5=py27h6174b99_1
   - chardet=3.0.4=py27_1
   - cloudpickle=0.6.1=py27_0
@@ -24,14 +24,15 @@ dependencies:
   - curl=7.62.0=ha441bb4_0
   - cycler=0.10.0=py27hfc73c78_0
   - cython=0.29=py27h0a44026_0
+  - cytoolz=0.9.0.1=py27h1de35cc_1
   - dask-core=1.0.0=py27_0
   - decorator=4.3.0=py27_0
   - docutils=0.14=py27h0befae3_0
   - enum34=1.1.6=py27_1
   - expat=2.2.6=h0a44026_0
-  - ffmpeg=4.0=hc84425e_0
-  - fontconfig=2.12.6=h9850fc5_0
-  - freetype=2.8=h12048fb_1
+  - ffmpeg=4.0=h01ea3c9_0
+  - fontconfig=2.13.0=h5d5b041_1
+  - freetype=2.9.1=hb4e5f40_0
   - funcsigs=1.0.2=py27hb9f6266_0
   - functools32=3.2.3.2=py27_1
   - future=0.17.1=py27_0
@@ -41,9 +42,9 @@ dependencies:
   - gitpython=2.1.11=py27_0
   - glib=2.56.2=hd9629dc_0
   - graphite2=1.3.12=h2098e52_2
-  - harfbuzz=1.7.6=h171471c_1
+  - harfbuzz=1.8.8=hb8d4a28_0
   - hdf4=4.2.13=h39711bb_2
-  - hdf5=1.8.18=h017327d_1
+  - hdf5=1.10.2=hfa1e0ec_1
   - icu=58.2=h4b95b61_1
   - idna=2.7=py27_0
   - imageio=2.4.1=py27_0
@@ -63,9 +64,9 @@ dependencies:
   - libffi=3.2.1=h475c297_4
   - libgfortran=3.0.1=h93005f0_2
   - libiconv=1.15=hdd342a3_7
-  - libnetcdf=4.6.1=hca06a9a_0
+  - libnetcdf=4.6.1=h4e6abe9_2
   - libogg=1.3.2=h1de35cc_0
-  - libopencv=3.4.1=he076b03_1
+  - libopencv=3.4.2=h7c891bd_1
   - libopus=1.3=h1de35cc_0
   - libpng=1.6.35=ha441bb4_0
   - libprotobuf=3.5.2=h2cd40f5_0
@@ -79,34 +80,34 @@ dependencies:
   - llvmlite=0.26.0=py27h8c7ce04_0
   - lz4-c=1.8.1.2=h1de35cc_0
   - markupsafe=1.1.0=py27h1de35cc_0
-  - matplotlib=2.2.2=py27ha7267d0_0
-  - mkl=2018.0.3=1
-  - mkl_fft=1.0.6=py27hb8a8100_0
-  - mkl_random=1.0.1=py27h5d10147_1
+  - matplotlib=2.2.3=py27h54f8f79_0
+  - mkl=2019.1=144
+  - mkl_fft=1.0.6=py27h27c97d8_0
+  - mkl_random=1.0.2=py27h27c97d8_0
   - ncurses=6.1=h0a44026_1
   - networkx=2.2=py27_1
   - nose=1.3.7=py27_2
   - numba=0.41.0=py27h6440ff4_0
-  - numpy=1.15.4=py27h6a91979_0
-  - numpy-base=1.15.4=py27h8a80b8c_0
+  - numpy=1.15.4=py27hacdab7b_0
+  - numpy-base=1.15.4=py27h6575580_0
   - olefile=0.46=py27_0
-  - opencv=3.4.1=py27h40b0b35_1
+  - opencv=3.4.2=py27h6fd60c2_1
   - openssl=1.1.1a=h1de35cc_0
   - packaging=18.0=py27_0
   - pandas=0.23.4=py27h6440ff4_0
   - path.py=11.5.0=py27_0
   - pathlib2=2.3.2=py27_0
   - pcre=8.42=h378b8a2_0
-  - pillow=5.1.0=py27hfcce615_0
+  - pillow=5.3.0=py27hb68e598_0
   - pip=18.1=py27_0
   - pixman=0.34.0=hca0a616_3
-  - py-opencv=3.4.1=py27ha6b5d2e_1
+  - py-opencv=3.4.2=py27h7c891bd_1
   - pycparser=2.19=py27_0
   - pygments=2.2.0=py27h1a556bb_0
   - pyopenssl=18.0.0=py27_0
   - pyparsing=2.3.0=py27_0
   - pysocks=1.6.8=py27_0
-  - python=2.7.15=h8f8e585_4
+  - python=2.7.15=h8f8e585_6
   - python-dateutil=2.7.5=py27_0
   - pytz=2018.7=py27_0
   - pywavelets=1.0.1=py27h1d22016_0
@@ -115,9 +116,9 @@ dependencies:
   - readline=7.0=h1de35cc_5
   - requests=2.20.1=py27_0
   - scandir=1.9.0=py27h1de35cc_0
-  - scikit-image=0.14.0=py27h0a44026_1
-  - scikit-learn=0.20.1=py27h4f467ca_0
-  - scipy=1.1.0=py27h28f7352_1
+  - scikit-image=0.14.1=py27h0a44026_0
+  - scikit-learn=0.20.1=py27h27c97d8_0
+  - scipy=1.1.0=py27h1410ff5_2
   - setuptools=40.6.2=py27_0
   - singledispatch=3.4.0.3=py27he22c18d_0
   - six=1.11.0=py27_1
@@ -134,7 +135,7 @@ dependencies:
   - tornado=5.1.1=py27h1de35cc_0
   - typing=3.6.6=py27_0
   - urllib3=1.23=py27_0
-  - vtk=8.1.0=py27h04d9db9_201
+  - vtk=8.1.1=py27hce9f6a2_204
   - wheel=0.32.3=py27_0
   - xz=5.2.4=h1de35cc_4
   - yaml=0.1.7=hc338f04_2
