@@ -55,7 +55,7 @@ log_file = 'versionclimber.log'
 
 def start_logging(log_file=log_file):
     logging.basicConfig(filename=log_file, level=logging.DEBUG)
-    logging.info("Hello"+ 'world'+ str(5)+ str(4.1))
+    #logging.info("Hello"+ 'world'+ str(5)+ str(4.1))
 
 # End Christophe
 
@@ -323,8 +323,10 @@ def liquidclimber(miniseries, packageversions, anchorFlag=True):
   if anchorFlag == True:
     #print('Here are the anchors to try: ', configs)
     print('Number of anchors to try: ', nb_configs)
+    logging.info('Number of anchors to try: ', nb_configs)
   if anchorFlag == False:
     print('Here is the number of configurations potentially to explore: ', nb_configs)
+    logging.info('Here is the number of configurations potentially to explore: ', nb_configs)
   notDone = True
   i = 0
   bestanchor = []
@@ -337,6 +339,7 @@ def liquidclimber(miniseries, packageversions, anchorFlag=True):
         # We're done because anchorFlag == False means we do
         # a lexicographic sort of all possible configurations
         print("Here is the best final configuration using a complete lexicographic sort: ", c)
+        logging.info("Here is the best final configuration using a complete lexicographic sort: ", c)
         return c
       elif anchorFlag == True:
         print("Here is the best anchor configuration: ", c)
@@ -347,6 +350,7 @@ def liquidclimber(miniseries, packageversions, anchorFlag=True):
           bestanchor[j]  = copy.deepcopy(x)
           j+= 1
         print("Here is the best final configuration: ", bestanchor)
+        logging.info("Here is the best final configuration: ", bestanchor)
 
   # print("Total configurations tested is: ", totaltests)
   if not bestanchor:
