@@ -215,6 +215,31 @@ def assembleconfig(cand, j, bestanchor):
     i+= 1
   return myconfig
 
+#  Given a  bestanchor
+# try the very latest package-vals of all series.
+# This is optimistic, because there is no reason to believe this will work.
+# Return a pair which is [BOOL, config].
+# BOOL is True if this worked and False otherwise.
+# config is the configuration that worked if there is one and empty
+# otherwise.
+def tryoptimistic(currentconfig, miniseries):
+  outconfig = []
+  for j in range(len(currentconfig)):
+    pv = currentconfig[j]
+    for m in miniseries:
+      if (m[0] == pv[0]) and (pv[1] in m[2]) and (m[1] == 'demand-constant'):
+        outconfig.append([pv[0],pv[1]])
+      if (m[0] == pv[0]) and (pv[1] in m[2]) and (m[1] == 'supply-constant'):
+        mymini = m[2]
+        badindex = len(mymini) # impossibly high
+        # first try the highest
+        k = badindex - 1
+        outconfig.append([pv[0], mymini[k]])
+  if works(outconfig):
+    return([True,outconfig])
+  else:
+    return([False,[]])
+
 #  Given a pv = bestanchor[j]
 # which is a package-value of one of the anchors that
 # came from the first phase, find a potentially better package-value
@@ -345,7 +370,12 @@ def liquidclimber(miniseries, packageversions, anchorFlag=True):
         print("Here is the best anchor configuration: ", c)
         bestanchor = copy.deepcopy(c)
         j = 0
-        while j < len(c):
+        pair = tryoptimistic(bestanchor, miniseries)
+        if pair[0] is True:
+          bestanchor = copy.deepcopy(pair[1])
+          j = len(c) # no longer need to do the loop below
+          print("Optimism worked!")
+        while (j < len(c)):
           x = findbetterpackval(bestanchor, j, miniseries)
           bestanchor[j]  = copy.deepcopy(x)
           j+= 1
