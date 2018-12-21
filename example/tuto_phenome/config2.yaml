@@ -1,0 +1,113 @@
+packages:
+    - name      : openalea.deploy
+      vcs       : git
+      url       : https://github.com/openalea/deploy.git
+      build_cmd : conda build
+      cmd       : conda install -y --use-local
+      conda     : True
+      recipe    : recipes/deploy
+      hierarchy : patch
+      supply    : minor
+
+    - name      : openalea.phenomenal
+      vcs       : git
+      url       : https://github.com/openalea/phenomenal.git
+      build_cmd : conda build
+      cmd       : conda install -y --use-local
+      conda     : True
+      recipe    : recipes/phenomenal
+      hierarchy : patch
+      supply    : minor
+
+    - name      : nose
+      vcs       : conda
+      cmd       : conda install -y
+      hierarchy : patch
+      supply    : minor
+
+    - name      : coverage
+      vcs       : conda
+      cmd       : conda install -y
+      hierarchy : patch
+      supply    : major
+
+    - name      : pandas
+      vcs       : conda
+      cmd       : conda install -y
+      hierarchy : patch
+      supply    : minor
+
+    - name      : vtk
+      vcs       : conda
+      cmd       : conda install -y
+      hierarchy : patch
+      supply    : minor
+
+    - name      : opencv
+      vcs       : conda
+      cmd       : conda install -y
+      hierarchy : patch
+      supply    : minor
+
+    - name      : networkx
+      vcs       : conda
+      cmd       : conda install -y
+      hierarchy : patch
+      supply    : major
+
+    - name      : scikit-image
+      vcs       : conda
+      cmd       : conda install -y
+      hierarchy : patch
+      supply    : minor
+
+    - name      : scikit-learn
+      vcs       : conda
+      cmd       : conda install -y
+      hierarchy : patch
+      supply    : minor
+
+    - name      : matplotlib
+      vcs       : conda
+      cmd       : conda install -y
+      hierarchy : patch
+      supply    : minor
+
+    - name      : scipy
+      vcs       : conda
+      cmd       : conda install -y
+      hierarchy : patch
+      supply    : minor
+
+    - name      : cython
+      vcs       : conda
+      cmd       : conda install -y
+      hierarchy : patch
+      supply    : minor
+
+    - name      : numba
+      vcs       : conda
+      cmd       : conda install -y
+      hierarchy : patch
+      supply    : minor
+
+    - name      : python
+      vcs       : conda
+      cmd       : conda install -y
+      hierarchy : patch
+      supply    : major
+
+    - name      : numpy
+      vcs       : conda
+      cmd       : conda install -y
+      hierarchy : patch
+      supply    : minor
+
+
+
+
+run:
+    - nosetests -w .vclimb/openalea.phenomenal/test
+    #- jupyter nbconvert --ExecutePreprocessor.timeout=60 --to notebook --execute ligo/index.ipynb
+post: conda env export > environment.yml
+
