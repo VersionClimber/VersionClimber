@@ -868,3 +868,28 @@ class YAMLEnv(MyEnv):
                     print(constant, ' '.join(v_dict[_version]))
 
 
+
+    def number_of_configurations(self, liquidparser, anchor=False, constraints=None):
+        ""
+        if self.algo_demandsupply:
+            packageversions, miniseries = self.monkey_patch(liquidparser)
+
+            if not constraints:
+                constraints = {}
+            versions = []
+            for pkg in packageversions:
+                if pkg[0][0] not in constraints:
+                    #versions.append(pkg)
+                    continue
+                name = pkg[0][0]
+                v = constraints[name]
+                for i, p in enumerate(pkg):
+                    if p[1] == v:
+                        versions.append(pkg[i:])
+                        continue
+
+            packageversions = versions
+
+            nb_configs, configs = liquidparser.mycrossproduct_iter(packageversions)
+
+            return nb_configs
