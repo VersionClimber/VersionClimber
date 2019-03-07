@@ -29,9 +29,9 @@ script:
   - source activate
   - git clone https://github.com/VersionClimber/VersionClimber.git
   - conda install --use-local versionclimber
-  - cd VersionClimber/example/tuto11
-  - vclimb -h
-  - vclimb -d
+  - conda install nose
+  - cd VersionClimber/test
+  - nosetests
   - cd -
 
 after_success:
