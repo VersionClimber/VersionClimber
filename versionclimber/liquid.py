@@ -833,10 +833,17 @@ class YAMLEnv(MyEnv):
             return packageversions, miniseries
 
 
-    def print_versions(self):
+    def print_versions(self, liquidparser=None):
         """ Print all the versions of the different packages."""
 
         print("-"*80)
+
+        if liquidparser:
+            nb_configs = self.number_of_configurations(liquidparser, anchor=False)
+            print("Number of configurations potentially to explore: %d "%(nb_configs))
+
+            nb_configs = self.number_of_configurations(liquidparser, anchor=True)
+            print("Number of anchors to explore: %d "%(nb_configs))
 
         versions = self.commits
         if not self.algo_demandsupply:
@@ -879,7 +886,7 @@ class YAMLEnv(MyEnv):
             versions = []
             for pkg in packageversions:
                 if pkg[0][0] not in constraints:
-                    #versions.append(pkg)
+                    versions.append(pkg)
                     continue
                 name = pkg[0][0]
                 v = constraints[name]
@@ -890,6 +897,6 @@ class YAMLEnv(MyEnv):
 
             packageversions = versions
 
-            nb_configs, configs = liquidparser.mycrossproduct_iter(packageversions)
+            nb_configs, configs = liquidparser.genconfigs(miniseries, packageversions, anchor)
 
             return nb_configs

@@ -40,7 +40,7 @@ vclimb can also print all the versions of the packages
     parser.add_option("-v", "--version", action="store_true", dest="version", default=False,
         help="Print versions of all packages")
     parser.add_option("-d", "--demandsupply", action="store_true", dest="demandsupply", default=True,
-        help="Use the demand supply algorithm")
+        help="Use the demand supply algorithm (default)")
     parser.add_option("-a", "--anchor", action="store_true", dest="anchor", default=False,
         help="Generate the cross-product of the anchor before testing all the configs.")
 
@@ -60,8 +60,6 @@ vclimb can also print all the versions of the packages
 
     env = liquid.YAMLEnv(opts.config, opts.demandsupply)
 
-    print('version ', opts.version)
-
 
     if not opts.version:
         solutions = env.run(algo_module, opts.anchor)
@@ -71,4 +69,4 @@ vclimb can also print all the versions of the packages
         for sol in solutions:
             print(sol)
     else:
-        env.print_versions()
+        env.print_versions(algo_module)
