@@ -104,10 +104,7 @@ packages:
       supply    : minor
 
 
-
-
 run:
     - nosetests -w .vclimb/openalea.phenomenal/test
-    #- jupyter nbconvert --ExecutePreprocessor.timeout=60 --to notebook --execute ligo/index.ipynb
 post: conda env export > environment.yml
 
