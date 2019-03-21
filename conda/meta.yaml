@@ -16,7 +16,8 @@ build:
 
 requirements:
   build:
-    - python {{PY_VER}}*
+    - python {{PY_VER}}* [not win]
+    - python {{PY_VER}} [win]
     - setuptools
 
   run:
