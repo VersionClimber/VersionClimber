@@ -240,7 +240,7 @@ def load_config(yaml_filename):
     f = open(yaml_filename)
     stream = f.read()
 
-    data = yaml.load(stream)
+    data = yaml.load(stream, yaml.SafeLoader)
 
     packages = []
     for pkg in data.get('packages', []):
