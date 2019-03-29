@@ -6,18 +6,21 @@ packages:
       cmd       : conda install -y
       hierarchy : patch
       supply    : minor
+      channels  : conda-forge
 
     - name      : numpy
       vcs       : conda
       cmd       : conda install -y
       hierarchy : patch
       supply    : minor
+      channels  : conda-forge
 
     - name      : matplotlib
       vcs       : conda
       cmd       : conda install -y
       hierarchy : patch
       supply    : minor
+      channels  : conda-forge
 
     - name      : seaborn
       vcs       : conda
