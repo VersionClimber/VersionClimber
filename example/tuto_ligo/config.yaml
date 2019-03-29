@@ -21,7 +21,7 @@ packages:
 
     - name      : seaborn
       vcs       : conda
-      cmd       : conda install -y --no-deps
+      cmd       : conda install -y
       hierarchy : patch
       supply    : minor
 
@@ -47,7 +47,7 @@ packages:
       vcs       : conda
       cmd       : conda install -y
       hierarchy : patch
-      supply    : minor
+      supply    : major
 
 
 run:
