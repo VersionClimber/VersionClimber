@@ -437,7 +437,7 @@ class YAMLEnv(MyEnv):
         - get the set of versions
 
     """
-    def __init__(self, config_file, demandsupply=False):
+    def __init__(self, config_file, demandsupply=False, newenv=True):
         config = load_config(config_file)
         self.pkgs = config['packages']
         self.cmd = config['run']
@@ -445,6 +445,9 @@ class YAMLEnv(MyEnv):
         self.post_stage = config['post']
 
         self.algo_demandsupply = demandsupply
+        self.newenv = True
+        self.conda_env = 'test_%d'
+        self.conda_numenv = 0
 
         if isinstance(self.cmd, list):
             self.cmd = self.cmd[0]
@@ -488,7 +491,7 @@ class YAMLEnv(MyEnv):
         status = pkg.local_install(commit,version=version)
         return status
 
-    def install_config(self, semantic_config):
+    def install_config(self, semantic_config, count):
         """ Install a set of packages in the most atomic way.
 
         We will first install all the conda packages. Then use other commands separetly.
@@ -517,11 +520,15 @@ class YAMLEnv(MyEnv):
 
             channel_str = ' '.join(['-c '+ channel for channel in channels])
 
-            cmd = 'conda install -y'
-            for i, pkg in conda_pkgs:
-                if len(pkg.cmd) > len(cmd):
-                    # more options have been given in the command
-                    cmd = pkg.cmd
+            if self.newenv:
+                conda_name = self.conda_env%count
+                cmd = 'conda create -y -n %s '%(conda_name)
+            else:
+                cmd = 'conda install -y'
+                for i, pkg in conda_pkgs:
+                    if len(pkg.cmd) > len(cmd):
+                        # more options have been given in the command
+                        cmd = pkg.cmd
 
             cmd_list = [cmd]
             cmd_list.append(channel_str)
@@ -538,6 +545,11 @@ class YAMLEnv(MyEnv):
             logger.info(s)
             if STAT_FILE:
                 f.write(s)
+
+            if self.newenv:
+                cmd_activate = 'source activate %s'%conda_name
+                status2 = sh(cmd_activate)
+                status = status + status2
 
             if status != 0:
                 res = [False, 2, self.pkg2int[(conda_pkgs[0][1].name)],
@@ -621,12 +633,14 @@ class YAMLEnv(MyEnv):
 
             tx = clock()
 
-            status, ret = env.install_config(semantic_config)
+            status, ret = env.install_config(semantic_config, count=count)
             if status and ret:
                 return ret
             elif status:
                 if STAT_FILE: f.close()
                 res = [False, 2, -1, -1]
+                if env.newenv:
+                    env.remove_conda_env(count)
                 return res
 
             t2 = clock()
@@ -644,6 +658,8 @@ class YAMLEnv(MyEnv):
                 if STAT_FILE: f.write('Execution FAILED\n')
                 logger.info('Status '+str(status))
 
+            if env.newenv:
+                env.remove_conda_env(count)
 
             s = 'Total time: %f s\n'%(t3-tx).total_seconds()
             if STAT_FILE: f.write(s)
@@ -691,13 +707,16 @@ class YAMLEnv(MyEnv):
 
             tx = clock()
 
-            status, ret = env.install_config(semantic_config)
+            status, ret = env.install_config(semantic_config, count=count)
             if status:
                 return False
 
             t2 = clock()
             status = env.one_run()
             #status = 0
+
+            if env.newenv:
+                env.remove_conda_env(count)
 
             t3 = clock()
 
@@ -762,6 +781,18 @@ class YAMLEnv(MyEnv):
     def restore(self):
         for pkg in self.pkgs:
             pkg.restore()
+
+    def remove_conda_env(self, count):
+        status = 0
+        if self.newenv:
+            cmd_deactivate = 'source deactivate'
+            status = sh(cmd_deactivate)
+
+            conda_name = self.conda_env%count
+            cmd = 'conda remove -y -n %s --all'%conda_name
+            status = sh(cmd)
+        return status
+
 
     def run(self, liquidparser, anchor=False):
 
