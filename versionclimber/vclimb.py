@@ -43,7 +43,7 @@ vclimb can also print all the versions of the packages
         help="Use the demand supply algorithm (default)")
     parser.add_option("-a", "--anchor", action="store_true", dest="anchor", default=False,
         help="Generate the cross-product of the anchor before testing all the configs.")
-    parser.add_option("-e", "--env", action="store_true", dest="newenv", default=True,
+    parser.add_option("-e", "--env", action="store_true", dest="newenv", default=False,
         help="Create a new conda environment at each iteration.")
 
     (opts, args)= parser.parse_args()
