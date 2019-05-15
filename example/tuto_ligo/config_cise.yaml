@@ -1,0 +1,56 @@
+pre: git clone https://github.com/pradal/ligo-binder.git ligo
+
+packages:
+    - name      : scipy
+      vcs       : conda
+      cmd       : conda install -y
+      hierarchy : patch
+      supply    : minor
+
+    - name      : numpy
+      vcs       : conda
+      cmd       : conda install -y
+      hierarchy : patch
+      supply    : minor
+
+    - name      : matplotlib
+      vcs       : conda
+      cmd       : conda install -y
+      hierarchy : patch
+      supply    : minor
+
+    - name      : seaborn
+      vcs       : conda
+      cmd       : conda install -y --no-deps
+      hierarchy : patch
+      supply    : minor
+
+    - name      : h5py
+      vcs       : conda
+      cmd       : conda install -y
+      hierarchy : patch
+      supply    : minor
+
+    - name      : notebook
+      vcs       : conda
+      cmd       : conda install -y
+      hierarchy : patch
+      supply    : minor
+
+    - name      : nbconvert
+      vcs       : conda
+      cmd       : conda install -y
+      hierarchy : patch
+      supply    : minor
+
+    - name      : python
+      vcs       : conda
+      cmd       : conda install -y
+      hierarchy : patch
+      supply    : major
+
+
+run:
+    - jupyter-nbconvert --ExecutePreprocessor.timeout=60 --to notebook --execute ligo/index.ipynb
+
+post: conda env export > environment.yml
