@@ -9,6 +9,7 @@ from __future__ import absolute_import
 from __future__ import print_function
 import itertools
 import logging
+from platform import system
 
 # import git
 from .utils import sh, Path, new_stat_file, clock
