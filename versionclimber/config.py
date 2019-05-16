@@ -169,7 +169,7 @@ class Package(object):
         return status
 
 
-    def local_install(self, commit, version=None):
+    def local_install(self, commit, version=None, env=None):
         """ Checkout or update the package to a given commit version.
         Install it with pip at this given revision.
         """
@@ -178,6 +178,7 @@ class Package(object):
         if self.vcs == 'pypi':
             cmd = '%s %s==%s' % (self.cmd, self.name, commit)
         elif self.vcs == 'conda':
+            # TODO : run the command in a new env with activate and deactivate
             cmd_list = [self.cmd]
             cmd_list.append(channels)
 
@@ -203,6 +204,9 @@ class Package(object):
                 _version = self.get_version(commit, version=version)
                 cmd = 'conda install -y --use-local %s=%s'%(self.name, _version)
                 cmd = '%s -y %s %s=%s'%(self.cmd, channels, self.name, _version)
+
+                if env:
+                    cmd = ';'.join(['source activate %s'%(env), cmd])
 
         status = sh(cmd)
         return status

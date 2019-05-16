@@ -59,7 +59,7 @@ def pypi_versions(package_name):
 
     return versions
 
-def conda_versions(package_name, channels=[], build='py27'):
+def conda_versions(package_name, channels=[], build=''): #build='py27'):
     """ Retrieve the different versions of a package on anaconda.
 
     Returns the versions as a sorted list.
