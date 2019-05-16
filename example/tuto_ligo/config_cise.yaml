@@ -13,7 +13,7 @@ packages:
       hierarchy : patch
       supply    : minor
 
-    - name      : matplotlib
+    - name      : h5py
       vcs       : conda
       cmd       : conda install -y
       hierarchy : patch
@@ -25,12 +25,6 @@ packages:
       hierarchy : patch
       supply    : minor
 
-    - name      : h5py
-      vcs       : conda
-      cmd       : conda install -y
-      hierarchy : patch
-      supply    : minor
-
     - name      : notebook
       vcs       : conda
       cmd       : conda install -y
@@ -38,6 +32,12 @@ packages:
       supply    : minor
 
     - name      : nbconvert
+      vcs       : conda
+      cmd       : conda install -y
+      hierarchy : patch
+      supply    : minor
+
+    - name      : matplotlib
       vcs       : conda
       cmd       : conda install -y
       hierarchy : patch
