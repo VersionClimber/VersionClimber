@@ -489,7 +489,11 @@ class YAMLEnv(MyEnv):
         else:
             pkg = self.pkg_names[pkg_name]
         version = self.bidir_commits[pkg_name][0][commit]
-        status = pkg.local_install(commit,version=version)
+
+        env = None
+        if self.newenv:
+            env = self.current_conda_env()
+        status = pkg.local_install(commit,version=version, env=env)
         return status
 
     def install_config(self, semantic_config, count):
@@ -522,7 +526,7 @@ class YAMLEnv(MyEnv):
             channel_str = ' '.join(['-c '+ channel for channel in channels])
 
             if self.newenv:
-                conda_name = self.conda_env%count
+                conda_name = self.current_conda_env()
                 cmd = 'conda create -y -n %s '%(conda_name)
             else:
                 cmd = 'conda install -y'
@@ -548,7 +552,7 @@ class YAMLEnv(MyEnv):
                 f.write(s)
 
             if self.newenv:
-                cmd_activate = 'source activate %s'%conda_name
+                cmd_activate = self.conda_activate()
                 status2 = sh(cmd_activate)
                 status = status + status2
 
@@ -585,6 +589,13 @@ class YAMLEnv(MyEnv):
         """
 
         cmd = self.cmd
+
+        if self.newenv:
+            # WARNING: only valid on Linux and Windows
+            cmd_activate = self.conda_activate()
+            cmd_deactivate = self.conda_deactivate()
+
+            cmd = ';'.join([cmd_activate, cmd, cmd_deactivate])
 
         status = sh(cmd)
         if Path(self.error_file).exists():
@@ -783,17 +794,37 @@ class YAMLEnv(MyEnv):
         for pkg in self.pkgs:
             pkg.restore()
 
-    def remove_conda_env(self, count):
+    def remove_conda_env(self):
         status = 0
         if self.newenv:
-            cmd_deactivate = 'source deactivate'
+            cmd_deactivate = self.conda_deactivate()
             status = sh(cmd_deactivate)
 
-            conda_name = self.conda_env%count
+            conda_name = self.current_conda_env()
             cmd = 'conda remove -y -n %s --all'%conda_name
             status = sh(cmd)
         return status
 
+    def conda_activate(self):
+        pre = 'source '
+        if system() == 'Windows':
+            pre = ''
+
+        cname = self.current_conda_env()
+        cmd_activate = pre+'activate '+cname
+        return cmd_activate
+
+    def conda_deactivate(self):
+        pre = 'source '
+        if system() == 'Windows':
+            pre = ''
+
+        cmd_deactivate = pre+'deactivate'
+        return cmd_deactivate
+
+    def current_conda_env(self):
+        conda_name = self.conda_env%self.count
+        return conda_name
 
     def run(self, liquidparser, anchor=False):
 
