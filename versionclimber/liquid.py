@@ -558,7 +558,7 @@ class YAMLEnv(MyEnv):
             logger.info(s)
 
             if status:
-                res, [False, 2, self.pkg2int[pkg.name],
+                res = [False, 2, self.pkg2int[pkg.name],
                        self.pkg2int[self.universe[0]]]
                 return status, res
 
