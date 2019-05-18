@@ -552,7 +552,7 @@ class YAMLEnv(MyEnv):
         for i, pkg in other_pkgs:
             t0 = clock()
             commit = versions[i]
-            python_ver = python_version(pkgs)
+            python_ver = python_version(pkgs, versions)
             status = self.checkout(pkg, commit, python=python_ver)
             t1 = clock()
             s = 'Install (%s,%s) in %f s\n'%(pkg, commit,(t1-t0).total_seconds())
@@ -903,9 +903,9 @@ class YAMLEnv(MyEnv):
             return nb_configs
 
 
-def python_version(pkgs):
+def python_version(pkgs, versions):
     """ Return the Python version. """
-    py_pkg = [p for p in pkgs if p.name.lower()=='python']
-    version = py_pkg[0].version if py_pkg else None
+    py_pkg = [i for i, p in enumerate(pkgs) if p.name.lower()=='python']
+    version = versions[py_pkg[0]] if py_pkg else None
     return version
 
