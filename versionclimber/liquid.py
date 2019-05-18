@@ -475,7 +475,7 @@ class YAMLEnv(MyEnv):
         self.error_file = 'error.txt'
 
 
-    def checkout(self, pkg_name, commit):
+    def checkout(self, pkg_name, commit, python=None):
         """ Install the package `pkg_name` at a given version.
 
         """
@@ -485,7 +485,7 @@ class YAMLEnv(MyEnv):
         else:
             pkg = self.pkg_names[pkg_name]
         version = self.bidir_commits[pkg_name][0][commit]
-        status = pkg.local_install(commit,version=version)
+        status = pkg.local_install(commit,version=version, python=python)
         return status
 
     def install_config(self, semantic_config):
@@ -552,7 +552,8 @@ class YAMLEnv(MyEnv):
         for i, pkg in other_pkgs:
             t0 = clock()
             commit = versions[i]
-            status = self.checkout(pkg, commit)
+            python_ver = python_version(pkgs)
+            status = self.checkout(pkg, commit, python=python_ver)
             t1 = clock()
             s = 'Install (%s,%s) in %f s\n'%(pkg, commit,(t1-t0).total_seconds())
             logger.info(s)
@@ -900,3 +901,11 @@ class YAMLEnv(MyEnv):
             nb_configs, configs = liquidparser.genconfigs(miniseries, packageversions, anchor)
 
             return nb_configs
+
+
+def python_version(pkgs):
+    """ Return the Python version. """
+    py_pkg = [p for p in pkgs if p.name.lower()=='python']
+    version = py_pkg[0].version if py_pkg else None
+    return version
+

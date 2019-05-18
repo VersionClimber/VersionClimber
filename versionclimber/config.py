@@ -169,7 +169,7 @@ class Package(object):
         return status
 
 
-    def local_install(self, commit, version=None):
+    def local_install(self, commit, version=None, python=None):
         """ Checkout or update the package to a given commit version.
         Install it with pip at this given revision.
         """
@@ -193,6 +193,8 @@ class Package(object):
                 cmd_list = [self.build_cmd]
                 cmd_list.append(channels)
                 cmd_list.append(self.recipe_dir)
+                if python:
+                    cmd_list.append('--python %s'%(python))
                 build_cmd = ' '.join(cmd_list)
 
                 logger.info('Build conda package: %s '%(build_cmd))
