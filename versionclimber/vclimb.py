@@ -24,11 +24,11 @@ def main():
 vclimb traverse the versions of the packages and get the optimal one.
 Example
 
-       vclimb --conf config.yaml --log vclimb.log
+       vclimb server|client --conf config.yaml --log vclimb.log
 
 vclimb can also print all the versions of the packages
 
-        vclimb --conf config.yaml  --version
+        vclimb server|client --conf config.yaml  --version
 """
 
     parser = OptionParser(usage=usage)
@@ -45,6 +45,14 @@ vclimb can also print all the versions of the packages
         help="Generate the cross-product of the anchor before testing all the configs.")
 
     (opts, args)= parser.parse_args()
+
+    server = True
+    if len(args) != 1:
+        parser.error("incorrect number of arguments")
+    elif args[0] not in ('client', 'server'):
+        parser.error("argument must be client or server")
+    else:
+        server = True if args[0] == 'server' else False
 
 
     if opts.config == None:
