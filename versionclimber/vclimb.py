@@ -46,13 +46,12 @@ vclimb can also print all the versions of the packages
 
     (opts, args)= parser.parse_args()
 
-    server = True
-    if len(args) != 1:
-        parser.error("incorrect number of arguments")
-    elif args[0] not in ('client', 'server'):
-        parser.error("argument must be client or server")
-    else:
-        server = True if args[0] == 'server' else False
+    mode_server = None
+    if len(args) == 1:
+        if args[0] not in ('client', 'server'):
+            parser.error("argument must be client or server")
+        else:
+            mode_server = args[0]
 
 
     if opts.config == None:
@@ -66,8 +65,13 @@ vclimb can also print all the versions of the packages
     if not opts.version:
         algo_module.start_logging(opts.log_file)
 
-    env = liquid.YAMLEnv(opts.config, opts.demandsupply)
-
+    env = None
+    if mode_server is None:
+        env = liquid.YAMLEnv(opts.config, opts.demandsupply)
+    elif mode_server == 'server':
+        env = server.YAMLEnv(opts.config, opts.demandsupply)
+    elif mode_server == 'client':
+        env = client.YAMLEnv(opts.config, opts.demandsupply)
 
     if not opts.version:
         solutions = env.run(algo_module, opts.anchor)
