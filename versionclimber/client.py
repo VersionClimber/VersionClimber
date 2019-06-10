@@ -337,25 +337,29 @@ class ClientEnv(YAMLEnv):
 
         #########################################
         # Client
+        # TODO
+        socket = self.socket
+        slaveidstring = str(self.slaveid) + " "
+        currentindex = -1
         while True:
-          print slaveidstring, "requestwork", currentindex
+          print(slaveidstring, "requestwork", currentindex)
           socket.send(b'request:' + slaveidstring + 'requestwork ' + str(currentindex))
           data = socket.recv()
-          print "master requests work on: ", data
+          print("master requests work on: ", data)
           x = data.split(" ")
-          print "x is: ", x
+          print("x is: ", x)
           currentindex = int(x[0])
           c = x[1]
           if x[2] == 'Tried_everything':
-            print 'Wait for others'
+            print('Wait for others')
           status = tryconfig(c)
-          print 'status on configuration ', c, ' is: ', status
+          print('status on configuration ', c, ' is: ', status)
           socket.send(b'update:' + slaveidstring + 'updatestatus ' + str(currentindex) + ' ' + str(status))
           data = socket.recv()
           x = data.split(" ")
-          print "return from updatestatus is: ", data
+          print("return from updatestatus is: ", data)
           if x[1] == 'Success':
-            print 'configuration ', c, ' is a winner: '
+            print('configuration ', c, ' is a winner: ')
             break
 
         #########################################

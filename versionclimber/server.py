@@ -92,14 +92,14 @@ class ServerEnv(YAMLEnv):
             numpart= ((fields[0]).split(":"))[1]
             if fields[1] == 'requestwork':
                ret = liquidparser.requestwork(int(numpart), int(fields[2]))
-               print 'ret from requestwork: ', ret
+               print('ret from requestwork: ', ret)
             if fields[1] == 'updatestatus':
                ret = liquidparser.updatestatus(int(numpart), int(fields[2]), int(fields[3]))
-               print 'ret from updatestatus: ', ret
+               print('ret from updatestatus: ', ret)
             if ret == 'Success':
                break
-            print "return value: ", ret
-            print "~~~~~~~~"
+            print("return value: ", ret)
+            print("~~~~~~~~")
             self.socket.send("%s " % (ret))
 
 
