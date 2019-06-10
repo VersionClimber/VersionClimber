@@ -69,7 +69,7 @@ vclimb can also print all the versions of the packages
     if mode_server is None:
         env = liquid.YAMLEnv(opts.config, opts.demandsupply)
     elif mode_server == 'server':
-        env = server.YAMLEnv(opts.config, opts.demandsupply)
+        env = server.ServerEnv(opts.config, opts.demandsupply)
     elif mode_server == 'client':
         env = client.YAMLEnv(opts.config, opts.demandsupply)
 

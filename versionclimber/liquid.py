@@ -438,7 +438,7 @@ class YAMLEnv(MyEnv):
 
     """
     def __init__(self, config_file, demandsupply=False):
-        config = load_config(config_file)
+        self._config = config = load_config(config_file)
         self.pkgs = config['packages']
         self.cmd = config['run']
         self.pre_stage = config['pre']
