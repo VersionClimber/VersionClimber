@@ -43,6 +43,8 @@ vclimb can also print all the versions of the packages
         help="Use the demand supply algorithm (default)")
     parser.add_option("-a", "--anchor", action="store_true", dest="anchor", default=False,
         help="Generate the cross-product of the anchor before testing all the configs.")
+    parser.add_option("-s", "--slaveid", , dest="slaveid", default='0',
+        help="Set the identifier of the client (client only) .")
 
     (opts, args)= parser.parse_args()
 
