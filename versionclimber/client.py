@@ -21,6 +21,9 @@ from six.moves import range
 from six.moves import zip
 
 from collections import OrderedDict
+from .liquid import YAMLEnv
+import zmq
+
 
 # Create a singleton defined once by the init method
 # replace all that stuff with Objects.
@@ -39,15 +42,17 @@ class ClientEnv(YAMLEnv):
         - get the set of versions
 
     """
-    def __init__(self, config_file, demandsupply=False, slaveid=0):
+    def __init__(self, config_file, demandsupply=False, slaveid=0, debug=False):
         """ Initialisation of the server.
         TODO: Add server ip address.
         """
-        YAMLEnv.__init__(self, config_file, demandsupply)
+        if not debug:
+            YAMLEnv.__init__(self, config_file, demandsupply)
         self.context = zmq.Context()
         self.socket = self.context.socket(zmq.REQ)
         self.socket.connect("tcp://localhost:50008")
-        self.slaveid = 0
+        self.slaveid = slaveid
+        self.debug = True
 
     def install_config(self, semantic_config):
         """ Install a set of packages in the most atomic way.
@@ -56,6 +61,8 @@ class ClientEnv(YAMLEnv):
         """
         # TODO : Move the main code in a new object PackageSet
 
+        if self.debug:
+            return 0, None
         #print(semantic_config) # log this
         pkg_names= list(semantic_config.keys())
         commits = list(semantic_config.values())
@@ -329,11 +336,29 @@ class ClientEnv(YAMLEnv):
 
         tx = clock()
 
-        works = self.works()
-        liquidparser.works = works
+        if not self.debug:
+            works = self.works()
+            liquidparser.works = works
 
-        if self.pre_stage:
-            status = sh(self.pre_stage)
+            def tryconfig(c):
+                print ('try config ', c)
+                if works(c):
+                    return 1
+                else:
+                    return 0
+
+            if self.pre_stage:
+                status = sh(self.pre_stage)
+        else:
+            def tryconfig(c):
+                print ('try config ', c)
+                if c == '1,1,1'.split(','):
+                    return 'Success'
+                else:
+                    if int(c[0]) <= 2 and int(c[1]) <= 4 and int(c[2]) <= 4:
+                        return 'Success'
+                    else:
+                        return 'Fail'
 
         #########################################
         # Client
@@ -342,25 +367,29 @@ class ClientEnv(YAMLEnv):
         slaveidstring = str(self.slaveid) + " "
         currentindex = -1
         while True:
-          print(slaveidstring, "requestwork", currentindex)
+          print(slaveidstring, "requestwork ", currentindex)
           socket.send(b'request:' + slaveidstring + 'requestwork ' + str(currentindex))
           data = socket.recv()
           print("master requests work on: ", data)
-          x = data.split(" ")
+          x = data.split(" ") # message is -1, currentindex, configarray
           print("x is: ", x)
-          currentindex = int(x[0])
-          c = x[1]
+          packageindex = int(x[0])
+          currentindex = int(x[1])
+          c = x[2].split(',')
+
           if x[2] == 'Tried_everything':
             print('Wait for others')
+
           status = tryconfig(c)
           print('status on configuration ', c, ' is: ', status)
-          socket.send(b'update:' + slaveidstring + 'updatestatus ' + str(currentindex) + ' ' + str(status))
+          socket.send(b'update:' + slaveidstring + 'updatestatus ' + str(packageindex) +' ' +
+                      str(currentindex) + ' ' + str(status))
           data = socket.recv()
           x = data.split(" ")
           print("return from updatestatus is: ", data)
           if x[1] == 'Success':
             print('configuration ', c, ' is a winner: ')
-            break
+
 
         #########################################
 
