@@ -312,6 +312,12 @@ class ServerEnv(YAMLEnv):
             if r_status == 'Success':
              status[r_packageindex] = 'found'
              bestconfig[ret[0]] = miniseries[ret[0]][ret[1]]
+             miniseries[ret[0]] = miniseries[ret[0]][ret[1]:]
+             if len(miniseries[ret[0]]) > 1:
+               status[ret[0]] = 'available'
+             else:
+               status[ret[0]] = 'found'
+
             else:
              miniseries[ret[0]] = miniseries[ret[0]][0:ret[1]]
              # truncate up to but not including that index
@@ -320,6 +326,8 @@ class ServerEnv(YAMLEnv):
              else:
                status[ret[0]] = 'found'
                bestconfig[ret[0]] = miniseries[ret[0]][0]
+            print('MINISERIES: ', miniseries)
+
           # recalculate numberleft
           i = 0
           numberleft = 0
@@ -334,7 +342,8 @@ class ServerEnv(YAMLEnv):
           print("~~~~~~~~")
           self.socket.send("%s " % (ret_msg))
 
-
+        print('*'*80)
+        print('status: ', status)
         # Confirmation: So now we have numberleft == 0
         # Test bestconfig and if that doesn't succeed, replace bestconfig
         # with workingnchors.

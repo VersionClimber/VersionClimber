@@ -379,16 +379,19 @@ class ClientEnv(YAMLEnv):
 
           if x[2] == 'Tried_everything':
             print('Wait for others')
-
-          status = tryconfig(c)
-          print('status on configuration ', c, ' is: ', status)
-          socket.send(b'update:' + slaveidstring + 'updatestatus ' + str(packageindex) +' ' +
+          else:
+            c = x[2].split(',')
+            status = tryconfig(c)
+            print('status on configuration ', c, ' is: ', status)
+            socket.send(b'update:' + slaveidstring + 'updatestatus ' + str(packageindex) +' ' +
                       str(currentindex) + ' ' + str(status))
+
           data = socket.recv()
           x = data.split(" ")
           print("return from updatestatus is: ", data)
           if x[1] == 'Success':
             print('configuration ', c, ' is a winner: ')
+            break
 
 
         #########################################
