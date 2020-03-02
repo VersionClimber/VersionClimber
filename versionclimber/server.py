@@ -13,6 +13,7 @@ import zmq
 
 from .liquid import YAMLEnv
 from .utils import sh, Path, new_stat_file, clock
+import config
 
 # Create a singleton defined once by the init method
 # replace all that stuff with Objects.
@@ -38,6 +39,9 @@ class ServerEnv(YAMLEnv):
         self.context = zmq.Context()
         self.socket = self.context.socket(zmq.REP)
         self.socket.bind("tcp://*:50008")
+
+        # Add config_file to send the content to clients
+        self.config_file = config_file
 
 
     def monkey_patch(self, liquidparser, knowcaller=False):
@@ -76,11 +80,16 @@ class ServerEnv(YAMLEnv):
         tx = clock()
 
         if not self.debug:
-
             if self.algo_demandsupply:
                 packageversions, miniseries = self.monkey_patch(liquidparser)
             else:
                 constraints, todolist = self.monkey_patch(liquidparser)
+        else:
+          # Get the configuration to know the package names & co.
+          global_configuration = config.load_config(self.config_file)
+          self.
+          # send the configuration to all clients
+
 
 
         ######################################
@@ -90,11 +99,22 @@ class ServerEnv(YAMLEnv):
         encode_config = lambda c: ','.join(map(str,c))
         MAX_EX = 0
 
+        # Build config array in parallel on client side
         # configarray is the set of miniseries (call this miniseries?)
         configarray = []
         configarray = [['highconfig'], ['midconfig'], ['lowconfig']]
         configarray = [[3,3,3], [2,2,2], [1, 1, 1] ]
+
         # CPL: generate configarray (client vs server).
+        hasbuildconfig = False
+        while (not hasbuildconfig):
+            data = self.socket.recv()
+            if not data: break
+            print('data are ', data)
+
+            fields = data.split(" ")
+            print("fields are: ", fields)
+
 
         # In addition we have an array of statuses that is of the same size
         # and that is initialized to the value "undone".
