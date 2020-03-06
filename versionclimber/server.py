@@ -76,11 +76,11 @@ class ServerEnv(YAMLEnv):
         tx = clock()
 
         if not self.debug:
-
             if self.algo_demandsupply:
                 packageversions, miniseries = self.monkey_patch(liquidparser)
             else:
                 constraints, todolist = self.monkey_patch(liquidparser)
+        else:
 
 
         ######################################
@@ -90,11 +90,22 @@ class ServerEnv(YAMLEnv):
         encode_config = lambda c: ','.join(map(str,c))
         MAX_EX = 0
 
+        # Build config array in parallel on client side
         # configarray is the set of miniseries (call this miniseries?)
         configarray = []
         configarray = [['highconfig'], ['midconfig'], ['lowconfig']]
         configarray = [[3,3,3], [2,2,2], [1, 1, 1] ]
+
         # CPL: generate configarray (client vs server).
+        hasbuildconfig = False
+        while (not hasbuildconfig):
+            data = self.socket.recv()
+            if not data: break
+            print('data are ', data)
+
+            fields = data.split(" ")
+            print("fields are: ", fields)
+
 
         # In addition we have an array of statuses that is of the same size
         # and that is initialized to the value "undone".

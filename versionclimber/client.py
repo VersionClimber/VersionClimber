@@ -362,9 +362,21 @@ class ClientEnv(YAMLEnv):
 
         #########################################
         # Client
-        # TODO
+        # TODO : implement messaging protocol
+
         socket = self.socket
         slaveidstring = str(self.slaveid) + " "
+
+        while True:
+          print(slaveidstring, "requestconfig ")
+          socket.send(b'request:' + slaveidstring + 'requestconfig ')
+          data = socket.recv()
+          print("master requests work on: ", data)
+          x = data.split(" ") # message is -1, currentindex, configarray
+          print("x is: ", x)
+          packagename = str(x[0])
+
+
         currentindex = -1
         while True:
           print(slaveidstring, "requestwork ", currentindex)
