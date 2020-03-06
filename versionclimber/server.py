@@ -13,6 +13,7 @@ import zmq
 
 from .liquid import YAMLEnv
 from .utils import sh, Path, new_stat_file, clock
+import config
 
 # Create a singleton defined once by the init method
 # replace all that stuff with Objects.
@@ -38,6 +39,9 @@ class ServerEnv(YAMLEnv):
         self.context = zmq.Context()
         self.socket = self.context.socket(zmq.REP)
         self.socket.bind("tcp://*:50008")
+
+        # Add config_file to send the content to clients
+        self.config_file = config_file
 
 
     def monkey_patch(self, liquidparser, knowcaller=False):
@@ -81,6 +85,11 @@ class ServerEnv(YAMLEnv):
             else:
                 constraints, todolist = self.monkey_patch(liquidparser)
         else:
+          # Get the configuration to know the package names & co.
+          global_configuration = config.load_config(self.config_file)
+          self.
+          # send the configuration to all clients
+
 
 
         ######################################

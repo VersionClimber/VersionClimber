@@ -238,11 +238,23 @@ def load_config(yaml_filename):
 
     TODO: manage errors
     """
-    config = {}
     f = open(yaml_filename)
     stream = f.read()
 
-    data = yaml.load(stream, yaml.SafeLoader)
+    config = load_config_from_stream(stream)
+
+    f.close()
+
+    return config
+
+
+def load_config_from_stream(yaml_stream):
+    """ Create an environment from a yaml string.
+
+    TODO: manage errors
+    """
+    config = {}
+    data = yaml.load(yaml_stream, yaml.SafeLoader)
 
     packages = []
     for pkg in data.get('packages', []):
@@ -257,6 +269,7 @@ def load_config(yaml_filename):
     config['algo'] = data.get('algo', 'demandsupply')
 
     return config
+
 
 #if __name__ == '__main__':
 #    load_config('../examples/config.yaml')
