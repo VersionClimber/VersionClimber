@@ -7,6 +7,11 @@ context = zmq.Context()
 socket = context.socket(zmq.REQ)
 socket.connect("tcp://localhost:50008")
 
+
+#########################################
+# Configuration
+#########################################
+
 # 1st step: Request the configuration
 m = Message('request', 'config')
 socket.send_pyobj(m)

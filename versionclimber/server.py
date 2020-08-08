@@ -1,8 +1,10 @@
-""" Simple test for liquid VM
+""" Version Climber server.
 
-foo: healthy_head
-goo: master
-hoo : master
+This zmq server communicates with various identical clients
+to find the optimal configuration.
+
+First only anchor versions are explored.
+Then the miniserie is explored to find the optimal solution.
 """
 
 from __future__ import absolute_import
@@ -35,6 +37,7 @@ class ServerEnv(YAMLEnv):
         """
         if not debug:
             YAMLEnv.__init__(self, config_file, demandsupply)
+
         self.debug = debug
         self.context = zmq.Context()
         self.socket = self.context.socket(zmq.REP)
@@ -86,9 +89,12 @@ class ServerEnv(YAMLEnv):
                 constraints, todolist = self.monkey_patch(liquidparser)
         else:
           # Get the configuration to know the package names & co.
+
+          # 1. Compute packaheversions and miniseries
           global_configuration = config.load_config(self.config_file)
-          self.
-          # send the configuration to all clients
+
+          # send the configuration when clients ask
+          packageversions, miniseries = self.supply_constant_packages()
 
 
 
@@ -100,10 +106,10 @@ class ServerEnv(YAMLEnv):
         MAX_EX = 0
 
         # Build config array in parallel on client side
-        # configarray is the set of miniseries (call this miniseries?)
+        # configarray is the set of anchors (see genconfig)
         configarray = []
         configarray = [['highconfig'], ['midconfig'], ['lowconfig']]
-        configarray = [[3,3,3], [2,2,2], [1, 1, 1] ]
+        configarray = [[3,3,3], [2,2,2], [1,1,1] ]
 
         # CPL: generate configarray (client vs server).
         hasbuildconfig = False
@@ -116,7 +122,7 @@ class ServerEnv(YAMLEnv):
             print("fields are: ", fields)
 
 
-        # In addition we have an array of statuses that is of the same size
+        # In addition we have an array of status that is of the same size
         # and that is initialized to the value "undone".
         # Altogether there are three statuses: "undone", "success", "fail"
         # CPL: define status based on a kind of enum
@@ -172,7 +178,7 @@ class ServerEnv(YAMLEnv):
                 print('ret from requestwork: ', ret)
                 currentindex+= 1
               else:
-                # Have no more configs to try start again
+                # Have no more configs to try: start again
                 currentindex = 0
                 while (currentindex < len(configarray)) and (statusarray[currentindex] != "undone"):
                   currentindex+= 1
@@ -261,7 +267,7 @@ class ServerEnv(YAMLEnv):
         # The formconfig function takes all working anchors except for
         # the one for packageindex and builds a configuration from that
 
-        # assemble a configuration from cand at position j of bestconfig
+        # assemble a configuration from c and at position j of bestconfig
         def formconfig(j, cand, bestconfig=bestconfig):
             myconfig = []
             for i in range(numpackages):
