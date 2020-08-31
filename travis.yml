@@ -26,13 +26,6 @@ before_script:
 
 script:
   - source script.sh
-  - source activate
-  - git clone https://github.com/VersionClimber/VersionClimber.git
-  - conda install --use-local versionclimber
-  - conda install nose
-  - cd VersionClimber/test
-  - nosetests
-  - cd -
 
 after_success:
   - source after_success.sh
