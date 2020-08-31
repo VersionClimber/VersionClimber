@@ -339,7 +339,8 @@ while numberleft > 0:
     #if (fields[1] == 'requestwork'):
         packageindex = 0
         while (packageindex < numpackages) and (status[packageindex] != 'available'):
-            packageindex+=1
+            packageindex += 1
+
         if (packageindex == numpackages):
             # nothing available but maybe something not found
             packageindex = 0
@@ -392,4 +393,33 @@ while numberleft > 0:
             numberleft+= 1
         i+= 1
 
+# TODO
+# Confirmation: So now we have numberleft == 0
+# Test bestconfig and if that doesn't succeed, replace bestconfig
+# with workingnchors.
+# Bestconfig will work if we were right about supplyconstant etc
+
+"""
+data = self.socket.recv_pyobj()
+print(data)
+print('data are ', data)
+if not data: break
+
+
+if data.category == 'update_status':
+    # CPL: TODO !!!
+     # Status update will be given back slaveid, 'updatestatus', mini-series, index, and success/fail.
+     client_pkgindex, client_index, client_status = data.content
+     #ret = [int(fields[2]), int(fields[3]), fields[4]]
+     if (client_pkgindex == -1): # this is the test on bestconfig
+       if client_status == 'success':
+         print('Best config is: ' + bestconfig)
+       else:
+         print('Best config is: ' + workinganchors)
+
+if data.category == 'request_work':
+    ret = [-1, -1, bestconfig]
+    m = Message('send_work', ret)
+    socket.send_pyobj(m)
+"""
 
