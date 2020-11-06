@@ -15,7 +15,7 @@ import zmq
 
 from .liquid import YAMLEnv
 from .utils import sh, Path, new_stat_file, clock
-import config
+from . import config
 
 # Create a singleton defined once by the init method
 # replace all that stuff with Objects.
