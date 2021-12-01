@@ -5,6 +5,7 @@ from message import Message
 
 context = zmq.Context()
 socket = context.socket(zmq.REQ)
+# TODO: move connection to cloud ip addr
 socket.connect("tcp://localhost:50008")
 
 
