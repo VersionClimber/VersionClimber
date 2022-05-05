@@ -17,12 +17,11 @@ build:
 
 requirements:
   host:
-    - python {{PY_VER}}* [not win]
-    - python {{PY_VER}} [win]
+    - python {{PY_VER}}
     - setuptools
 
   run:
-    - python {{PYTHON}}
+    - python {{PY_VER}}
     - path
     - gitpython
     - pyyaml
