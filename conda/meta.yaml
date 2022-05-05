@@ -1,4 +1,4 @@
-{% set version = "1.3.2" %}
+{% set data = load_setup_py_data() %}
 
 package:
   name: versionclimber
@@ -8,21 +8,22 @@ source:
   path: ..
 
 build:
+  noarch: python
   number: 0
   entry_points:
     - vclimb = versionclimber.vclimb:main
 
-  script: python setup.py install
+  script: {{PYTHON}} setup.py install
 
 requirements:
-  build:
+  host:
     - python {{PY_VER}}* [not win]
     - python {{PY_VER}} [win]
     - setuptools
 
   run:
-    - python
-    - path.py
+    - python {{PYTHON}}
+    - path
     - gitpython
     - pyyaml
     - six
@@ -31,7 +32,7 @@ requirements:
 
 test:
   requires:
-    - nose
+    - pytest
   imports:
     - versionclimber
     - versionclimber.utils
@@ -44,12 +45,13 @@ test:
 
   commands:
     - vclimb --help
-    - nosetests
+    - cd test
+    - pytest -v 
 
 about:
-  home: https://github.com/VersionClimber/VersionClimber
+  home: {{ data.get('url') }}
   license: Cecill-C
-  summary: 'Version Climber is a system for package evolution for Data Science.'
+  summary: {{ data.get('description') }}
 
 extra:
   recipe-maintainers:

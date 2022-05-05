@@ -11,21 +11,18 @@ packages = ['versionclimber', 'versionclimber.algo']
 setup_requires = []
 install_requires = []
 
-# web sites where to find eggs
-dependency_links = ['http://openalea.gforge.inria.fr/pi']
-
 name = 'VersionClimber'
 description = 'Version Climber: System and Algorithms for Package evolution in Data Science.'
 long_description = description
 
 authors = 'Christophe Pradal, Sarah Cohen-Boulakia, Patrick Valduriez, Dennis Shasha'
 authors_email = 'christophe.pradal@inria.fr shasha@courant.nyu.edu Sarah.Cohen_Boulakia@lri.fr Patrick.Valduriez@inria.fr'.split()
-url = 'http://github.com/pradal/VersionClimber'
+url = 'https://github.com/VersionClimber/VersionClimber'
 license = 'Cecill-C'
 
 setup(
     name=name,
-    version='1.3.0',
+    version='1.3.3',
     description=description,
     long_description=long_description,
     author=authors,
@@ -40,8 +37,5 @@ setup(
     zip_safe=False,
 
     # Dependencies
-    setup_requires=setup_requires,
-    install_requires=install_requires,
-    dependency_links=dependency_links,
     entry_points={"console_scripts": ["vclimb = versionclimber.vclimb:main"]},
 )
