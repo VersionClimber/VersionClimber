@@ -18,7 +18,7 @@ from vflexql import liquid, liquidparser
 count = 0
 
 def works(listofpackversions):
-   print 'LPV ', listofpackversions
+   print('LPV ', listofpackversions)
    history = []
    for p in liquidparser.orderofpackages:
     x = liquidparser.decidepackage(history, [p,listofpackversions[p]])

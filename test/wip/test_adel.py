@@ -142,7 +142,7 @@ constraints = {}
 
 try:
     endconfig = liquidparser.liquidclimber(constraints, todolist)
-    print liquidparser.memory
+    print(liquidparser.memory)
 finally:
     liquid.restore_config()
 

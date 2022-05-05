@@ -45,7 +45,7 @@ test:
   commands:
     - vclimb --help
     - cd test
-    - pytest -v 
+    - pytest -v test_*.py
 
 about:
   home: 'https://github.com/VersionClimber/VersionClimber'
