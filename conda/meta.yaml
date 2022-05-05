@@ -2,7 +2,7 @@
 
 package:
   name: versionclimber
-  version: {{ version }}
+  version: {{ data.get('version') }}
 
 source:
   path: ..
@@ -21,7 +21,7 @@ requirements:
     - setuptools
 
   run:
-    - python {{PY_VER}}
+    - python
     - path
     - gitpython
     - pyyaml
