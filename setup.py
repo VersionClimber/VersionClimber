@@ -1,8 +1,8 @@
-from setuptools import setup
+from setuptools import setup, find_packages
 
 # Packages list, namespace and root directory of packages
 
-packages = ['versionclimber', 'versionclimber.algo']
+packages = find_packages('.')
 
 # dependencies to other eggs
 setup_requires = []
@@ -13,7 +13,7 @@ description = 'Version Climber: System and Algorithms for Package evolution in D
 long_description = description
 
 authors = 'Christophe Pradal, Sarah Cohen-Boulakia, Patrick Valduriez, Dennis Shasha'
-authors_email = 'christophe.pradal@cirad.fr, shasha@courant.nyu.edu, Sarah.Cohen_Boulakia@lri.fr, Patrick.Valduriez@inria.fr'
+authors_email = 'christophe.pradal at cirad.fr, shasha at courant.nyu.edu, Sarah.Cohen_Boulakia at lri.fr, Patrick.Valduriez at inria.fr'
 url = 'https://github.com/VersionClimber/VersionClimber'
 license = 'Cecill-C'
 
@@ -30,9 +30,7 @@ setup(
     license=license,
     keywords='',
 
-    # package installation
     packages=packages,
-
     zip_safe=False,
 
     # Dependencies

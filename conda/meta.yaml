@@ -1,8 +1,8 @@
-{% set data = load_setup_py_data() %}
+{% set version = "1.3.3" %}
 
 package:
   name: versionclimber
-  version: {{ data.get('version') }}
+  version: {{version}}
 
 source:
   path: ..
@@ -48,9 +48,9 @@ test:
     - pytest -v 
 
 about:
-  home: {{ data.get('url') }}
-  license: Cecill-C
-  summary: {{ data.get('description') }}
+  home: 'https://github.com/VersionClimber/VersionClimber'
+  license: 'Cecill-C'
+  summary: 'Version Climber: System and Algorithms for Package evolution in Data Science.'
 
 extra:
   recipe-maintainers:
