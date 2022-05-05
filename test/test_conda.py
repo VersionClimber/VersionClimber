@@ -11,12 +11,12 @@ def test_sklearn():
 
 
 def test_skimage():
-    versions = utils.conda_versions('scikit-image', , build='')
+    versions = utils.conda_versions('scikit-image', build='')
     assert versions[0] == '0.12.3'
     assert len(versions) >= 19
 
 def test_mtg_channels():
-    versions = utils.conda_versions('openalea.mtg', channels=['openalea3'], , build='')
+    versions = utils.conda_versions('openalea.mtg', channels=['openalea3'], build='')
     assert '2.1.1' in versions
     assert len(versions) >= 1
 
