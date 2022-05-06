@@ -4,10 +4,6 @@ from setuptools import setup, find_packages
 
 packages = find_packages('.')
 
-# dependencies to other eggs
-setup_requires = []
-install_requires = []
-
 name = 'VersionClimber'
 description = 'Version Climber: System and Algorithms for Package evolution in Data Science.'
 long_description = description
