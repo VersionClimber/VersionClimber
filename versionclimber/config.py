@@ -103,7 +103,7 @@ class Package(object):
         if self.vcs == 'pypi':
             versions = pypi_versions(self.name)
         elif self.vcs == 'conda':
-            versions = conda_versions(self.name, channels= self.conda_channels)
+            versions = conda_versions(self.name, channels= self.conda_channels, build='')
         else:
             if not pp.exists():
                 logger.info('We clone the package %s to get the versions'%self.name)
