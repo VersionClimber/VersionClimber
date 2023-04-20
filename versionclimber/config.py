@@ -16,6 +16,22 @@ logger = logging.getLogger(__name__)
 
 class Package(object):
     """Package description
+
+    TODO: Document the different options.
+
+    - name : name of the package
+    - vcs: Versioning Control System
+        * pypi : package versions are on pypi
+        * conda : package versions are on a conda repository
+        * git : retrieve versions from git
+        * svn : retrieve versions from svn
+        * path : the package source code is stored locally
+    - url : link to retrieve the source code of the package
+        This is needed for git or svn repository
+    - cmd : how to install the package
+    - build_cmd : how to build the package before installing it
+    - version : the minimum version of the package. Traverse only higher versions.
+    - conda : either True, False or mamba if we want to install package with mamba.
     """
 
     def __init__(self,
@@ -103,7 +119,7 @@ class Package(object):
         if self.vcs == 'pypi':
             versions = pypi_versions(self.name)
         elif self.vcs == 'conda':
-            versions = conda_versions(self.name, channels= self.conda_channels)
+            versions = conda_versions(self.name, channels= self.conda_channels, build='')
         else:
             if not pp.exists():
                 logger.info('We clone the package %s to get the versions'%self.name)

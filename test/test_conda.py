@@ -16,13 +16,13 @@ def test_skimage():
     assert len(versions) >= 3
 
 def test_mtg_channels():
-    versions = utils.conda_versions('openalea.mtg', channels=['openalea'])
-    assert '2.0.1' in versions
+    versions = utils.conda_versions('openalea.mtg', channels=['openalea3'], build='')
+    assert '2.1.1' in versions
     assert len(versions) >= 1
 
 def test_nonpy():
-    versions_default = utils.conda_versions('gmp')
-    versions = utils.conda_versions('gmp', channels=['openalea'])
+    versions_default = utils.conda_versions('gmp', build='')
+    versions = utils.conda_versions('gmp', channels=['openalea'], build='')
     if len(versions_default) < len(versions):
         assert len(versions_default) <= len(versions), str(len(versions_default)) + ', ' + str(len(versions))
         assert set(versions) - set(versions_default)
