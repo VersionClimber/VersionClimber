@@ -1,5 +1,3 @@
-.. image:: https://travis-ci.org/VersionClimber/VersionClimber.svg?branch=master
-    :target: https://travis-ci.org/VersionClimber/VersionClimber
 .. image:: https://readthedocs.org/projects/versionclimber/badge/?version=latest
     :target: http://versionclimber.readthedocs.io/en/latest/?badge=latest
     :alt: Documentation Status
