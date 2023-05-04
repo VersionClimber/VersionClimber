@@ -517,7 +517,7 @@ class YAMLEnv(MyEnv):
 
             channel_str = ' '.join(['-c '+ channel for channel in channels])
             
-            main_pkg = conda_pkgs[0]
+            main_pkg = conda_pkgs[0][1]
 
             cmd = 'conda install -y' if not main_pkg.conda=='mamba' else 'mamba install -y'
             for i, pkg in conda_pkgs:
