@@ -13,7 +13,7 @@ authors_email = 'christophe.pradal at cirad.fr, shasha at courant.nyu.edu, Sarah
 url = 'https://github.com/VersionClimber/VersionClimber'
 license = 'Cecill-C'
 
-version='1.3.4'
+version='1.3.5'
 
 setup(
     name=name,
