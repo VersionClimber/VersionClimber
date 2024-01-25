@@ -3,7 +3,7 @@
 from __future__ import absolute_import
 from versionclimber import utils, version
 from versionclimber.conda_version import VersionSpec
-
+import reduceconfig
 
 def test_numpy_scipy():
     python_versions = utils.conda_versions('python', channels=['conda-forge'], build='')
@@ -64,7 +64,11 @@ def test_decimate_version():
         info_pkgs.update(info)
 
     all_pairs = decimate(pkg_versions, info_pkgs)
-    return all_pairs, pkg_versions, info_pkgs
+
+    large_config = get_config(all_pairs=all_pairs)
+
+
+    return reduceconfig.reduce_config(large_config)
 
 
 def decimate(pkg_versions, info_pkgs):
@@ -116,3 +120,35 @@ def decimate(pkg_versions, info_pkgs):
 
     # filter the versions
 
+def get_one_config(package, v, dep):
+    l = []
+    l.append(package+'__'+v)
+    for p in dep:  
+        sub_config = ' '.join([(p+'__'+vp) for vp in dep[p]])
+        l.append('['+sub_config+']')
+
+    return ' '.join(l)
+
+def get_config(all_pairs):
+    large_config = []
+
+    config = list(all_pairs)
+
+    # we traverse all the config
+    # package is a string, version also
+    for package in config:
+        _config = []
+        for v in all_pairs[package]:
+            for dep in all_pairs[package][v]:
+                if not dep:
+                    continue
+                #print(dep)
+                l = get_one_config(package, v, dep)
+                _config.append(l)
+        large_config.append('')
+        _config = list(set(_config))
+        large_config.extend(_config)
+
+    print('\n'.join(large_config))
+    print('#lines : ', len(large_config))
+    return large_config

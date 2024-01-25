@@ -175,45 +175,57 @@ def parserow(r):
     
 # DATA
 
+def reduce_config(text: list):
+  #myfile=open(filename,"r")
 
-myfile=open("foobar","r")
+  # EXECUTION
 
-# EXECUTION
-
-text=myfile.readlines()
-groups =[] # these will be groups of constraints
-g = []
-for t in text:
-  t1 = t.strip('\n') 
-  if 2 > len(t1):
-    groups.append(g)
-    g=[]
-  else:
-    g.append(t1)
-groups.append(g)
-print(groups)
-
-
-newgroups = []
-for g in groups:
-  newg = []
-  for r in g: # each row in g
-    expanded = expandrow(r)
-    if isinstance(expanded,str):
-      newg.append(expanded)
+  #text=myfile.readlines()
+  groups =[] # these will be groups of constraints
+  g = []
+  for t in text:
+    t1 = t.strip('\n') 
+    if 2 > len(t1):
+      groups.append(g)
+      g=[]
     else:
-      for e in expanded:
-        newg.append(e)
-  newgroups.append(newg)
+      g.append(t1)
+  groups.append(g)
+  print(groups)
+
+
+  newgroups = []
+  for g in groups:
+    newg = []
+    for r in g: # each row in g
+      expanded = expandrow(r)
+      if isinstance(expanded,str):
+        newg.append(expanded)
+      else:
+        for e in expanded:
+          newg.append(e)
+    newgroups.append(newg)
 
 
 
-i = 1
-out = newgroups[0]
-while(i < len(newgroups)):
-  tmp = crossprodsel(out,newgroups[i])
-  out = copy.deepcopy(tmp)
-  i+=1
+  i = 1
+  out = newgroups[0]
+  while(i < len(newgroups)):
+    tmp = crossprodsel(out,newgroups[i])
+    out = copy.deepcopy(tmp)
+    i+=1
 
-for t in out:
-  print(t)
+  for t in out:
+    print(t)
+
+  return out
+
+def main(filename: str="foobar"):
+  myfile=open(filename,"r")
+  text=myfile.readlines()
+  return reduce_config(text)
+
+
+
+if __name__ == "__main__":
+  main("foobar")
