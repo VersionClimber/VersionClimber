@@ -83,6 +83,30 @@ def conda_versions(package_name, channels=[], build='py27'):
 
     return versions
 
+def conda_depends(package_name, channels=[], build=''):
+    """ Retrieve the different versions of a package on anaconda.
+
+    Returns the versions as a sorted list.
+    """
+    cmd = 'conda search -f %s -C --info --json'%(package_name,)
+    cmd_list = cmd.split()
+
+    for channel in channels:
+        cmd_list.append('-c')
+        cmd_list.append(channel)
+
+    json_data = call_and_parse(cmd_list)
+    if package_name not in json_data:
+        return []
+
+    pkgs = json_data[package_name]
+
+    versions = [d['version'] for d in pkgs if ('py' not in d['build']) or (build in d['build'])]
+    versions = list(set(versions))
+    versions.sort(key=MyLooseVersion)
+
+    return versions
+
 
 def git_versions(package_path, tags=False):
     """ Return a list of git versions of a package.
