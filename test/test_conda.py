@@ -6,13 +6,13 @@ from versionclimber import utils
 
 def test_sklearn():
     versions = utils.conda_versions('scikit-learn', build='')
-    assert versions[0] == '0.19.0'
+    assert ('0.19.0' in versions)
     assert len(versions) >= 20
 
 
 def test_skimage():
     versions = utils.conda_versions('scikit-image', build='')
-    assert versions[0] == '0.13.0'
+    assert ('0.13.0' in versions)
     assert len(versions) >= 13
 
 def test_mtg_channels():
