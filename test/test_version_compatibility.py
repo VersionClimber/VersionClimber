@@ -67,6 +67,7 @@ def test_decimate_version():
 
     large_config = get_config(all_pairs=all_pairs)
 
+    write_config(large_config, "toto.txt")
 
     return reduceconfig.reduce_config(large_config)
 
@@ -152,3 +153,8 @@ def get_config(all_pairs):
     print('\n'.join(large_config))
     print('#lines : ', len(large_config))
     return large_config
+
+def write_config(large_config: list, filename : str):
+    f = open(filename, 'w')
+    f.write('\n'.join(large_config))
+    f.close()

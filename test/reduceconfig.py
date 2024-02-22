@@ -30,68 +30,101 @@ P1__4 P2__4 P3__6
 P1__4 P2__3 P3__6
 """
 
-# The idea is to take a cross product of pairs and then keep only those
+# The first group is the union of the results of each line in
+# the groups (i.e. before an emptye line or the end).
+# The first group expands to:
+"""
+P1__3 P2__5 P3__6
+P1__3 P2__4 P3__6
+P1__3 P2__3 P3__6
+P1__4 P2__5 P3__6
+P1__4 P2__4 P3__6
+P1__4 P2__3 P3__6
+P1__4 P2__4 P3__19
+"""
+
+# The second group yields:
+"""
+P2__4 P4__7
+P2__4 P4__8
+P2__4 P4__9
+"""
+
+# The outer join of the first group and the second group is the same as
+# taking a cross product of pairs and then keep only those
 # rows where the version numbers for the same package are the same.
+# This is done by crossprodsel
 # So if we take a cross-product between the first group and the second
 # group and do the selection, we get
 """
-P1__3 P2__4 P3__6 P2__4 P4__7
-P1__3 P2__4 P3__6 P2__4 P4__8
-P1__3 P2__4 P3__6 P2__4 P4__9
-P1__4 P2__4 P3__6 P2__4 P4__7
-P1__4 P2__4 P3__6 P2__4 P4__8
-P1__4 P2__4 P3__6 P2__4 P4__9
+P1__3 P2__4 P3_6 P4__7
+P1__3 P2__4 P3_6 P4__8
+P1__3 P2__4 P3_6 P4__9
+P1__4 P2__4 P3_6 P4__7
+P1__4 P2__4 P3_6 P4__8
+P1__4 P2__4 P3_6 P4__9
+P1__4 P2__4 P3__19 P4__7
+P1__4 P2__4 P3__19 P4__8
+P1__4 P2__4 P3__19 P4__9
 """
-# Now take away the repeated elements in each row to get:
+# The last group 
+# constrains P1 and P6: 
+# P1__4 [P6__1 P6__2]
+# P1__9 P6__3
+# An outerjoin with that group yields
 """
-P1__3 P2__4 P3__6 P4__7
-P1__3 P2__4 P3__6 P4__8
-P1__3 P2__4 P3__6 P4__9
-P1__4 P2__4 P3__6 P4__7
-P1__4 P2__4 P3__6 P4__8
-P1__4 P2__4 P3__6 P4__9
+P1__4 P2__4 P3_6 P4__7 P6__1
+P1__4 P2__4 P3_6 P4__7 P6__2
+P1__4 P2__4 P3_6 P4__8 P6__1
+P1__4 P2__4 P3_6 P4__8 P6__2
+P1__4 P2__4 P3_6 P4__9 P6__1
+P1__4 P2__4 P3_6 P4__9 P6__2
+P1__4 P2__4 P3__19 P4__7 P6__1
+P1__4 P2__4 P3__19 P4__7 P6__2
+P1__4 P2__4 P3__19 P4__8 P6__1
+P1__4 P2__4 P3__19 P4__8 P6__2
+P1__4 P2__4 P3__19 P4__9 P6__1
+P1__4 P2__4 P3__19 P4__9 P6__2
 """
-# Now join this result with the last group:
-"""
-P1__4 P2__4 P3__6 P4__7 P1__4 P6__1
-P1__4 P2__4 P3__6 P4__8 P1__4 P6__1
-P1__4 P2__4 P3__6 P4__9 P1__4 P6__1
-P1__4 P2__4 P3__6 P4__7 P1__4 P6__2
-P1__4 P2__4 P3__6 P4__8 P1__4 P6__2
-P1__4 P2__4 P3__6 P4__9 P1__4 P6__2
-"""
-# Take away the repeats:
-"""
-P1__4 P2__4 P3__6 P4__7 P6__1
-P1__4 P2__4 P3__6 P4__8 P6__1
-P1__4 P2__4 P3__6 P4__9 P6__1
-P1__4 P2__4 P3__6 P4__7 P6__2
-P1__4 P2__4 P3__6 P4__8 P6__2
-P1__4 P2__4 P3__6 P4__9 P6__2
-"""
+
+# So we're taking the union of the constraints within each group
+# and taking the outer join between groups
 
 import copy
 
+# This is an outerjoin: on any common packages they must
+# agree but on the symmetric difference of packages they are just 
+# added in. 
+# Each group should have the same schema (i.e. the same set of packages)
+# So for each row in the cross product of rows having package sets P1 and P2, 
+# the number of unique package-version values 
+# should be equal to the cardinality of P1 union P2
 def crossprodsel(arr1, arr2):
+  if testlevel > 0:
+    print("arr1 is: ")
+    [print(x) for x in arr1]
+    print("arr2 is: ")
+    [print(x) for x in arr2]
   res = [sub1 + " " + sub2 for sub1 in arr1 for sub2 in arr2]
   out = []
+  # for an element of the cross-product to survive after taking the 
+  # First find out how many unique packages in the union.
+  if (len(res)) > 0:
+    if testlevel > 0:
+      print("res: ")
+      print(res)
+    firstline = (res[0]).split(" ")
+    if testlevel > 0:
+      print("firstline: ")
+      print(firstline)
+    p = findpackage(firstline)
+    desiredlength = len(p)
   for r in res:
     sfields = r.split(" ")
     fields = [*set(sfields)] # remove duplicates
-    fields.sort() 
-    flag = 1 # no mismatch
-    i = 1
-    while ((i < len(fields)) and flag == 1):
-      pair1 = fields[i].split("__") 
-      pair2 = fields[i-1].split("__")
-      if (pair1[0] == pair2[0]) and (not pair1[1] == pair2[1]):
-        flag = 0
-      i+= 1
-    if flag == 1: 
-     tmp = []
-     for f in fields:
-       tmp.append(f)
-     out.append(' '.join(tmp))
+    if (len(fields) == desiredlength): # no mismatches
+     fields.sort() 
+     out.append(' '.join(fields))
   return out
 
 
@@ -172,16 +205,92 @@ def parserow(r):
       elif len(myc) > 2: # just a simple package-version
         simples.append(myc)
   return [simples, vgroups] 
+
+# finds the packages in the format [P1__xyz, P2__jkjk, P3__jkjj]
+# Comes up with P1, P2, P3 in this case
+def findpackage(mylist):
+  j = 0
+  packages = []
+  while j < len(mylist):
+    f = mylist[j]
+    packages.append((f.split("__"))[0])
+    j+= 1
+  s = set(packages)
+  if (testlevel > 0):
+    print("set of packages: ")
+    print(s)
+  return s
+
+# finds newgroups that have common packages  with at least one other newgroup
+def findconnected(newpackages):
+  out = []
+  i = 0 
+  while i < len(newpackages):
+    if i not in out:
+      j = i+1
+      while j < len(newpackages):
+        if not newpackages[i].isdisjoint(newpackages[j]):
+          out.append(i)
+          out.append(j)
+        j+=1
+    i+=1
+  return list(set(out))
     
+# finds the best join order among newgroups based on package
+# intersection and size
+def findnewgrouporder(newpackages, newsizes):
+  firstcands = findconnected(newpackages) # candidates for first group
+       # must be joinable to at least one other group
+  minindex = newsizes.index(min(newsizes))
+  if not minindex in firstcands:
+    minindex = firstcands[-1] # That will probably be the smallest set
+  ind = [minindex] # start with newgroup minindex
+  packagessofar = newpackages[minindex]
+  flag = True # have more work to do
+  while(flag):
+    flag = False
+    i = 0
+    cands = []
+    mincandsize = 1 + max(newsizes)
+    while(i < len(newpackages)):
+      if (not i in ind) and (not packagessofar.isdisjoint(newpackages[i])):
+        cands.append(i)
+        if newsizes[i] < mincandsize: 
+          mincandsize = newsizes[i]
+      i+= 1
+    if len(cands) > 0: 
+      flag = True
+      for j in cands:
+        if (newsizes[j] == mincandsize):
+          ind.append(j)
+          packagessofar=packagessofar.union(newpackages[j])
+  if len(ind) < len(newpackages):
+    i = 0
+    while(i < len(newpackages)):
+      if not i in ind:
+        ind.append(i)
+      i+= 1
+  print("ind is:")
+  print(ind)
+  return(ind)
+   
+    
+    
+    
+  
+
+
 # DATA
 
 def reduce_config(text: list):
   #myfile=open(filename,"r")
 
+
   # EXECUTION
 
+  # One line of constraints at a time
   #text=myfile.readlines()
-  groups =[] # these will be groups of constraints
+  groups =[] # these will be groups of constraints pertaining to same packages
   g = []
   for t in text:
     t1 = t.strip('\n') 
@@ -191,12 +300,17 @@ def reduce_config(text: list):
     else:
       g.append(t1)
   groups.append(g)
-  print(groups)
+  if testlevel > 0:
+    print(groups)
 
 
   newgroups = []
+  newpackages = [] # packages in each new group
+  newsizes = [] # sizes of each group
+  print('# groups', len(groups))
   for g in groups:
     newg = []
+    i = 1
     for r in g: # each row in g
       expanded = expandrow(r)
       if isinstance(expanded,str):
@@ -204,15 +318,31 @@ def reduce_config(text: list):
       else:
         for e in expanded:
           newg.append(e)
-    newgroups.append(newg)
+      print('count ',i); i+=1;
+    if 0 < len(newg): 
+      newgroups.append(newg)
+      print("newg: ")
+      print(newg)
+      p = findpackage((newg[0]).split(" "))
+      newpackages.append(p)
+      newsizes.append(len(newg))
+      print("packages: ")
+      print(p)
+      print("newpackages: ")
+      print(newpackages)
+      print("sizes: ")
+      print(newsizes)
 
-
+  ind = findnewgrouporder(newpackages, newsizes)
 
   i = 1
-  out = newgroups[0]
-  while(i < len(newgroups)):
-    tmp = crossprodsel(out,newgroups[i])
+  out = newgroups[ind[0]]
+  while(i < len(ind)):
+    print("newgroups " + str(ind[i]) + ":")
+    print(newgroups[ind[i]])
+    tmp = crossprodsel(out,newgroups[ind[i]])
     out = copy.deepcopy(tmp)
+    print(ind[i],)
     i+=1
 
   for t in out:
@@ -227,5 +357,8 @@ def main(filename: str="foobar"):
 
 
 
+testlevel = 0 # raise the test level to print more
 if __name__ == "__main__":
-  main("foobar")
+  #main("foobar2")
+  # main("foobar")
+  main("toto_full.txt")
