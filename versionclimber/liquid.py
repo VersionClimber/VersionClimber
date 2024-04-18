@@ -437,7 +437,7 @@ class YAMLEnv(MyEnv):
         - get the set of versions
 
     """
-    def __init__(self, config_file, demandsupply=False):
+    def __init__(self, config_file, demandsupply=False, reduce=False):
         config = load_config(config_file)
         self.pkgs = config['packages']
         self.cmd = config['run']

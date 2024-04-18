@@ -43,6 +43,8 @@ vclimb can also print all the versions of the packages
         help="Use the demand supply algorithm (default)")
     parser.add_option("-a", "--anchor", action="store_true", dest="anchor", default=False,
         help="Generate the cross-product of the anchor before testing all the configs.")
+    parser.add_option("-r", "--reduce", action="store_true", dest="reduce", default=False,
+        help="Query the channels to select only versions that are compatible to each others.")
 
     (opts, args)= parser.parse_args()
 
@@ -57,16 +59,16 @@ vclimb can also print all the versions of the packages
 
     if not opts.version:
         algo_module.start_logging(opts.log_file)
-
-    env = liquid.YAMLEnv(opts.config, opts.demandsupply)
+        
+    env = liquid.YAMLEnv(opts.config, opts.demandsupply, opts.reduce)
 
 
     if not opts.version:
-        solutions = env.run(algo_module, opts.anchor)
+        solutions = env.run(algo_module, opts.anchor, opts.reduce)
 
         print(('\n' * 3))
         print('Solution is:')
         for sol in solutions:
             print(sol)
     else:
-        env.print_versions(algo_module)
+        env.print_versions(algo_module, opts.reduce)

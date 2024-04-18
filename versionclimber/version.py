@@ -6,6 +6,7 @@ from collections import OrderedDict
 from six.moves import range
 from six.moves import zip
 
+from .conda_version import VersionSpec
 
 # Select major, minor, patch and commit versions
 def _major(version):
@@ -130,3 +131,47 @@ def take(seq, p):
         values.append(seq[-1])
 
     return values
+
+def decimate_versions(pkg_versions, info_pkgs):
+    """ return a dict of package : dict(package: dict(package : [version]) 
+    """
+    result = dict()
+    pkg_names = list(pkg_versions)
+
+    def get_deps(pkg):
+        deps = [d for d in pkg['depends'] for name in pkg_names if (name+' ') in d]
+        res = {dep.split()[0]:dep.split()[1] for dep in deps}
+        return res
+
+    for pkg in pkg_names:
+
+        result[pkg] = dict()
+        versions = pkg_versions[pkg]
+
+        for p in info_pkgs[pkg]:
+            # Check if the version is in the pkg_versions
+            v = p['version']
+            if v not in versions:
+                continue
+            # check dependencies
+            pkg_version_dep = result[pkg].setdefault(v, [])
+            new_pkg_version = dict()
+            deps = get_deps(p)
+            if deps:
+                add_it = True
+                for pn in deps:
+                    constraint = VersionSpec(deps[pn])
+                    match_versions = [v for v in pkg_versions[pn] if constraint.match(v)] 
+                    if not match_versions:
+                        add_it = False
+                        break
+                    new_pkg_version[pn] = match_versions
+                if add_it and (new_pkg_version not in pkg_version_dep):
+                    pkg_version_dep.append(new_pkg_version)
+            if not result[pkg][v]:
+                del  result[pkg][v]
+            
+
+    return result
+
+    

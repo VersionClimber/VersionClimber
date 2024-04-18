@@ -24,7 +24,7 @@ def test_numpy_scipy():
     # 2. make a request to retrive all the versions in one shot
     # 3. traverse for each version all the packages deps and retrieve the versions
     # 4. parsing des contraintes
-    # 5. appelle reduce config
+    # 5. call reduce config
 
 def test_skimage():
     versions = utils.pypi_versions('scikit-image')
@@ -69,7 +69,7 @@ def test_decimate_version():
 
     write_config(large_config, "toto.txt")
 
-    return reduceconfig.reduce_config(large_config)
+    return None# reduceconfig.reduce_config(large_config)
 
 
 def decimate(pkg_versions, info_pkgs):
@@ -84,7 +84,8 @@ def decimate(pkg_versions, info_pkgs):
         return res
 
     for pkg in pkg_names:
-        versions = set(pkg_versions[pkg])
+        versions = list(set(pkg_versions[pkg]))
+        versions.sort(key=utils.MyLooseVersion)
         result[pkg] = dict()
         for p in info_pkgs[pkg]:
             # Check if the version is in the pkg_versions
@@ -94,15 +95,17 @@ def decimate(pkg_versions, info_pkgs):
             # check dependencies
             pkg_version_dep = result[pkg].setdefault(v, [])
             new_pkg_version = dict()
-            pkg_version_dep.append(new_pkg_version)
             deps = get_deps(p)
             if deps:
                 for pn in deps:
                     constraint = VersionSpec(deps[pn])
                     match_versions = [v for v in pkg_versions[pn] if constraint.match(v)] 
                     new_pkg_version[pn] = match_versions
+                if new_pkg_version not in pkg_version_dep:
+                    pkg_version_dep.append(new_pkg_version)
 
-    print(result)
+        #print(result[pkg])
+
     return result
 
     
@@ -143,10 +146,10 @@ def get_config(all_pairs):
             for dep in all_pairs[package][v]:
                 if not dep:
                     continue
-                #print(dep)
                 l = get_one_config(package, v, dep)
                 _config.append(l)
-        large_config.append('')
+        if large_config and _config: 
+            large_config.append('')
         _config = list(set(_config))
         large_config.extend(_config)
 

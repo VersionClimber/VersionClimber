@@ -1,0 +1,38 @@
+pre: mamba install -y -c conda-forge numpy scipy
+packages:
+    - name      : scikit-image
+      vcs       : conda
+      conda     : mamba
+      cmd       : mamba install -y
+      hierarchy : patch
+
+    - name      : scikit-learn
+      vcs       : conda
+      cmd       : conda install -y
+      hierarchy : patch
+
+    - name      : scipy
+      vcs       : conda
+      conda     : mamba
+      cmd       : mamba install -y
+      hierarchy : patch
+      supply    : minor
+
+    - name      : numpy
+      vcs       : conda
+      cmd       : mamba install -y
+      conda     : mamba
+      hierarchy : patch
+      supply    : minor
+
+    - name      : python
+      vcs       : conda
+      cmd       : mamba install -y
+      conda     : mamba
+      hierarchy : patch
+      supply    : minor
+      version   : 3.7.0
+
+run:
+    - python estimate_hog.py
+post: conda env export > environment.yml

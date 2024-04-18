@@ -6,8 +6,10 @@ from os.path import exists
 import versionclimber as vc
 from versionclimber.config import load_config
 from versionclimber.liquid import YAMLEnv, pkg_versions
-from versionclimber.algo import demandsupply
 from versionclimber import version
+from versionclimber.algo.demandsupply import findanchors
+from versionclimber.utils import conda_full_depends
+
 
 
 def test_config():
@@ -52,5 +54,21 @@ def my_segment_versions(config='config.yaml'):
         for _version in v_dict:
             miniseries.append([pkg, 'supply-constant', v_dict[_version]])
 
-
     return packageversions, miniseries
+
+
+def my_reduce_config(config='config2.yaml'):
+    packageversions, miniseries = my_segment_versions(config)
+    anchors = findanchors(miniseries)
+    universe = [l[0][0] for l in anchors]
+
+    info_pkgs = {}
+    for i, pkg in enumerate(universe):
+        info = conda_full_depends(pkg)
+        info_pkgs.update(info)
+
+    pkg_versions = { l[0][0] : [version for name, version in l] for l in anchors}
+    all_pairs = version.decimate_versions(pkg_versions, info_pkgs)
+
+
+    

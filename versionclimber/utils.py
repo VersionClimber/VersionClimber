@@ -13,7 +13,11 @@ import json
 import requests
 import datetime
 import logging
-from distutils.version import LooseVersion
+try:
+    from packaging.version import Version as LooseVersion
+except ImportError:
+    from distutils.version import LooseVersion
+
 try:
     from itertools import zip_longest
 except ImportError:
@@ -168,4 +172,11 @@ class MyLooseVersion(LooseVersion):
                 return 1
         return 0
 
+
+def conda_full_depends(pkg, deps=None):
+    """return all the versions of a package with specifications"""
+    cmd = "conda search %s -c conda-forge -C --info --json"%(pkg)
+    cmd_list = cmd.split()
+    json_data = call_and_parse(cmd_list)
+    return json_data
 
