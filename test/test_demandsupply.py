@@ -73,7 +73,7 @@ def my_reduce_config(config='config2.yaml'):
     all_pairs = version.decimate_versions(pkg_versions, info_pkgs)
 
     # build a config to reduceconfig
-    groups = version._build_config(all_pairs)
+    groups = version._build_config(all_pairs, universe)
     full_config = reduceconfig.reduce_config2(groups)
 
     return full_config
@@ -88,6 +88,9 @@ def sort_pkgversions(pkgversions, universe):
         
         #l = ' '.join('__'.join(pv) for pv in l)
         confs.append(l)
+
+    confs = multisort(confs)
+    
     return confs 
 
 from versionclimber.utils import MyLooseVersion
@@ -122,8 +125,6 @@ A2__4 P1__4 P3__19 P4__9 P6__2
     universe.reverse()
 
     conf = sort_pkgversions(pkgvers, universe)
-
-    conf = multisort(conf)
 
     conf_sorted = '\n'.join(' '.join(['__'.join(pv) for pv in c]) for c in conf)
     print(conf_sorted)

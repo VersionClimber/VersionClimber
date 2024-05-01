@@ -157,7 +157,17 @@ def expandrow(r):
   if len(simples) == 0:
     return out
   else:
-    return [sub1 + " " + sub2 for sub1 in simples for sub2 in out]
+    # out2 = [sub1 + " " + sub2 for sub1 in simples for sub2 in out]
+    i = 0
+    while i < len(simples):
+      out = [simples[i] + " " + sub2 for sub2 in out]
+      i+= 1
+    if (testlevel > 0):
+      print("point C simples: ")
+      print(simples)
+      print("point C out: ")
+      print(out)
+    return out
   
     
 
