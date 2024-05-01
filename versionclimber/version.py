@@ -174,4 +174,66 @@ def decimate_versions(pkg_versions, info_pkgs):
 
     return result
 
+
+def _get_one_config(package, v, dep, pkg_order):
+    l = []
+    l.append(package+'__'+v)
+    for p in pkg_order:
+        if p not in dep:
+            continue  
+        sub_config = ' '.join([(p+'__'+vp) for vp in dep[p]])
+        if len(dep[p]) > 1:
+            l.append('['+sub_config+']')
+        else:
+            l.append(sub_config)
+
+    return ' '.join(l)
+
+
+def _build_config(all_pairs: dict, universe: list):
+    """
+    Transform all_pairs into a group of str 
+
+    Parameters:
+        - all_pairs : dict of dict
+            for each package , a dict of versions with its dependencies.
     
+    Example:
+        all_pairs = {'numpy': {'1.9.3': [{'python': ['3.7.0']}]}
+    """
+
+    large_config = []
+    config = list(all_pairs)
+    # we traverse all the config
+    # package is a string, version also
+    for package in config:
+        _config = []
+        for v in all_pairs[package]:
+            for dep in all_pairs[package][v]:
+                if not dep:
+                    continue
+                l = _get_one_config(package, v, dep, universe)
+                _config.append(l)
+
+        _config = list(set(_config))
+        if _config:
+            print(_config)
+            large_config.append(_config)
+            print()
+
+
+
+    #print('\n'.join(large_config))
+    #print('#lines : ', len(large_config))
+    return large_config
+
+def write_config(large_config: list, filename : str):
+    groups = []
+    for g in large_config:
+        groups.append('\n'.join(g))
+        groups.append('')
+
+    f = open(filename, 'w')
+    f.write('\n'.join(groups))
+    f.close()
+

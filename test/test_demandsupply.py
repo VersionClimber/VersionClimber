@@ -9,6 +9,8 @@ from versionclimber.liquid import YAMLEnv, pkg_versions
 from versionclimber import version
 from versionclimber.algo.demandsupply import findanchors
 from versionclimber.utils import conda_full_depends
+from versionclimber import reduceconfig
+
 
 
 
@@ -70,5 +72,59 @@ def my_reduce_config(config='config2.yaml'):
     pkg_versions = { l[0][0] : [version for name, version in l] for l in anchors}
     all_pairs = version.decimate_versions(pkg_versions, info_pkgs)
 
+    # build a config to reduceconfig
+    groups = version._build_config(all_pairs)
+    full_config = reduceconfig.reduce_config2(groups)
 
-    
+    return full_config
+
+
+def sort_pkgversions(pkgversions, universe):
+    confs = []
+
+    for c in pkgversions:
+        l = list(k.split('__') for k in c.split(' '))
+        l = sorted(l, key=lambda pv:universe.index(pv[0]), reverse=True)
+        
+        #l = ' '.join('__'.join(pv) for pv in l)
+        confs.append(l)
+    return confs 
+
+from versionclimber.utils import MyLooseVersion
+
+def multisort(conf):
+    c0 = conf[0]
+    n = len(c0)
+
+    for i in range(n):
+        conf.sort(key=lambda conf: MyLooseVersion(conf[i][1]),
+                  reverse=True)
+    return conf
+
+def test_sort():
+    pkgvers = """
+A2__4 P1__4 P3__6 P4__7 P6__1
+A2__4 P1__4 P3__6 P4__7 P6__2
+A2__4 P1__4 P3__19 P4__7 P6__1
+A2__4 P1__4 P3__19 P4__7 P6__2
+A2__4 P1__4 P3__6 P4__8 P6__1
+A2__4 P1__4 P3__6 P4__8 P6__2
+A2__4 P1__4 P3__19 P4__8 P6__1
+A2__4 P1__4 P3__19 P4__8 P6__2
+A2__4 P1__4 P3__6 P4__9 P6__1
+A2__4 P1__4 P3__6 P4__9 P6__2
+A2__4 P1__4 P3__19 P4__9 P6__1
+A2__4 P1__4 P3__19 P4__9 P6__2
+""".split('\n')
+    pkgvers = list(filter(None, pkgvers))
+
+    universe = 'P1 A2 P3 P4 P6'.split()
+    universe.reverse()
+
+    conf = sort_pkgversions(pkgvers, universe)
+
+    conf = multisort(conf)
+
+    conf_sorted = '\n'.join(' '.join(['__'.join(pv) for pv in c]) for c in conf)
+    print(conf_sorted)
+    return conf
