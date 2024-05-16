@@ -7,6 +7,8 @@ from six.moves import range
 from six.moves import zip
 
 from .conda_version import VersionSpec
+from .utils import MyLooseVersion
+
 
 # Select major, minor, patch and commit versions
 def _major(version):
@@ -237,3 +239,26 @@ def write_config(large_config: list, filename : str):
     f.write('\n'.join(groups))
     f.close()
 
+
+def multisort(conf):
+    c0 = conf[0]
+    n = len(c0)
+
+    for i in range(n):
+        conf.sort(key=lambda conf: MyLooseVersion(conf[i][1]),
+                  reverse=True)
+    return conf
+
+def sort_pkgversions(pkgversions, universe):
+    confs = []
+
+    for c in pkgversions:
+        l = list(k.split('__') for k in c.split(' '))
+        l = sorted(l, key=lambda pv:universe.index(pv[0]), reverse=True)
+        
+        #l = ' '.join('__'.join(pv) for pv in l)
+        confs.append(l)
+
+    confs = multisort(confs)
+
+    return confs 

@@ -61,6 +61,9 @@ def my_segment_versions(config='config.yaml'):
 
 def my_reduce_config(config='config2.yaml'):
     packageversions, miniseries = my_segment_versions(config)
+    return filter_config(miniseries)
+
+def filter_config(miniseries):
     anchors = findanchors(miniseries)
     universe = [l[0][0] for l in anchors]
 
@@ -76,35 +79,11 @@ def my_reduce_config(config='config2.yaml'):
     groups = version._build_config(all_pairs, universe)
     full_config = reduceconfig.reduce_config2(groups)
 
-    configs = sort_pkgversions(full_config, universe)
+    configs = version.sort_pkgversions(full_config, universe)
 
     return configs
 
 
-def sort_pkgversions(pkgversions, universe):
-    confs = []
-
-    for c in pkgversions:
-        l = list(k.split('__') for k in c.split(' '))
-        l = sorted(l, key=lambda pv:universe.index(pv[0]), reverse=True)
-        
-        #l = ' '.join('__'.join(pv) for pv in l)
-        confs.append(l)
-
-    confs = multisort(confs)
-
-    return confs 
-
-from versionclimber.utils import MyLooseVersion
-
-def multisort(conf):
-    c0 = conf[0]
-    n = len(c0)
-
-    for i in range(n):
-        conf.sort(key=lambda conf: MyLooseVersion(conf[i][1]),
-                  reverse=True)
-    return conf
 
 def test_sort():
     pkgvers = """

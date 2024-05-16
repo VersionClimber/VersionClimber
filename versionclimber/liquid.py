@@ -474,6 +474,7 @@ class YAMLEnv(MyEnv):
         self.knowcaller = False
         self.error_file = 'error.txt'
 
+        self.reduce = reduce
 
     def checkout(self, pkg_name, commit, python=None):
         """ Install the package `pkg_name` at a given version.
@@ -782,7 +783,7 @@ class YAMLEnv(MyEnv):
             if self.algo_demandsupply:
                 # print("PackageVersions", packageversions) # log this
                 # print("miniseries", miniseries) # log this
-                endconfig = liquidparser.liquidclimber(miniseries, packageversions, anchor)
+                endconfig = liquidparser.liquidclimber(miniseries, packageversions, anchor, reduce=self.reduce)
 
             else:
                 endconfig = liquidparser.liquidclimber(constraints, todolist)
