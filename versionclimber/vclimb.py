@@ -64,7 +64,7 @@ vclimb can also print all the versions of the packages
 
 
     if not opts.version:
-        solutions = env.run(algo_module, opts.anchor, opts.reduce)
+        solutions = env.run(algo_module, opts.anchor)
 
         print(('\n' * 3))
         print('Solution is:')

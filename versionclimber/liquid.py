@@ -837,7 +837,7 @@ class YAMLEnv(MyEnv):
             return packageversions, miniseries
 
 
-    def print_versions(self, liquidparser=None):
+    def print_versions(self, liquidparser=None, reduce=False):
         """ Print all the versions of the different packages."""
 
         print("-"*80)
