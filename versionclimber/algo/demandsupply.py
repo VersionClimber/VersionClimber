@@ -359,7 +359,7 @@ def liquidclimber(miniseries, packageversions, anchorFlag=True, reduce=False):
     logging.info('Reduce configuration with constraints')
     anchors = findanchors(miniseries)
     _configs = filter_config(miniseries=miniseries, anchors=anchors)
-    nb_configs = len(configs)
+    nb_configs = len(_configs)
     configs = iter(_configs) # _configs is a list
 
   if anchorFlag == True:
