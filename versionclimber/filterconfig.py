@@ -1,12 +1,12 @@
-from .algo.demandsupply import findanchors
+#from .algo.demandsupply import findanchors
 from .utils import conda_full_depends
 from . import version
 from . import reduceconfig
 
 
-def filter_config(miniseries):
+def filter_config(miniseries, anchors):
     """Return a reduce configuration by applying a set of constraints associated with each package and version"""
-    anchors = findanchors(miniseries)
+    #anchors = findanchors(miniseries)
     universe = [l[0][0] for l in anchors]
 
     info_pkgs = {}

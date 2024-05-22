@@ -105,7 +105,7 @@ A2__4 P1__4 P3__19 P4__9 P6__2
     universe = 'P1 A2 P3 P4 P6'.split()
     universe.reverse()
 
-    conf = sort_pkgversions(pkgvers, universe)
+    conf = version.sort_pkgversions(pkgvers, universe)
 
     conf_sorted = '\n'.join(' '.join(['__'.join(pv) for pv in c]) for c in conf)
     print(conf_sorted)
