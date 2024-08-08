@@ -6,6 +6,9 @@ from collections import OrderedDict
 from six.moves import range
 from six.moves import zip
 
+from .conda_version import VersionSpec
+from .utils import MyLooseVersion
+
 
 # Select major, minor, patch and commit versions
 def _major(version):
@@ -130,3 +133,132 @@ def take(seq, p):
         values.append(seq[-1])
 
     return values
+
+def decimate_versions(pkg_versions, info_pkgs):
+    """ return a dict of package : dict(package: dict(package : [version]) 
+    """
+    result = dict()
+    pkg_names = list(pkg_versions)
+
+    def get_deps(pkg):
+        deps = [d for d in pkg['depends'] for name in pkg_names if (name+' ') in d]
+        res = {dep.split()[0]:dep.split()[1] for dep in deps}
+        return res
+
+    for pkg in pkg_names:
+
+        result[pkg] = dict()
+        versions = pkg_versions[pkg]
+
+        for p in info_pkgs[pkg]:
+            # Check if the version is in the pkg_versions
+            v = p['version']
+            if v not in versions:
+                continue
+            # check dependencies
+            pkg_version_dep = result[pkg].setdefault(v, [])
+            new_pkg_version = dict()
+            deps = get_deps(p)
+            if deps:
+                add_it = True
+                for pn in deps:
+                    constraint = VersionSpec(deps[pn])
+                    match_versions = [v for v in pkg_versions[pn] if constraint.match(v)] 
+                    if not match_versions:
+                        add_it = False
+                        break
+                    new_pkg_version[pn] = match_versions
+                if add_it and (new_pkg_version not in pkg_version_dep):
+                    pkg_version_dep.append(new_pkg_version)
+            if not result[pkg][v]:
+                del  result[pkg][v]
+            
+
+    return result
+
+
+def _get_one_config(package, v, dep, pkg_order):
+    l = []
+    l.append(package+'__'+v)
+    for p in pkg_order:
+        if p not in dep:
+            continue  
+        sub_config = ' '.join([(p+'__'+vp) for vp in dep[p]])
+        if len(dep[p]) > 1:
+            l.append('['+sub_config+']')
+        else:
+            l.append(sub_config)
+
+    return ' '.join(l)
+
+
+def _build_config(all_pairs: dict, universe: list):
+    """
+    Transform all_pairs into a group of str 
+
+    Parameters:
+        - all_pairs : dict of dict
+            for each package , a dict of versions with its dependencies.
+    
+    Example:
+        all_pairs = {'numpy': {'1.9.3': [{'python': ['3.7.0']}]}
+    """
+
+    large_config = []
+    config = list(all_pairs)
+    # we traverse all the config
+    # package is a string, version also
+    for package in config:
+        _config = []
+        for v in all_pairs[package]:
+            for dep in all_pairs[package][v]:
+                if not dep:
+                    continue
+                l = _get_one_config(package, v, dep, universe)
+                _config.append(l)
+
+        _config = list(set(_config))
+        if _config:
+            print(_config)
+            large_config.append(_config)
+            print()
+
+
+
+    #print('\n'.join(large_config))
+    #print('#lines : ', len(large_config))
+    return large_config
+
+def write_config(large_config: list, filename : str):
+    groups = []
+    for g in large_config:
+        groups.append('\n'.join(g))
+        groups.append('')
+
+    f = open(filename, 'w')
+    f.write('\n'.join(groups))
+    f.close()
+
+
+def multisort(conf):
+    c0 = conf[0]
+    n = len(c0)
+
+    for i in range(n):
+        conf.sort(key=lambda conf: MyLooseVersion(conf[i][1]),
+                  reverse=True)
+    return conf
+
+def sort_pkgversions(pkgversions, universe):
+    confs = []
+
+    for c in pkgversions:
+        l = list(k.split('__') for k in c.split(' '))
+        l = sorted(l, key=lambda pv:universe.index(pv[0]), reverse=True)
+        
+        #l = ' '.join('__'.join(pv) for pv in l)
+        confs.append(l)
+
+    confs = multisort(confs)
+
+    return confs 

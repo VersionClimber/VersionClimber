@@ -437,7 +437,7 @@ class YAMLEnv(MyEnv):
         - get the set of versions
 
     """
-    def __init__(self, config_file, demandsupply=False):
+    def __init__(self, config_file, demandsupply=False, reduce=False):
         config = load_config(config_file)
         self.pkgs = config['packages']
         self.cmd = config['run']
@@ -474,6 +474,7 @@ class YAMLEnv(MyEnv):
         self.knowcaller = False
         self.error_file = 'error.txt'
 
+        self.reduce = reduce
 
     def checkout(self, pkg_name, commit, python=None):
         """ Install the package `pkg_name` at a given version.
@@ -782,7 +783,7 @@ class YAMLEnv(MyEnv):
             if self.algo_demandsupply:
                 # print("PackageVersions", packageversions) # log this
                 # print("miniseries", miniseries) # log this
-                endconfig = liquidparser.liquidclimber(miniseries, packageversions, anchor)
+                endconfig = liquidparser.liquidclimber(miniseries, packageversions, anchor, reduce=self.reduce)
 
             else:
                 endconfig = liquidparser.liquidclimber(constraints, todolist)
@@ -836,7 +837,7 @@ class YAMLEnv(MyEnv):
             return packageversions, miniseries
 
 
-    def print_versions(self, liquidparser=None):
+    def print_versions(self, liquidparser=None, reduce=False):
         """ Print all the versions of the different packages."""
 
         print("-"*80)

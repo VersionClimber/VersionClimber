@@ -51,6 +51,8 @@ import itertools
 #socket.bind("tcp://*:50008")
 
 # Christophe
+from ..filterconfig import filter_config
+
 log_file = 'versionclimber.log'
 
 def start_logging(log_file=log_file):
@@ -73,7 +75,10 @@ def genconfigs(miniseries, packageversions, anchorFlag):
     # just go through all configurations
     return mycrossproduct_iter(packageversions)
 
+def filterconfigs(miniseries):
 
+    myanchors = findanchors(miniseries)
+  
 
 # return the cross product in descending order
 def mycrossproduct(packageversions):
@@ -342,9 +347,21 @@ def read_packageversions(fn):
     packageversions.append(bufferofpackages)
   return packageversions, miniseries
 
+
 # Christophe : main program
-def liquidclimber(miniseries, packageversions, anchorFlag=True):
-  nb_configs, configs = genconfigs(miniseries, packageversions, anchorFlag)
+def liquidclimber(miniseries, packageversions, anchorFlag=True, reduce=False):
+  if not reduce:
+    nb_configs, configs = genconfigs(miniseries, packageversions, anchorFlag)
+
+  #CPL
+  elif anchorFlag == True:
+    print('Reduce configuration with constraints')
+    logging.info('Reduce configuration with constraints')
+    anchors = findanchors(miniseries)
+    _configs = filter_config(miniseries=miniseries, anchors=anchors)
+    nb_configs = len(_configs)
+    configs = iter(_configs) # _configs is a list
+
   if anchorFlag == True:
     #print('Here are the anchors to try: ', configs)
     print('Number of anchors to try: ', nb_configs)
