@@ -43,6 +43,8 @@ vclimb can also print all the versions of the packages
         help="Use the demand supply algorithm (default)")
     parser.add_option("-a", "--anchor", action="store_true", dest="anchor", default=False,
         help="Generate the cross-product of the anchor before testing all the configs.")
+    parser.add_option("-r", "--reduce", action="store_true", dest="reduce", default=False,
+        help="Query the channels to select only versions that are compatible to each others.")
     parser.add_option("-s", "--slaveid", dest="slaveid", default='0',
         help="Set the identifier of the client (client only) .")
     parser.add_option("--debug", action="store_true", dest="debug", default='True',
@@ -68,12 +70,12 @@ vclimb can also print all the versions of the packages
 
     if not opts.version:
         algo_module.start_logging(opts.log_file)
-
+        
     env = None
     if mode_server is None:
-        env = liquid.YAMLEnv(opts.config, opts.demandsupply)
+        env = liquid.YAMLEnv(opts.config, opts.demandsupply, opts.reduce)
     elif mode_server == 'server':
-        env = server.ServerEnv(opts.config, demandsupply=opts.demandsupply, debug=opts.debug)
+        env = server.ServerEnv(opts.config, demandsupply=opts.demandsupply, debug=opts.debug, reduce=opts.reduce)
     elif mode_server == 'client':
         env = client.ClientEnv(opts.config, demandsupply=opts.demandsupply, slaveid=opts.slaveid,
                                debug=opts.debug)
@@ -86,4 +88,4 @@ vclimb can also print all the versions of the packages
         for sol in solutions:
             print(sol)
     else:
-        env.print_versions(algo_module)
+        env.print_versions(algo_module, opts.reduce)

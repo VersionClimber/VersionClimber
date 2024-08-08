@@ -13,7 +13,11 @@ import json
 import requests
 import datetime
 import logging
-from distutils.version import LooseVersion
+try:
+    from packaging.version import Version as LooseVersion
+except ImportError:
+    from distutils.version import LooseVersion
+
 try:
     from itertools import zip_longest
 except ImportError:
@@ -65,6 +69,30 @@ def conda_versions(package_name, channels=[], build='py27'):
     Returns the versions as a sorted list.
     """
     cmd = 'conda search -f %s --json'%(package_name,)
+    cmd_list = cmd.split()
+
+    for channel in channels:
+        cmd_list.append('-c')
+        cmd_list.append(channel)
+
+    json_data = call_and_parse(cmd_list)
+    if package_name not in json_data:
+        return []
+
+    pkgs = json_data[package_name]
+
+    versions = [d['version'] for d in pkgs if ('py' not in d['build']) or (build in d['build'])]
+    versions = list(set(versions))
+    versions.sort(key=MyLooseVersion)
+
+    return versions
+
+def conda_depends(package_name, channels=[], build=''):
+    """ Retrieve the different versions of a package on anaconda.
+
+    Returns the versions as a sorted list.
+    """
+    cmd = 'conda search -f %s -C --info --json'%(package_name,)
     cmd_list = cmd.split()
 
     for channel in channels:
@@ -144,4 +172,11 @@ class MyLooseVersion(LooseVersion):
                 return 1
         return 0
 
+
+def conda_full_depends(pkg, deps=None):
+    """return all the versions of a package with specifications"""
+    cmd = "conda search %s -c conda-forge -C --info --json"%(pkg)
+    cmd_list = cmd.split()
+    json_data = call_and_parse(cmd_list)
+    return json_data
 

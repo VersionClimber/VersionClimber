@@ -437,8 +437,8 @@ class YAMLEnv(MyEnv):
         - get the set of versions
 
     """
-    def __init__(self, config_file, demandsupply=False):
-        self._config = config = load_config(config_file)
+    def __init__(self, config_file, demandsupply=False, reduce=False):
+        config = load_config(config_file)
         self.pkgs = config['packages']
         self.cmd = config['run']
         self.pre_stage = config['pre']
@@ -474,6 +474,7 @@ class YAMLEnv(MyEnv):
         self.knowcaller = False
         self.error_file = 'error.txt'
 
+        self.reduce = reduce
 
     def checkout(self, pkg_name, commit, python=None):
         """ Install the package `pkg_name` at a given version.
@@ -517,7 +518,7 @@ class YAMLEnv(MyEnv):
 
             channel_str = ' '.join(['-c '+ channel for channel in channels])
             
-            main_pkg = conda_pkgs[0]
+            main_pkg = conda_pkgs[0][1]
 
             cmd = 'conda install -y' if not main_pkg.conda=='mamba' else 'mamba install -y'
             for i, pkg in conda_pkgs:
@@ -782,7 +783,7 @@ class YAMLEnv(MyEnv):
             if self.algo_demandsupply:
                 # print("PackageVersions", packageversions) # log this
                 # print("miniseries", miniseries) # log this
-                endconfig = liquidparser.liquidclimber(miniseries, packageversions, anchor)
+                endconfig = liquidparser.liquidclimber(miniseries, packageversions, anchor, reduce=self.reduce)
 
             else:
                 endconfig = liquidparser.liquidclimber(constraints, todolist)
@@ -836,7 +837,7 @@ class YAMLEnv(MyEnv):
             return packageversions, miniseries
 
 
-    def print_versions(self, liquidparser=None):
+    def print_versions(self, liquidparser=None, reduce=False):
         """ Print all the versions of the different packages."""
 
         print("-"*80)

@@ -6,8 +6,12 @@ from os.path import exists
 import versionclimber as vc
 from versionclimber.config import load_config
 from versionclimber.liquid import YAMLEnv, pkg_versions
-from versionclimber.algo import demandsupply
 from versionclimber import version
+from versionclimber.algo.demandsupply import findanchors
+from versionclimber.utils import conda_full_depends
+from versionclimber import reduceconfig
+
+
 
 
 def test_config():
@@ -52,5 +56,57 @@ def my_segment_versions(config='config.yaml'):
         for _version in v_dict:
             miniseries.append([pkg, 'supply-constant', v_dict[_version]])
 
-
     return packageversions, miniseries
+
+
+def my_reduce_config(config='config2.yaml'):
+    packageversions, miniseries = my_segment_versions(config)
+    return filter_config(miniseries)
+
+def filter_config(miniseries):
+    anchors = findanchors(miniseries)
+    universe = [l[0][0] for l in anchors]
+
+    info_pkgs = {}
+    for i, pkg in enumerate(universe):
+        info = conda_full_depends(pkg)
+        info_pkgs.update(info)
+
+    pkg_versions = { l[0][0] : [version for name, version in l] for l in anchors}
+    all_pairs = version.decimate_versions(pkg_versions, info_pkgs)
+
+    # build a config to reduceconfig
+    groups = version._build_config(all_pairs, universe)
+    full_config = reduceconfig.reduce_config2(groups)
+
+    configs = version.sort_pkgversions(full_config, universe)
+
+    return configs
+
+
+
+def test_sort():
+    pkgvers = """
+A2__4 P1__4 P3__6 P4__7 P6__1
+A2__4 P1__4 P3__6 P4__7 P6__2
+A2__4 P1__4 P3__19 P4__7 P6__1
+A2__4 P1__4 P3__19 P4__7 P6__2
+A2__4 P1__4 P3__6 P4__8 P6__1
+A2__4 P1__4 P3__6 P4__8 P6__2
+A2__4 P1__4 P3__19 P4__8 P6__1
+A2__4 P1__4 P3__19 P4__8 P6__2
+A2__4 P1__4 P3__6 P4__9 P6__1
+A2__4 P1__4 P3__6 P4__9 P6__2
+A2__4 P1__4 P3__19 P4__9 P6__1
+A2__4 P1__4 P3__19 P4__9 P6__2
+""".split('\n')
+    pkgvers = list(filter(None, pkgvers))
+
+    universe = 'P1 A2 P3 P4 P6'.split()
+    universe.reverse()
+
+    conf = version.sort_pkgversions(pkgvers, universe)
+
+    conf_sorted = '\n'.join(' '.join(['__'.join(pv) for pv in c]) for c in conf)
+    print(conf_sorted)
+    return conf

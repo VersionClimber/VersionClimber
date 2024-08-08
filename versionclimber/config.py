@@ -55,7 +55,7 @@ class Package(object):
         self.version = version
         self.hierarchy = hierarchy
         self.supply = supply
-        self.conda = bool(conda)
+        self.conda = conda
         self.dir = Path(directory).abspath()
         self.conda_channels = [] if not channels else channels
         if conda and recipe:
