@@ -58,7 +58,7 @@ jobs:
       uses: openalea/action-build-publish-anaconda@main
       with:
         conda: conda
-        mamba: false
+        mamba: true
         python: ${{ matrix.python-minor-version }}
         channels: VersionClimber, conda-forge
         numpy: '20.0'
