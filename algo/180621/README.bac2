@@ -1,0 +1,51 @@
+May 25, 2018
+
+Run in python 2.7
+In this case, there is a single client.
+python versionclimber_manager.py
+python versionclimber_client_0.py
+
+packageversions can have letters for minor versions and patches and commits.
+Packages are organized from highest priority to lowest, one line per package.
+Within a line, the package name is not needed
+each version should be indicated by major.minor at least and major.minor.patch.commit
+if you wish.
+There should be no underbars ("_").
+The versions should be organized in ascending order.
+
+
+May 6, 2017
+
+Run in python 2.7
+python versionclimber_manager.py
+python versionclimber_client_0.py
+python versionclimber_client_1.py
+
+Input is packageversions
+This is the input that Christophe should supply.
+
+The overall 
+output will be highest working configuration assuming that the 
+strategy of trying major releases first and then major minor in a limited
+range works.
+Specifically, that strategy tries the latest major.minor of each major release
+in a first pass.
+Let's say that for a particular package P, the best major is 4.86.
+Then in the second pass (all done within versionclimber_manager.py, so no
+need for a second call), all versions of P that begin with 5 will also be tried.
+If there are none, then 4.86 will be the only version for package P to be tried.
+The best major configuration and the best minor configurations are both
+announced in versionclimber_manager.py.
+
+To add more clients, change 
+numslaves in versionclimber_manager.py to be the number of clients.
+Each client has an identifer slaveid so 
+0 in versionclimber_client_0.py, 
+1 in versionclimber_client_1.py, etc.
+Otherwise, the clients are identical.
+
+Each client has a works function that should be replaced
+with a real call to the execution.
+That may be system specific.
+
+
