@@ -1,0 +1,25 @@
+name: sconsx
+channels:
+  - openalea3
+  - conda-forge
+
+dependencies:
+  - python=3.12
+  - setuptools
+  - path
+  - gitpython
+  - pyyaml
+  - six
+  - requests
+  - pyzmq
+  - sphinx
+  - sphinx-copybutton
+  - sphinx-favicon
+  - sphinx-rtd-theme
+  - nbsphinx
+  - myst-parser
+  - pydata-sphinx-theme
+  - sphinx-autodoc-typehints
+  - pip
+  - pip:
+    - -e ..
