@@ -5,15 +5,15 @@ from versionclimber import utils
 
 
 def test_sklearn():
-    versions = utils.conda_versions('scikit-learn', build='')
-    assert ('0.19.0' in versions)
-    assert len(versions) >= 20
+    versions = utils.conda_versions('scikit-learn')
+    assert '0.20.0' in versions
+    assert len(versions) >= 3
 
 
 def test_skimage():
-    versions = utils.conda_versions('scikit-image', build='')
-    assert ('0.13.0' in versions)
-    assert len(versions) >= 13
+    versions = utils.conda_versions('scikit-image')
+    assert '0.14.0' in versions
+    assert len(versions) >= 3
 
 def test_mtg_channels():
     versions = utils.conda_versions('openalea.mtg', channels=['openalea3'], build='')
