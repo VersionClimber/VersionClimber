@@ -49,7 +49,7 @@ def new_stat_file(exp='experiment'):
         l = [int(str(x.basename()).split('result')[1][0]) for x in exp.listdir('result*.txt')]
         n = max(l)+1 if l else 1
         return n
-    stat_file = exp/'result%d.txt'%next_id()
+    stat_file = exp/('result%d.txt'%next_id())
     return stat_file
 
 def clone(repo, pkg):
