@@ -4,7 +4,11 @@
 
 from __future__ import absolute_import
 import os
-from path import Path
+try: 
+    from pathlib import Path
+    Path.abspath = Path.absolute
+except ImportError:
+    from path import Path
 
 import subprocess
 from subprocess import Popen, PIPE
