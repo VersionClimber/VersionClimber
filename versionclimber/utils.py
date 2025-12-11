@@ -8,6 +8,7 @@ try:
     from pathlib import Path
     Path.abspath = Path.absolute
     Path.makedirs = Path.mkdir
+    Path.listdir = Path.glob
 except ImportError:
     from path import Path
 
