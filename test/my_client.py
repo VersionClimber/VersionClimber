@@ -16,7 +16,7 @@ socket.connect("tcp://localhost:5555")
 socket.send_multipart([b'', b'Register to Coordinator'])
 
 # Receive assignment
-_, response = socket.recv_multipart()
+empty, response = socket.recv_multipart()
 if response.startswith(b'ASSIGNED:'):
     client_id = response.decode().split(':', 1)[1]
     print(f"Received ID from server: {client_id}")

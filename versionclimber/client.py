@@ -365,12 +365,23 @@ class ClientEnv(YAMLEnv):
         # TODO : implement messaging protocol
 
         socket = self.socket
-        slaveidstring = str(self.slaveid) + " "
+        slaveidstring = str(self.slaveid)
 
+        registerd = False
+
+        if not registered:
+            msg = ' '.join([f'{slaveidstring}', 'register'])
+            socket.send_string(msg)
+            response = socket.recv_string()
+            if response == 'Success':
+                print('Client registered')
+            registered = True
+
+        # OK
         while True:
           print(slaveidstring, "requestconfig ")
-          socket.send(b'request:' + slaveidstring + 'requestconfig ')
-          data = socket.recv()
+          socket.send_string('request:' + slaveidstring + 'requestconfig ')
+          data = socket.recv_string()
           print("master requests work on: ", data)
           x = data.split(" ") # message is -1, currentindex, configarray
           print("x is: ", x)

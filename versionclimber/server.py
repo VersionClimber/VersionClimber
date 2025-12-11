@@ -31,12 +31,13 @@ class ServerEnv(YAMLEnv):
         - get the set of versions
 
     """
-    def __init__(self, config_file, demandsupply=False, debug=True):
+    def __init__(self, config_file, demandsupply=False, debug=True, reduce=False):
         """ Initialisation of the server.
         TODO: Add port as argument.
         """
-        if not debug:
-            YAMLEnv.__init__(self, config_file, demandsupply)
+        YAMLEnv.__init__(self, config_file, 
+                          demandsupply=demandsupply,
+                          reduce=reduce)
 
         self.debug = debug
         self.context = zmq.Context()
@@ -47,6 +48,7 @@ class ServerEnv(YAMLEnv):
         self.config_file = config_file
 
 
+    """
     def monkey_patch(self, liquidparser, knowcaller=False):
 
         #works = self.works()
@@ -76,31 +78,75 @@ class ServerEnv(YAMLEnv):
             liquidparser.knowcaller = knowcaller
 
             return constraints, todolist
-
+    """
 
     def run(self, liquidparser, anchor=False):
 
+        # TODO : only demand supply case is managed.
+        # Remove others or raise an error.
+        # We need nb_configs and the list of config
+
         tx = clock()
 
-        if not self.debug:
-            if self.algo_demandsupply:
-                packageversions, miniseries = self.monkey_patch(liquidparser)
-            else:
-                constraints, todolist = self.monkey_patch(liquidparser)
+        if self.algo_demandsupply:
+            packageversions, miniseries = self.monkey_patch(liquidparser)
         else:
-          # Get the configuration to know the package names & co.
+            constraints, todolist = self.monkey_patch(liquidparser)
 
-          # 1. Compute packaheversions and miniseries
-          global_configuration = config.load_config(self.config_file)
+        if self.pre_stage:
+            status = sh(self.pre_stage)
 
-          # send the configuration when clients ask
-          packageversions, miniseries = self.supply_constant_packages()
+        try:
+            reduce = self.reduce
+            anchorFlag = anchor
+            if self.algo_demandsupply:
+                # print("PackageVersions", packageversions) # log this
+                # print("miniseries", miniseries) # log this
+                # endconfig = liquidparser.liquidclimber(miniseries, packageversions, anchor, reduce=self.reduce)
+
+                if not reduce:
+                  nb_configs, configs = liquidparser.genconfigs(miniseries, packageversions, anchorFlag)
+
+                elif anchorFlag == True:
+                  print('Reduce configuration with constraints')
+                  anchors = liquidparser.findanchors(miniseries)
+                  _configs = liquidparser.filter_config(miniseries=miniseries, anchors=anchors)
+                  nb_configs = len(_configs)
+                  #configs = iter(_configs) # _configs is a list
+
+                if anchorFlag == True:
+                  print('Number of anchors to try: ', nb_configs)
+                if anchorFlag == False:
+                  print('Here is the number of configurations potentially to explore: ', nb_configs)
+
+                print(_configs)
+                #return True
+                
+                # run the distributed server algorithm
+                self.run_distributed(nb_configs, _configs)
+        
+            else:
+                return False # we do not manage this case
+                endconfig = liquidparser.liquidclimber(constraints, todolist)
+            # print liquidparser.memory
+        finally:
+            self.restore()
+        
+        if self.algo_demandsupply:
+
+
+        if self.post_stage:
+            # Activate the last configuration that works and then run the postb step.
+            status = sh(self.post_stage)
 
 
 
+    def run_distributed(self, nb_configs, configs):
         ######################################
         ####### ALGORITHM ####################
         ######################################
+
+        #configs = list(configs)
 
         encode_config = lambda c: ','.join(map(str,c))
         MAX_EX = 0
@@ -111,15 +157,6 @@ class ServerEnv(YAMLEnv):
         configarray = [['highconfig'], ['midconfig'], ['lowconfig']]
         configarray = [[3,3,3], [2,2,2], [1,1,1] ]
 
-        # CPL: generate configarray (client vs server).
-        hasbuildconfig = False
-        while (not hasbuildconfig):
-            data = self.socket.recv()
-            if not data: break
-            print('data are ', data)
-
-            fields = data.split(" ")
-            print("fields are: ", fields)
 
 
         # In addition we have an array of status that is of the same size
@@ -139,10 +176,29 @@ class ServerEnv(YAMLEnv):
         #  - requestwork : nothing
         #  - updatestatus : mini-series, index, and success/fail
 
+
+        # CPL : Algo with Dennis
+
+        # 1. Agents register with coordinator. Coordinator registers that agent as idle. 
+        # Port P1 on server
+        agents = clients = dict()
+        
+        # 2. Coordinator calculates some order of configurations and puts on a work queue.
+        # CPL in the while
+        work_queue = []
+
+        # 3. While there are still unassigned configurations or some configuration has taken too long and there are idle agents
+        # Coordinator selects an idle agent
+        # sends a configuration asynchronously giving priority to configurations that have taken too long
+        # record the configuration sent
+        # sets the time of start
+
+        OPCODES = ['register', 'requestwork', 'updatestatus']
+
         while (not foundbestanchor):
-            data = self.socket.recv()
+            data = self.socket.recv_string()
             if not data: break
-            print('data are ', data)
+            print(f'data are {data}')
 
             fields = data.split(" ")
             print("fields are: ", fields)
@@ -151,6 +207,14 @@ class ServerEnv(YAMLEnv):
             # 'updatestatus' with arguments mini-series (-1 in first phase),
             # configindex and succeed(1) or fail(0)
             # numpart= ((fields[0]).split(":"))[1]
+
+            if fields[1] == 'register':
+              # Register the client
+              agents[fields[0]] = 'idle'
+              print(f'Agent {fields[0]} registered')
+              self.socket.send_string('Success')
+
+
             if fields[1] == 'requestwork' and successfound:
               # Find anything lexicographically earlier has
               # not yet been done.
