@@ -7,6 +7,7 @@ import os
 try: 
     from pathlib import Path
     Path.abspath = Path.absolute
+    Path.makedirs = Path.mkdir
 except ImportError:
     from path import Path
 
