@@ -49,9 +49,9 @@ test:
     - test/config.yaml
 
   commands:
-    - vclimb  # [not win]
+    - vclimb  --help # [not win]
     - cd test
-    - pytest -v test_*.py
+    - pytest -v 
 
 
 about:
