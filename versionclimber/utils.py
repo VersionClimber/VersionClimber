@@ -4,7 +4,13 @@
 
 from __future__ import absolute_import
 import os
-from path import Path
+try: 
+    from pathlib import Path
+    Path.abspath = Path.absolute
+    Path.makedirs = Path.mkdir
+    Path.listdir = Path.glob
+except ImportError:
+    from path import Path
 
 import subprocess
 from subprocess import Popen, PIPE
@@ -40,10 +46,10 @@ def sh(cmd):
 def new_stat_file(exp='experiment'):
     exp = Path(exp)
     def next_id(exp=exp):
-        l = [int(x.basename().split('result')[1][0]) for x in exp.listdir('result*.txt')]
+        l = [int(str(x.basename()).split('result')[1][0]) for x in exp.listdir('result*.txt')]
         n = max(l)+1 if l else 1
         return n
-    stat_file = exp/'result%d.txt'%next_id()
+    stat_file = exp/('result%d.txt'%next_id())
     return stat_file
 
 def clone(repo, pkg):
