@@ -1,0 +1,79 @@
+[build-system]
+requires = [
+    "setuptools",
+    "wheel",
+    "setuptools_scm",
+  ]
+build-backend = "setuptools.build_meta"
+
+# enable dynamic versioning based on git tags
+[tool.setuptools_scm]
+# Format version to ease alignment with conda/meta.yaml tag-based versioning
+fallback_version = "1.3.6.dev0"
+version_scheme = "guess-next-dev"
+local_scheme = "no-local-version"
+
+[project]
+name = "versionclimber"
+dynamic = ["version"]
+description = "Version Climber is a system for package evolution for Data Science and Scientific Computing."
+readme = "README.rst"
+authors = [
+    { name = "Christophe Pradal", email = "christophe.pradal@cirad.fr" },
+    { name = "Dennis Shasha", email = "shasha@courant.nyu.edu" }
+]
+license = "CECILL-C"
+license-files = ["LICEN[CS]E*"]
+classifiers = [
+  "Intended Audience :: Science/Research",
+  "Intended Audience :: Developers",
+  "Programming Language :: Python :: 3.10",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+  "Programming Language :: Python :: 3.13",
+  "Topic :: Scientific/Engineering",
+]
+keywords = ["Reproducibility", "Versioning"]
+
+dependencies = [
+    "path",
+    "gitpython",
+    "pyyaml",
+    "six",
+    "requests",
+    "pyzmq"
+]
+
+[project.urls]
+Homepage = "https://github.com/VersionClimber/VersionClimber"
+
+[project.scripts]
+vclimb = "versionclimber.vclimb:main"
+
+[project.optional-dependencies]
+test = [
+    "pytest",]
+doc = [
+  "sphinx-favicon",
+  "sphinx-rtd-theme",
+  "pydata-sphinx-theme",
+  "myst-parser",
+  "sphinx-favicon",
+  "nbsphinx",
+]
+
+# section specific to conda-only distributed package (not used by pip yet)
+# based on astk, used in hydroroot with a meta.yaml that only use metadata from
+# pyproject => only pyproject.toml must be modified
+[tool.conda.environment]
+channels = [
+  "versionclimber",
+  "conda-forge"
+]
+dependencies = [
+]
+
+
+[tool.setuptools.packages.find]
+where = ["."]
+
