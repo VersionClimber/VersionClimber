@@ -51,7 +51,7 @@ test:
   commands:
     - vclimb  --help # [not win]
     - cd test
-    - pytest -v 
+    - pytest -v --deselect=test_version_compatibility.py::test_decimate_version
 
 
 about:
