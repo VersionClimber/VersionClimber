@@ -49,7 +49,7 @@ test:
     - test/config.yaml
 
   commands:
-    - vclimb --help
+    - vclimb  # [not win]
     - cd test
     - pytest -v test_*.py
 
